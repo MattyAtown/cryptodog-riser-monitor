@@ -25,7 +25,14 @@ def get_supported_coins(limit=150):
             print(f"❌ Failed to fetch currencies: {response.status_code} | Response: {response.text}")
     except Exception as e:
         print(f"🚨 Error fetching supported coins: {e}")
-    return ["BTC", "ETH", "SOL"]  # Fallback default
+    return COINS = [
+    "BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "AVAX", "SHIB", "DOT", "LINK", "MATIC",
+    "WBTC", "TRX", "BCH", "NEAR", "UNI", "LTC", "ICP", "DAI", "ETC", "APT", "FIL", "STX",
+    "RNDR", "CRO", "ATOM", "ARB", "HBAR", "INJ", "VET", "MKR", "THETA", "PEPE", "LDO",
+    "QNT", "AAVE", "GRT", "SUI", "USDC", "XLM", "OP", "AGIX", "ALGO", "BAT", "BAL", "BNT",
+    "CVC", "COMP", "ENS", "FTM", "FTT", "GALA", "IMX", "KNC", "LRC", "MANA", "MASK",
+    "NMR", "OXT", "RLC", "SKL", "SNX", "SAND", "ZRX", "ZIL", "YFI", "UMA", "TUSD"
+]
 
 # Fetch spot price from Coinbase for a given coin
 def fetch_price(coin_symbol):
