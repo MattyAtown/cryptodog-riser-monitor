@@ -15,7 +15,7 @@ COINS = []  # This will be dynamically populated
 # Fetch the full list of supported coins from Coinbase (fallback to /v2/currencies)
 def get_supported_coins(limit=150):
     try:
-        response = requests.get("https://api.coinbase.com/v2/currencies")
+        response = requests.get("https://api.coinbase.com/v2/currencies/crypto")
         if response.status_code == 200:
             data = response.json().get("data", [])
             coins = [item["id"] for item in data if item.get("id") and item["id"].isupper()]
