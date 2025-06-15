@@ -12,17 +12,17 @@ PRICE_HISTORY = defaultdict(list)
 TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 COINS = []  # This will be dynamically populated
 
-# Fetch the full list of supported coins from Coinbase
+# Fetch the full list of supported coins from Coinbase (fallback to /v2/currencies)
 def get_supported_coins(limit=150):
     try:
-        response = requests.get("https://api.coinbase.com/v2/assets")
+        response = requests.get("https://api.coinbase.com/v2/currencies")
         if response.status_code == 200:
-            assets = response.json().get("data", [])
-            coins = [asset["id"] for asset in assets if asset.get("id")]
+            data = response.json().get("data", [])
+            coins = [item["id"] for item in data if item.get("id") and item["id"].isupper()]
             print(f"✅ Retrieved {len(coins)} coins from Coinbase.")
             return coins[:limit]
         else:
-            print(f"❌ Failed to fetch assets: {response.status_code}")
+            print(f"❌ Failed to fetch currencies: {response.status_code} | Response: {response.text}")
     except Exception as e:
         print(f"🚨 Error fetching supported coins: {e}")
     return ["BTC", "ETH", "SOL"]  # Fallback default
