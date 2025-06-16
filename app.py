@@ -4,26 +4,25 @@ from datetime import datetime
 from collections import defaultdict
 import threading
 import time
+import feedparser
 
 app = Flask(__name__)
 
-def get_supported_coins():
-    # Hardcoded verified list of working -USD pairs
-    return [
-        "BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "AVAX", "SHIB", "DOT", "LINK",
-        "MATIC", "TRX", "BCH", "NEAR", "UNI", "LTC", "ICP", "DAI", "ETC", "APT",
-        "FIL", "STX", "RNDR", "ATOM", "ARB", "HBAR", "INJ", "VET", "MKR", "THETA",
-        "PEPE", "LDO", "QNT", "AAVE", "GRT", "SUI", "USDC", "XLM", "OP", "AGIX",
-        "ALGO", "BAT", "BAL", "BNT", "CVC", "COMP", "ENS", "FTM", "GALA", "IMX",
-        "KNC", "LRC", "MANA", "MASK", "NMR", "OXT", "RLC", "SKL", "SNX", "SAND",
-        "ZRX", "ZIL", "YFI", "UMA", "TUSD"
-    ]
-
-
 PRICE_HISTORY = defaultdict(list)
-TOP_RISER = (None, 0, 0.0)  # Now includes coin, % rise, and price
+TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
-# Fetch price from Coinbase
+# Hardcoded verified list of Coinbase USD pairs
+COINS = [
+    "BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "AVAX", "SHIB", "DOT", "LINK",
+    "MATIC", "TRX", "BCH", "NEAR", "UNI", "LTC", "ICP", "DAI", "ETC", "APT",
+    "FIL", "STX", "RNDR", "ATOM", "ARB", "HBAR", "INJ", "VET", "MKR", "THETA",
+    "PEPE", "LDO", "QNT", "AAVE", "GRT", "SUI", "USDC", "XLM", "OP", "AGIX",
+    "ALGO", "BAT", "BAL", "BNT", "CVC", "COMP", "ENS", "FTM", "GALA", "IMX",
+    "KNC", "LRC", "MANA", "MASK", "NMR", "OXT", "RLC", "SKL", "SNX", "SAND",
+    "ZRX", "ZIL", "YFI", "UMA", "TUSD"
+]
+
+# Fetch spot price from Coinbase for a given coin
 def fetch_price(coin_symbol):
     try:
         url = f"https://api.coinbase.com/v2/prices/{coin_symbol}-USD/spot"
@@ -32,10 +31,10 @@ def fetch_price(coin_symbol):
             data = response.json()
             return round(float(data['data']['amount']), 2)
     except Exception as e:
-        print(f"🚨 Error fetching price for {coin_symbol}: {e}")
+        print(f"\U0001f6a8 Error fetching price for {coin_symbol}: {e}")
     return None
 
-# Monitor top riser every 15 seconds
+# Monitor top risers
 def monitor_risers():
     global TOP_RISER
     MINIMUM_RISE_PERCENTAGE = 0.05  # 0.05% threshold
@@ -44,7 +43,7 @@ def monitor_risers():
         try:
             top_riser = None
             top_change = 0
-            print("🔍 Checking for top risers...")
+            print("\U0001f50d Checking for top risers...")
 
             for coin in COINS:
                 price = fetch_price(coin)
@@ -61,8 +60,6 @@ def monitor_risers():
                             average_change = ((price - (initial + min_price) / 2) / ((initial + min_price) / 2)) * 100
                             change = max(initial_change, min_change, average_change)
 
-                            print(f"📊 {coin}: {change:.2f}% over last 1 minute | Price: ${price:.2f}")
-
                             if change > top_change and change >= MINIMUM_RISE_PERCENTAGE:
                                 top_riser = coin
                                 top_change = change
@@ -71,14 +68,12 @@ def monitor_risers():
                 price = fetch_price(top_riser)
                 if price is not None:
                     TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
-                    print(f"🚀 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
-                else:
-                    print(f"⚠️ Could not fetch price for {top_riser}")
+                    print(f"\U0001f680 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
 
         except Exception as e:
-            print(f"🚨 Error in riser monitor: {e}")
+            print(f"\U0001f6a8 Error in riser monitor: {e}")
 
-        time.sleep(15)
+        time.sleep(5)  # Check every 5 seconds
 
 @app.route("/")
 def index():
@@ -98,8 +93,6 @@ def top_riser_api():
         "price": "N/A"
     })
 
-import feedparser
-
 @app.route("/api/crypto-news")
 def crypto_news():
     try:
@@ -116,7 +109,7 @@ def crypto_news():
 
         return jsonify(news)
     except Exception as e:
-        print(f"🚨 Failed to fetch RSS feed: {e}")
+        print(f"\U0001f6a8 Failed to fetch RSS feed: {e}")
         return jsonify([])
 
 # Start the monitor in a background thread
