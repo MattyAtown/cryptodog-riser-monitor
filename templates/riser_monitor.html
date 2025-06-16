@@ -1,278 +1,184 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CryptoDog Riser Monitor</title>
-  <style>
-    body {
-      background-color: #0d0d0d;
-      color: #00f0ff;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .top-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 40px;
-      margin-bottom: 30px;
-    }
-
-    .top-row img {
-      max-height: 100px;
-      filter: drop-shadow(0 0 15px #00f0ff);
-    }
-
-    .middle-row {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 30px;
-    }
-
-    .riser-box, .history-box {
-      background-color: #111;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 40px #00f0ff;
-      width: 300px;
-    }
-
-    .coin-name {
-      font-size: 2.2em;
-      color: #00ff95;
-      text-shadow: 0 0 15px #00ff95;
-      margin-bottom: 10px;
-    }
-
-    .coin-change {
-      font-size: 1.6em;
-      color: #ff1744;
-      text-shadow: 0 0 15px #ff1744;
-    }
-
-    .coin-price {
-      font-size: 1.4em;
-      color: #ffd700;
-      text-shadow: 0 0 10px #ffd700;
-      margin-top: 10px;
-    }
-
-    .update-time {
-      color: #888;
-      font-size: 0.85em;
-      margin-top: 20px;
-      text-shadow: 0 0 10px #00f0ff;
-    }
-
-    .history-item {
-      color: #00ff95;
-      margin-bottom: 10px;
-      font-size: 0.9em;
-    }
-
-    .news-section {
-      background-color: #111;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 30px #0040ff;
-      width: 90%;
-      max-width: 800px;
-      margin-top: 20px;
-    }
-
-    .news-section h2 {
-      color: #ffd700;
-      margin-bottom: 10px;
-    }
-
-    .news-item {
-      margin-bottom: 10px;
-      color: #ccc;
-      font-size: 0.95em;
-    }
-
-    .news-item a {
-      color: #00f0ff;
-      text-decoration: none;
-    }
-
-    .flash {
-      animation: flash 0.5s ease-in-out 3;
-    }
-
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.2; }
-    }
-  </style>
-  <script>
-    let currentTopRiser = null;
-    const history = [];
-
-    async function fetchTopRiser() {
-      try {
-        const response = await fetch('/api/top-riser');
-        const data = await response.json();
-        const coinName = data.coin || 'No Riser';
-        const coinChange = data.change || '0%';
-        const coinPrice = data.price || '$0.00';
-        const timestamp = new Date().toLocaleTimeString();
-
-        document.getElementById('coin-name').innerText = coinName;
-        document.getElementById('coin-change').innerText = coinChange;
-        document.getElementById('coin-price').innerText = `Price: ${coinPrice}`;
-        document.getElementById('update-time').innerText = `Last updated at ${timestamp}`;
-
-        if (coinName !== currentTopRiser && coinName !== "No Riser") {
-          currentTopRiser = coinName;
-          document.getElementById('coin-name').classList.add('flash');
-          setTimeout(() => document.getElementById('coin-name').classList.remove('flash'), 2000);
-
-          history.unshift(`${timestamp} - ${coinName} (${coinChange}) @ ${coinPrice}`);
-          if (history.length > 10) history.pop();
-          document.getElementById('history-box').innerHTML = history.map(item => `<div class="history-item">${item}</div>`).join('');
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CryptoDog Live Monitor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0e0e0e;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
         }
-      } catch (error) {
-        console.error('Error fetching top riser:', error);
-      }
-    }
-
-    async function fetchStarRiser() {
-      try {
-        const response = await fetch('/api/star-riser');
-        const data = await response.json();
-        document.getElementById('star-coin-name').innerText = data.coin || 'No Star Riser';
-        document.getElementById('star-coin-change').innerText = data.change || '0%';
-        document.getElementById('star-coin-price').innerText = `Price: ${data.price || '$0.00'}`;
-        document.getElementById('star-update-time').innerText = `Last updated at ${new Date().toLocaleTimeString()}`;
-      } catch (error) {
-        console.error('Error fetching star riser:', error);
-      }
-    }
-
-    async function fetchCryptoNews() {
-      try {
-        const response = await fetch('/api/crypto-news');
-        const data = await response.json();
-        const newsBox = document.getElementById('news-box');
-        newsBox.innerHTML = data.map(item => `
-          <div class="news-item">
-            <a href="${item.link}" target="_blank">${item.title}</a><br>
-            <small style="color:#888;">${item.published}</small>
-          </div>
-        `).join('');
-      } catch (err) {
-        console.error("Failed to load news:", err);
-        document.getElementById('news-box').innerHTML = '<p style="color: #888;">Unable to fetch news right now.</p>';
-      }
-    }
-
-    let trialInterval = null, startPrice = null, selectedCoin = null, investment = null;
-
-    function startTrial() {
-      selectedCoin = document.getElementById('calc-coin').value;
-      investment = parseFloat(document.getElementById('mock-amount').value || "1000");
-      if (!selectedCoin || isNaN(investment)) return;
-
-      fetch(`https://api.coinbase.com/v2/prices/${selectedCoin}-USD/spot`)
-        .then(res => res.json())
-        .then(data => {
-          startPrice = parseFloat(data.data.amount);
-          document.getElementById('calc-results').innerHTML = `Bought ${investment} USD of ${selectedCoin} at $${startPrice.toFixed(2)}...`;
-          trialInterval = setInterval(updateTrial, 5000);
-        });
-    }
-
-    function updateTrial() {
-      fetch(`https://api.coinbase.com/v2/prices/${selectedCoin}-USD/spot`)
-        .then(res => res.json())
-        .then(data => {
-          const currentPrice = parseFloat(data.data.amount);
-          const coinsHeld = investment / startPrice;
-          const currentValue = coinsHeld * currentPrice;
-          const gain = currentValue - investment;
-          const gainPercent = (gain / investment) * 100;
-          document.getElementById('calc-results').innerHTML = `
-            Bought at: $${startPrice.toFixed(2)}<br>
-            Current Price: $${currentPrice.toFixed(2)}<br>
-            Current Value: $${currentValue.toFixed(2)}<br>
-            Gain/Loss: $${gain.toFixed(2)} (${gainPercent.toFixed(2)}%)
-          `;
-        });
-    }
-
-    function stopTrial() {
-      clearInterval(trialInterval);
-      document.getElementById('calc-results').innerHTML = 'Tracking stopped.';
-    }
-
-    setInterval(fetchTopRiser, 15000);
-    setInterval(fetchStarRiser, 15000);
-    setInterval(fetchCryptoNews, 43200000);
-    window.onload = () => {
-      fetchTopRiser();
-      fetchStarRiser();
-      fetchCryptoNews();
-    };
-  </script>
+        h1 {
+            margin-top: 20px;
+            font-size: 2rem;
+            color: #ffd700;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .top-section {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .box {
+            background-color: #1e1e1e;
+            border: 2px solid #444;
+            border-radius: 10px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        .box.gold {
+            border-color: gold;
+            color: gold;
+        }
+        .banner {
+            background-color: #1a1a1a;
+            padding: 20px;
+            margin-top: 10px;
+            width: 90%;
+            border-radius: 12px;
+            border: 1px solid #555;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+        .banner input, .banner select {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 6px;
+            border: none;
+            font-size: 1rem;
+        }
+        .banner button {
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+    </style>
 </head>
 <body>
-  <div class="top-row">
-    <img src="static/logo.png" alt="AiM Logo" />
-    <img src="static/neutral.png" alt="CryptoDog" id="dog-face" />
-  </div>
+    <h1>CryptoDog Live Tracker</h1>
+    <div class="container">
+        <div class="top-section">
+            <div class="box" id="topRiserBox">
+                <h2>Top Riser</h2>
+                <p id="topRiser">Loading...</p>
+            </div>
+            <div class="box gold" id="starRiserBox">
+                <h2>⭐ Star Riser</h2>
+                <p id="starRiser">Waiting for signal...</p>
+            </div>
+            <div class="box" id="newsBox">
+                <h2>📰 News</h2>
+                <ul id="newsList" style="list-style: none; padding-left: 0;"></ul>
+            </div>
+        </div>
 
-  <div class="middle-row">
-    <div class="riser-box">
-      <div class="coin-name" id="coin-name">No Riser</div>
-      <div class="coin-change" id="coin-change">0%</div>
-      <div class="coin-price" id="coin-price">$0.00</div>
-      <div class="update-time" id="update-time">Last updated at --:--:--</div>
+        <div class="banner">
+            <h3>💸 Trial Run Calculator</h3>
+            <select id="coinSelect">
+                <option value="BTC">BTC</option>
+                <option value="ETH">ETH</option>
+                <option value="SOL">SOL</option>
+                <!-- Add more coins here as needed -->
+            </select>
+            <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000">
+            <button onclick="startTracking()">Start Tracking</button>
+            <button onclick="stopTracking()">Stop</button>
+            <div class="results" id="trackingResults"></div>
+        </div>
     </div>
 
-    <div class="riser-box" id="star-box">
-      <div class="coin-name" id="star-coin-name">No Star Riser</div>
-      <div class="coin-change" id="star-coin-change">0%</div>
-      <div class="coin-price" id="star-coin-price">$0.00</div>
-      <div class="update-time" id="star-update-time">Last updated at --:--:--</div>
-    </div>
+    <script>
+        async function updateTopRiser() {
+            const res = await fetch('/api/top-riser');
+            const data = await res.json();
+            document.getElementById("topRiser").innerText = `${data.coin} | ${data.change} | ${data.price}`;
+        }
+        async function updateStarRiser() {
+            const res = await fetch('/api/star-riser');
+            const data = await res.json();
+            document.getElementById("starRiser").innerText = `${data.coin} | ${data.change} | ${data.price}`;
+        }
+        async function updateNews() {
+            const res = await fetch('/api/crypto-news');
+            const news = await res.json();
+            const list = document.getElementById("newsList");
+            list.innerHTML = "";
+            news.forEach(item => {
+                const li = document.createElement("li");
+                li.innerHTML = `<a href="${item.link}" style="color: #ccc" target="_blank">${item.title}</a>`;
+                list.appendChild(li);
+            });
+        }
 
-    <div class="history-box" id="history-box">
-      <div class="history-item">History will appear here...</div>
-    </div>
+        // Mock tracker
+        let mockTracking = false;
+        let mockCoin = "BTC";
+        let mockBuyPrice = 0;
+        let mockUSD = 1000;
 
-    <div class="riser-box" id="calculator-box">
-      <h3 style="color:#ffd700;">Crypto Trial Run</h3>
-      <label for="calc-coin" style="color:#ccc;">Select Coin:</label>
-      <select id="calc-coin" style="width:100%; padding:5px; margin-bottom:10px;">
-        <option value="BTC">BTC</option>
-        <option value="ETH">ETH</option>
-        <option value="SOL">SOL</option>
-        <option value="DOGE">DOGE</option>
-        <option value="XRP">XRP</option>
-      </select>
-      <label for="mock-amount" style="color:#ccc;">Mock Investment ($):</label>
-      <input type="number" id="mock-amount" value="1000" style="width:100%; padding:5px;" />
-      <button onclick="startTrial()" style="margin-top:10px; width:48%;">Start</button>
-      <button onclick="stopTrial()" style="margin-top:10px; width:48%;">Stop</button>
-      <div id="calc-results" style="margin-top:20px; font-size:0.95em; color:#00ff95;"></div>
-    </div>
-  </div>
+        async function fetchCurrentPrice(symbol) {
+            const res = await fetch(`https://api.coinbase.com/v2/prices/${symbol}-USD/spot`);
+            const data = await res.json();
+            return parseFloat(data.data.amount);
+        }
 
-  <div class="news-section">
-    <h2>Recent Crypto News</h2>
-    <div id="news-box">
-      <p style="color: #888;">Loading news...</p>
-    </div>
-  </div>
+        async function startTracking() {
+            mockCoin = document.getElementById("coinSelect").value;
+            mockUSD = parseFloat(document.getElementById("mockAmount").value);
+            mockBuyPrice = await fetchCurrentPrice(mockCoin);
+            mockTracking = true;
+            updateMockLoop();
+        }
+
+        function stopTracking() {
+            mockTracking = false;
+            document.getElementById("trackingResults").innerText = "Tracking stopped.";
+        }
+
+        async function updateMockLoop() {
+            while (mockTracking) {
+                const current = await fetchCurrentPrice(mockCoin);
+                const change = ((current - mockBuyPrice) / mockBuyPrice) * 100;
+                const value = (mockUSD / mockBuyPrice) * current;
+                document.getElementById("trackingResults").innerHTML = `
+                    Mock Buy: $${mockUSD.toFixed(2)} of ${mockCoin}<br>
+                    Bought at: $${mockBuyPrice.toFixed(2)}<br>
+                    Current Price: $${current.toFixed(2)}<br>
+                    Current Value: $${value.toFixed(2)}<br>
+                    Gain/Loss: ${change.toFixed(2)}%
+                `;
+                await new Promise(res => setTimeout(res, 5000));
+            }
+        }
+
+        // Live updates
+        setInterval(updateTopRiser, 5000);
+        setInterval(updateStarRiser, 5000);
+        setInterval(updateNews, 30000);
+
+        updateTopRiser();
+        updateStarRiser();
+        updateNews();
+    </script>
 </body>
 </html>
