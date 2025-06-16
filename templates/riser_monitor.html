@@ -100,7 +100,27 @@
       <ul id="newsList"></ul>
     </div>
   </div>
-
+<div class='history-section'>
+    <div class='top-riser-history' style='margin-bottom: 20px;'>
+        <h3>Top Riser History</h3>
+        <ul style='list-style: none; padding-left: 0;'>
+            <li><strong>SOL</strong> | +6.12% | $160.45 <span style='color:gray;'>(13:05)</span></li>
+            <li><strong>ETH</strong> | +5.88% | $3,245.12 <span style='color:gray;'>(12:53)</span></li>
+            <li><strong>XRP</strong> | +5.32% | $0.58 <span style='color:gray;'>(12:41)</span></li>
+            <li><strong>ADA</strong> | +4.99% | $0.41 <span style='color:gray;'>(12:20)</span></li>
+            <li><strong>DOT</strong> | +4.80% | $6.72 <span style='color:gray;'>(12:04)</span></li>
+        </ul>
+    </div>
+    <div class='star-riser-history'>
+        <h3>Star Riser History</h3>
+        <ul style='list-style: none; padding-left: 0;'>
+            <li><strong>SOL</strong> | +5.21% | $161.12 <span style='color:gray;'>(13:05)</span></li>
+            <li><strong>ETH</strong> | +5.36% | $3,251.00 <span style='color:gray;'>(11:47)</span></li>
+            <li><strong>LINK</strong> | +5.19% | $17.02 <span style='color:gray;'>(11:02)</span></li>
+            <li><strong>MATIC</strong> | +5.04% | $0.92 <span style='color:gray;'>(10:35)</span></li>
+        </ul>
+    </div>
+</div>
   <script>
     async function fetchTopRiser() {
       const res = await fetch('/api/top-riser');
