@@ -4,18 +4,21 @@ from datetime import datetime
 from collections import defaultdict
 import threading
 import time
-import feedparser
 
 app = Flask(__name__)
 
-# Coinbase-compatible top 50 symbols
-COINS = [
-    "BTC", "ETH", "USDT", "BNB", "SOL", "XRP", "DOGE", "TON", "ADA", "AVAX",
-    "SHIB", "WETH", "DOT", "LINK", "MATIC", "WBTC", "TRX", "BCH", "NEAR", "UNI",
-    "LTC", "ICP", "LEO", "DAI", "ETC", "APT", "FIL", "STX", "RNDR", "OKB", "CRO",
-    "ATOM", "IMX", "FDUSD", "ARB", "HBAR", "TAO", "INJ", "VET", "MKR", "MNT",
-    "THETA", "PEPE", "LDO", "QNT", "AAVE", "GRT", "SUI", "USDC", "XLM", "OP"
-]
+def get_supported_coins():
+    # Hardcoded verified list of working -USD pairs
+    return [
+        "BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "AVAX", "SHIB", "DOT", "LINK",
+        "MATIC", "TRX", "BCH", "NEAR", "UNI", "LTC", "ICP", "DAI", "ETC", "APT",
+        "FIL", "STX", "RNDR", "ATOM", "ARB", "HBAR", "INJ", "VET", "MKR", "THETA",
+        "PEPE", "LDO", "QNT", "AAVE", "GRT", "SUI", "USDC", "XLM", "OP", "AGIX",
+        "ALGO", "BAT", "BAL", "BNT", "CVC", "COMP", "ENS", "FTM", "GALA", "IMX",
+        "KNC", "LRC", "MANA", "MASK", "NMR", "OXT", "RLC", "SKL", "SNX", "SAND",
+        "ZRX", "ZIL", "YFI", "UMA", "TUSD"
+    ]
+
 
 PRICE_HISTORY = defaultdict(list)
 TOP_RISER = (None, 0, 0.0)  # Now includes coin, % rise, and price
