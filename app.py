@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 PRICE_HISTORY = defaultdict(list)
 TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
+STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
 # Hardcoded verified list of Coinbase USD pairs
 COINS = [
@@ -31,25 +32,31 @@ def fetch_price(coin_symbol):
             data = response.json()
             return round(float(data['data']['amount']), 2)
     except Exception as e:
-        print(f"\U0001f6a8 Error fetching price for {coin_symbol}: {e}")
+        print(f"🚨 Error fetching price for {coin_symbol}: {e}")
     return None
 
 # Monitor top risers
 def monitor_risers():
-    global TOP_RISER
-    MINIMUM_RISE_PERCENTAGE = 0.05  # 0.05% threshold
+    global TOP_RISER, STAR_RISER
+    MINIMUM_RISE_PERCENTAGE = 0.05  # 0.05% threshold for short-term
+    STAR_THRESHOLD_PERCENTAGE = 5.0  # 5% threshold for 1-hour change
+
+    ONE_HOUR_LIMIT = 720  # 5 sec checks = 720 in 1 hour
 
     while True:
         try:
             top_riser = None
             top_change = 0
-            print("\U0001f50d Checking for top risers...")
+            star_riser = None
+            star_change = 0
+
+            print("🔍 Checking for top risers...")
 
             for coin in COINS:
                 price = fetch_price(coin)
                 if price is not None:
                     PRICE_HISTORY[coin].append(price)
-                    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-10:]  # Keep last 10 prices
+                    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-ONE_HOUR_LIMIT:]  # Up to 1 hour
 
                     if len(PRICE_HISTORY[coin]) >= 2:
                         initial = PRICE_HISTORY[coin][0]
@@ -64,20 +71,30 @@ def monitor_risers():
                                 top_riser = coin
                                 top_change = change
 
+                            if change >= STAR_THRESHOLD_PERCENTAGE and change > star_change:
+                                star_riser = coin
+                                star_change = change
+
             if top_riser:
                 price = fetch_price(top_riser)
                 if price is not None:
                     TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
-                    print(f"\U0001f680 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
+                    print(f"🚀 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
+
+            if star_riser:
+                price = fetch_price(star_riser)
+                if price is not None:
+                    STAR_RISER = (star_riser, round(star_change, 2), round(price, 2))
+                    print(f"🌟 STAR RISER: {star_riser} | Change: {star_change:.2f}% | Price: ${price:.2f}")
 
         except Exception as e:
-            print(f"\U0001f6a8 Error in riser monitor: {e}")
+            print(f"🚨 Error in riser monitor: {e}")
 
-        time.sleep(5)  # Check every 5 seconds
+        time.sleep(5)
 
 @app.route("/")
 def index():
-    return render_template("riser_monitor.html", top_riser=TOP_RISER)
+    return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
 
 @app.route("/api/top-riser")
 def top_riser_api():
@@ -89,6 +106,20 @@ def top_riser_api():
         })
     return jsonify({
         "coin": "No Riser",
+        "change": "0%",
+        "price": "N/A"
+    })
+
+@app.route("/api/star-riser")
+def star_riser_api():
+    if STAR_RISER and STAR_RISER[0] is not None:
+        return jsonify({
+            "coin": STAR_RISER[0],
+            "change": f"{STAR_RISER[1]:.2f}%",
+            "price": f"${STAR_RISER[2]:.2f}"
+        })
+    return jsonify({
+        "coin": "No Star Riser",
         "change": "0%",
         "price": "N/A"
     })
@@ -109,7 +140,7 @@ def crypto_news():
 
         return jsonify(news)
     except Exception as e:
-        print(f"\U0001f6a8 Failed to fetch RSS feed: {e}")
+        print(f"🚨 Failed to fetch RSS feed: {e}")
         return jsonify([])
 
 # Start the monitor in a background thread
