@@ -1,13 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="en">
- <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>
-   CryptoDog Riser Monitor
-  </title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CryptoDog Riser Monitor</title>
   <style>
-   body {
+    body {
       background-color: #0d0d0d;
       color: #00f0ff;
       font-family: Arial, sans-serif;
@@ -116,7 +115,7 @@
     }
   </style>
   <script>
-   let currentTopRiser = null;
+    let currentTopRiser = null;
     const history = [];
 
     async function fetchTopRiser() {
@@ -225,93 +224,81 @@
       fetchCryptoNews();
     };
   </script>
- </head>
- <body>
+</head>
+<body>
   <div class="top-row">
-   <img alt="AiM Logo" src="static/logo.png"/>
-   <img alt="CryptoDog" id="dog-face" src="static/neutral.png"/>
+    <img src="static/logo.png" alt="AiM Logo" />
+    <img src="static/neutral.png" alt="CryptoDog" id="dog-face" />
   </div>
+
   <div class="middle-row">
-   <div class="riser-box">
-    <div class="coin-name" id="coin-name">
-     No Riser
+    <div class="riser-box">
+      <div class="coin-name" id="coin-name">No Riser</div>
+      <div class="coin-change" id="coin-change">0%</div>
+      <div class="coin-price" id="coin-price">$0.00</div>
+      <div class="update-time" id="update-time">Last updated at --:--:--</div>
     </div>
-    <div class="coin-change" id="coin-change">
-     0%
+
+    <div class="riser-box" id="star-box">
+      <div class="coin-name" id="star-coin-name">No Star Riser</div>
+      <div class="coin-change" id="star-coin-change">0%</div>
+      <div class="coin-price" id="star-coin-price">$0.00</div>
+      <div class="update-time" id="star-update-time">Last updated at --:--:--</div>
     </div>
-    <div class="coin-price" id="coin-price">
-     $0.00
+
+    <div class="history-box" id="history-box">
+      <div class="history-item">History will appear here...</div>
     </div>
-    <div class="update-time" id="update-time">
-     Last updated at --:--:--
+
+    <div class="riser-box" id="calculator-box">
+      <h3 style="color:#ffd700;">Crypto Trial Run</h3>
+      <label for="calc-coin" style="color:#ccc;">Select Coin:</label>
+      <select id="calc-coin" style="width:100%; padding:5px; margin-bottom:10px;">
+        <option value="BTC">BTC</option>
+        <option value="ETH">ETH</option>
+        <option value="SOL">SOL</option>
+        <option value="DOGE">DOGE</option>
+        <option value="XRP">XRP</option>
+      </select>
+      <label for="mock-amount" style="color:#ccc;">Mock Investment ($):</label>
+      <input type="number" id="mock-amount" value="1000" style="width:100%; padding:5px;" />
+      <button onclick="startTrial()" style="margin-top:10px; width:48%;">Start</button>
+      <button onclick="stopTrial()" style="margin-top:10px; width:48%;">Stop</button>
+      <div id="calc-results" style="margin-top:20px; font-size:0.95em; color:#00ff95;"></div>
     </div>
-   </div>
-   <div class="riser-box" id="star-box">
-    <div class="coin-name" id="star-coin-name">
-     No Star Riser
-    </div>
-    <div class="coin-change" id="star-coin-change">
-     0%
-    </div>
-    <div class="coin-price" id="star-coin-price">
-     $0.00
-    </div>
-    <div class="update-time" id="star-update-time">
-     Last updated at --:--:--
-    </div>
-   </div>
-   <div class="history-box" id="history-box">
-    <div class="history-item">
-     History will appear here...
-    </div>
-   </div>
-   <div class="riser-box" id="calculator-box">
-    <h3 style="color:#ffd700;">
-     Crypto Trial Run
-    </h3>
-    <label for="calc-coin" style="color:#ccc;">
-     Select Coin:
-    </label>
-    <select id="calc-coin" style="width:100%; padding:5px; margin-bottom:10px;">
-     <option value="BTC">
-      BTC
-     </option>
-     <option value="ETH">
-      ETH
-     </option>
-     <option value="SOL">
-      SOL
-     </option>
-     <option value="DOGE">
-      DOGE
-     </option>
-     <option value="XRP">
-      XRP
-     </option>
-    </select>
-    <label for="mock-amount" style="color:#ccc;">
-     Mock Investment ($):
-    </label>
-    <input id="mock-amount" style="width:100%; padding:5px;" type="number" value="1000"/>
-    <button onclick="startTrial()" style="margin-top:10px; width:48%;">
-     Start
-    </button>
-    <button onclick="stopTrial()" style="margin-top:10px; width:48%;">
-     Stop
-    </button>
-    <div id="calc-results" style="margin-top:20px; font-size:0.95em; color:#00ff95;">
-    </div>
-   </div>
   </div>
+
   <div class="news-section">
-   <h2>
-    Recent Crypto News
-   </h2>
-   <div id="news-box">
-    <p style="color: #888;">
-     Loading news...
-    </p>
-   </div>
+    <h2>Recent Crypto News</h2>
+    <div id="news-box">
+      <p style="color: #888;">Loading news...</p>
+    </div>
   </div>
- </body>
+
+<div class="bottom-section">
+    <div class="box" id="virtualEstimatorBox">
+        <h2>💸 Virtual Estimator</h2>
+        <select id="coinSelect">
+            <option value="BTC">BTC</option>
+            <option value="ETH">ETH</option>
+            <option value="SOL">SOL</option>
+        </select>
+        <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000">
+        <button onclick="startTracking()">Start</button>
+        <button onclick="stopTracking()">Stop</button>
+        <div class="results" id="trackingResults"></div>
+    </div>
+    <div class="box" id="btcChartBox">
+        <h2>📈 BTC Chart</h2>
+        <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
+                width="100%" height="220" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
+    </div>
+    <div class="box" id="learnTradeBox">
+        <h2>🎓 Learn to Trade</h2>
+        <p>Join our FREE trial and get daily crypto insights!</p>
+        <button onclick="alert('Sign-up functionality coming soon!')">Sign Up Free</button>
+    </div>
+</div>
+
+</body>
 </html>
