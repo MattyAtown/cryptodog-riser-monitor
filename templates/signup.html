@@ -2,9 +2,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sign Up | Learn to Trade with Arnie</title>
+  <meta charset="UTF-8">
+  <title>Sign Up | Learn with Arnie</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -15,71 +14,58 @@
       background-size: cover;
       color: #fff;
     }
-    .signup-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
     .signup-box {
-      background: rgba(0, 0, 0, 0.8);
+      max-width: 400px;
+      margin: 80px auto;
+      background: rgba(0, 0, 0, 0.75);
       padding: 30px;
       border-radius: 15px;
-      box-shadow: 0 0 20px #0ff;
+      box-shadow: 0 0 15px #0ff;
       text-align: center;
-      width: 400px;
     }
-    .signup-box h2 {
+    h2 {
       color: #0ff;
-      text-shadow: 0 0 10px #0ff;
+      text-shadow: 0 0 8px #0ff;
       margin-bottom: 20px;
     }
-    .signup-box input[type="text"],
-    .signup-box input[type="email"],
-    .signup-box input[type="date"],
-    .signup-box input[type="password"] {
-      width: 100%;
+    input, label {
+      display: block;
+      width: 90%;
+      margin: 10px auto;
       padding: 10px;
-      margin: 10px 0;
+      font-size: 1em;
       border: none;
       border-radius: 5px;
     }
-    .signup-box input[type="checkbox"] {
-      margin-top: 10px;
-    }
-    .signup-box button {
-      width: 100%;
-      padding: 10px;
-      background: #ff00ff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    input[type="submit"] {
+      background-color: #0ff;
+      color: #000;
       font-weight: bold;
-      text-shadow: 0 0 5px #fff;
-      margin-top: 10px;
+      cursor: pointer;
+      text-shadow: none;
     }
-    .signup-box p {
+    label {
+      text-align: left;
+      color: #fff;
       font-size: 0.9em;
-      margin-top: 15px;
-      color: #aaa;
     }
   </style>
 </head>
 <body>
-  <div class="signup-container">
-    <div class="signup-box">
-      <h2>Sign Up to Learn How</h2>
-      <p>Free to sign up. You only pay if you commit after the free trial period.</p>
-      <form method="POST" action="/send_verification_email">
-        <input type="text" name="first_name" placeholder="First Name" required><br>
-        <input type="text" name="surname" placeholder="Surname" required><br>
-        <input type="email" name="email" placeholder="Email Address" required><br>
-        <input type="date" name="dob" required><br>
-        <label><input type="checkbox" name="consent" required> I agree to receive a verification email</label><br>
-        <button type="submit">Start Free Trial</button>
-      </form>
-    </div>
+  <div class="signup-box">
+    <h2>Sign Up to Learn How</h2>
+    <form method="post" action="/submit_signup">
+      <label for="first">First Name</label>
+      <input type="text" id="first" name="first" required>
+      <label for="last">Surname</label>
+      <input type="text" id="last" name="last" required>
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" required>
+      <label for="dob">Date of Birth (must be 18+)</label>
+      <input type="date" id="dob" name="dob" required>
+      <label><input type="checkbox" required> I give permission to receive email verification and updates</label>
+      <input type="submit" value="Submit & Start Free Trial">
+    </form>
   </div>
 </body>
 </html>
