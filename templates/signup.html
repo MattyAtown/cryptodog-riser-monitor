@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up | Learn to Trade with Arnie</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: url('/static/cyberpunk-bitcoin-illustration.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+    .signup-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .signup-box {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #0ff;
+      text-align: center;
+      width: 400px;
+    }
+    .signup-box h2 {
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
+      margin-bottom: 20px;
+    }
+    .signup-box input[type="text"],
+    .signup-box input[type="email"],
+    .signup-box input[type="date"],
+    .signup-box input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+    }
+    .signup-box input[type="checkbox"] {
+      margin-top: 10px;
+    }
+    .signup-box button {
+      width: 100%;
+      padding: 10px;
+      background: #ff00ff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      text-shadow: 0 0 5px #fff;
+      margin-top: 10px;
+    }
+    .signup-box p {
+      font-size: 0.9em;
+      margin-top: 15px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <div class="signup-box">
+      <h2>Sign Up to Learn How</h2>
+      <p>Free to sign up. You only pay if you commit after the free trial period.</p>
+      <form method="POST" action="/send_verification_email">
+        <input type="text" name="first_name" placeholder="First Name" required><br>
+        <input type="text" name="surname" placeholder="Surname" required><br>
+        <input type="email" name="email" placeholder="Email Address" required><br>
+        <input type="date" name="dob" required><br>
+        <label><input type="checkbox" name="consent" required> I agree to receive a verification email</label><br>
+        <button type="submit">Start Free Trial</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
