@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -113,7 +114,6 @@
       50% { opacity: 0.2; }
     }
   </style>
-
   <script>
     let currentTopRiser = null;
     const history = [];
@@ -122,99 +122,107 @@
       try {
         const response = await fetch('/api/top-riser');
         const data = await response.json();
-
         const coinName = data.coin || 'No Riser';
         const coinChange = data.change || '0%';
         const coinPrice = data.price || '$0.00';
-        const streak = data.streak || 0;
         const timestamp = new Date().toLocaleTimeString();
 
-        const coinElement = document.getElementById('coin-name');
-        const changeElement = document.getElementById('coin-change');
-        const priceElement = document.getElementById('coin-price');
-        const dogFace = document.getElementById('dog-face');
-        const historyBox = document.getElementById('history-box');
-
-        // CryptoDog Mood
-        if (streak >= 3) {
-          dogFace.src = 'static/excited.png';
-        } else if (streak === 2) {
-          dogFace.src = 'static/happy.png';
-        } else if (streak === 1) {
-          dogFace.src = 'static/neutral.png';
-        } else {
-          dogFace.src = 'static/angry.png';
-        }
-
-        coinElement.innerText = coinName;
-        changeElement.innerText = coinChange;
-        priceElement.innerText = `Price: ${coinPrice}`;
+        document.getElementById('coin-name').innerText = coinName;
+        document.getElementById('coin-change').innerText = coinChange;
+        document.getElementById('coin-price').innerText = `Price: ${coinPrice}`;
         document.getElementById('update-time').innerText = `Last updated at ${timestamp}`;
 
         if (coinName !== currentTopRiser && coinName !== "No Riser") {
           currentTopRiser = coinName;
-
-          coinElement.classList.add('flash');
-          setTimeout(() => coinElement.classList.remove('flash'), 2000);
+          document.getElementById('coin-name').classList.add('flash');
+          setTimeout(() => document.getElementById('coin-name').classList.remove('flash'), 2000);
 
           history.unshift(`${timestamp} - ${coinName} (${coinChange}) @ ${coinPrice}`);
           if (history.length > 10) history.pop();
-          historyBox.innerHTML = history.map(item => `<div class="history-item">${item}</div>`).join('');
+          document.getElementById('history-box').innerHTML = history.map(item => `<div class="history-item">${item}</div>`).join('');
         }
       } catch (error) {
         console.error('Error fetching top riser:', error);
       }
     }
 
-  async function fetchCryptoNews() {
-  try {
-    const response = await fetch('/api/crypto-news');
-    const data = await response.json();
-    const newsBox = document.getElementById('news-box');
-
-    newsBox.innerHTML = data.map(item => `
-      <div class="news-item">
-        <a href="${item.link}" target="_blank">
-          ${item.title}
-        </a><br>
-        <small style="color:#888;">${item.published}</small>
-      </div>
-    `).join('');
-  } catch (err) {
-    console.error("Failed to load news:", err);
-    document.getElementById('news-box').innerHTML = '<p style="color: #888;">Unable to fetch news right now.</p>';
-  }
-}
-
-    // Refresh data
-    setInterval(fetchTopRiser, 15000);
-    setInterval(fetchCryptoNews, 12 * 60 * 60 * 1000); // every 12 hours
-    
     async function fetchStarRiser() {
       try {
         const response = await fetch('/api/star-riser');
         const data = await response.json();
-
-        const coinName = data.coin || 'No Star Riser';
-        const coinChange = data.change || '0%';
-        const coinPrice = data.price || '$0.00';
-        const timestamp = new Date().toLocaleTimeString();
-
-        document.getElementById('star-coin-name').innerText = coinName;
-        document.getElementById('star-coin-change').innerText = coinChange;
-        document.getElementById('star-coin-price').innerText = `Price: ${coinPrice}`;
-        document.getElementById('star-update-time').innerText = `Last updated at ${timestamp}`;
+        document.getElementById('star-coin-name').innerText = data.coin || 'No Star Riser';
+        document.getElementById('star-coin-change').innerText = data.change || '0%';
+        document.getElementById('star-coin-price').innerText = `Price: ${data.price || '$0.00'}`;
+        document.getElementById('star-update-time').innerText = `Last updated at ${new Date().toLocaleTimeString()}`;
       } catch (error) {
         console.error('Error fetching star riser:', error);
       }
     }
+
+    async function fetchCryptoNews() {
+      try {
+        const response = await fetch('/api/crypto-news');
+        const data = await response.json();
+        const newsBox = document.getElementById('news-box');
+        newsBox.innerHTML = data.map(item => `
+          <div class="news-item">
+            <a href="${item.link}" target="_blank">${item.title}</a><br>
+            <small style="color:#888;">${item.published}</small>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error("Failed to load news:", err);
+        document.getElementById('news-box').innerHTML = '<p style="color: #888;">Unable to fetch news right now.</p>';
+      }
+    }
+
+    let trialInterval = null, startPrice = null, selectedCoin = null, investment = null;
+
+    function startTrial() {
+      selectedCoin = document.getElementById('calc-coin').value;
+      investment = parseFloat(document.getElementById('mock-amount').value || "1000");
+      if (!selectedCoin || isNaN(investment)) return;
+
+      fetch(`https://api.coinbase.com/v2/prices/${selectedCoin}-USD/spot`)
+        .then(res => res.json())
+        .then(data => {
+          startPrice = parseFloat(data.data.amount);
+          document.getElementById('calc-results').innerHTML = `Bought ${investment} USD of ${selectedCoin} at $${startPrice.toFixed(2)}...`;
+          trialInterval = setInterval(updateTrial, 5000);
+        });
+    }
+
+    function updateTrial() {
+      fetch(`https://api.coinbase.com/v2/prices/${selectedCoin}-USD/spot`)
+        .then(res => res.json())
+        .then(data => {
+          const currentPrice = parseFloat(data.data.amount);
+          const coinsHeld = investment / startPrice;
+          const currentValue = coinsHeld * currentPrice;
+          const gain = currentValue - investment;
+          const gainPercent = (gain / investment) * 100;
+          document.getElementById('calc-results').innerHTML = `
+            Bought at: $${startPrice.toFixed(2)}<br>
+            Current Price: $${currentPrice.toFixed(2)}<br>
+            Current Value: $${currentValue.toFixed(2)}<br>
+            Gain/Loss: $${gain.toFixed(2)} (${gainPercent.toFixed(2)}%)
+          `;
+        });
+    }
+
+    function stopTrial() {
+      clearInterval(trialInterval);
+      document.getElementById('calc-results').innerHTML = 'Tracking stopped.';
+    }
+
+    setInterval(fetchTopRiser, 15000);
     setInterval(fetchStarRiser, 15000);
+    setInterval(fetchCryptoNews, 43200000);
     window.onload = () => {
       fetchTopRiser();
       fetchStarRiser();
       fetchCryptoNews();
     };
-
   </script>
 </head>
 <body>
@@ -231,7 +239,6 @@
       <div class="update-time" id="update-time">Last updated at --:--:--</div>
     </div>
 
-    
     <div class="riser-box" id="star-box">
       <div class="coin-name" id="star-coin-name">No Star Riser</div>
       <div class="coin-change" id="star-coin-change">0%</div>
@@ -241,6 +248,23 @@
 
     <div class="history-box" id="history-box">
       <div class="history-item">History will appear here...</div>
+    </div>
+
+    <div class="riser-box" id="calculator-box">
+      <h3 style="color:#ffd700;">Crypto Trial Run</h3>
+      <label for="calc-coin" style="color:#ccc;">Select Coin:</label>
+      <select id="calc-coin" style="width:100%; padding:5px; margin-bottom:10px;">
+        <option value="BTC">BTC</option>
+        <option value="ETH">ETH</option>
+        <option value="SOL">SOL</option>
+        <option value="DOGE">DOGE</option>
+        <option value="XRP">XRP</option>
+      </select>
+      <label for="mock-amount" style="color:#ccc;">Mock Investment ($):</label>
+      <input type="number" id="mock-amount" value="1000" style="width:100%; padding:5px;" />
+      <button onclick="startTrial()" style="margin-top:10px; width:48%;">Start</button>
+      <button onclick="stopTrial()" style="margin-top:10px; width:48%;">Stop</button>
+      <div id="calc-results" style="margin-top:20px; font-size:0.95em; color:#00ff95;"></div>
     </div>
   </div>
 
