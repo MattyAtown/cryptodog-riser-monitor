@@ -1,4 +1,7 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
+from flask_mail import Mail, Message
+import random
+import string
 import requests
 from datetime import datetime
 from collections import defaultdict
@@ -7,6 +10,12 @@ import time
 import feedparser
 
 app = Flask(__name__)
+
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
 PRICE_HISTORY = defaultdict(list)
 TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
@@ -95,6 +104,10 @@ def monitor_risers():
 @app.route("/")
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
+
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
 
 @app.route("/api/top-riser")
 def top_riser_api():
