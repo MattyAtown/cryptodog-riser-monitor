@@ -106,6 +106,10 @@ def monitor_risers():
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
 
+@app.route('/verify_email')
+def verify_email():
+    return render_template('verify.html')
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
