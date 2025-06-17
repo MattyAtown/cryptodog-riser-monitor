@@ -106,11 +106,15 @@ def monitor_risers():
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
 
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        # your logic here
-        ...
+@app.route('/signup', methods=['POST'])
+def submit_signup():
+    first_name = request.form.get('first_name')
+    surname = request.form.get('surname')
+    email = request.form.get('email')
+    dob = request.form.get('dob')
+    # Optional: Save to DB, send email, etc.
+
+    return render_template('verify.html', name=first_name)  # or wherever you go next
 
 @app.route("/api/top-riser")
 def top_riser_api():
