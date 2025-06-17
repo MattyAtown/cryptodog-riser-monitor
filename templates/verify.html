@@ -1,355 +1,51 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CryptoKitty Elite v2.2</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <title>Email Verification</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
   <style>
-    /* Page and Layout Styles */
     body {
-      background: #0d0d0d;
-      color: #00f0ff;
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      height: 100vh;
-    }
-
-    .main-wrapper {
-      padding: 20px;
-      margin-left: -2%;
-      box-sizing: border-box;
-      height: 100%;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .top-bar-left {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .top-bar-right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .cryptoDogToggle {
-      background: #111;
-      color: #00f0ff;
-      border: 2px solid #00f0ff;
-      padding: 8px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .top-right-logo img {
-      max-width: 100px;
-      height: auto;
-      filter: drop-shadow(0 0 8px #00e0ff);
-    }
-
-    .alert-banner {
-      padding: 10px;
-      margin-bottom: 10px;
+      background-image: url("/static/cyberpunk-bitcoin-illustration.png");
+      background-size: cover;
+      background-position: center;
+      color: #00ffcc;
+      font-family: 'Orbitron', sans-serif;
       text-align: center;
-      font-weight: bold;
-      font-size: 1.1em;
-      border: 2px solid #ff00f7;
-      background-color: #210025;
-      color: #ff00f7;
-      box-shadow: 0 0 15px #ff00f7;
-      min-height: 50px;
+      padding-top: 80px;
     }
-
-    .content-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      height: calc(100% - 160px);
+    .verify-box {
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #00ffff;
+      border-radius: 15px;
+      width: 60%;
+      margin: auto;
+      padding: 40px;
+      box-shadow: 0 0 15px #00ffcc;
     }
-
-    @keyframes beamMove {
-      0% { background-position: 0 0; }
-      100% { background-position: 0 100%; }
+    h1 {
+      font-size: 2.5em;
+      color: #00ffcc;
+      text-shadow: 0 0 5px #00ffcc;
     }
-
-    .panel {
-      background: #111;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px #00f0ff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      transition: box-shadow 0.3s ease;
-      background-image: linear-gradient(to bottom, #00f0ff 0%, transparent 100%);
-      background-size: 2px 400%;
-      background-repeat: no-repeat;
-      animation: beamMove 4s linear infinite;
-      overflow: hidden;
+    p {
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: #ffffffcc;
     }
-
-    .panel:hover {
-      box-shadow: 0 0 30px #00f0ff, 0 0 20px #00f0ff inset;
-    }
-
-    .coins-panel { flex: 0 0 10%; border-right: 2px solid #00f0ff; }
-    .prices-panel { flex: 0 0 20%; border-right: 2px solid #00f0ff; }
-    .cryptodog-panel { flex: 0 0 20%; border-right: 2px solid #00f0ff; }
-    .chart-panel { flex: 0 0 50%; }
-
-    select {
-      width: 100%;
-      padding: 6px;
-      background-color: #111;
-      color: #00f0ff;
-      border: 1px solid #00f0ff;
-      border-radius: 8px;
-    }
-
-    .badge {
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.8em;
-      font-weight: bold;
-      margin-left: 10px;
-      text-shadow: 0 0 4px #000;
-    }
-
-    .riser { background-color: #00e676; color: black; }
-    .warning { background-color: #ff1744; color: white; }
-    .stable { background-color: #555; color: white; }
-
-    #cryptoDogWidget img {
-      width: 90%;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-
-    canvas {
-      width: 100% !important;
-      height: auto !important;
-    }
-
-    .timestamp {
-      position: fixed;
-      bottom: 10px;
-      right: 20px;
-      color: #888;
-      font-size: 0.85em;
-      text-shadow: 0 0 6px #00e0ff;
+    .logo {
+      width: 120px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
-
 <body>
-
-<div class="main-wrapper">
-  <!-- 🔥 Top Bar -->
-  <div class="top-bar">
-    <div class="top-bar-left">
-      <h1>🐱 CryptoKitty Elite Tracker</h1>
-    </div>
-    <div class="top-bar-right">
-      <div class="cryptoDogToggle" onclick="toggleCryptoDog()">🐶 CryptoDog</div>
-      <div class="top-right-logo">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" />
-      </div>
-    </div>
+  <div class="verify-box">
+    <img src="/static/logo.png" class="logo" alt="AiM Logo" />
+    <h1>Welcome to CryptoDog, {{ name }}!</h1>
+    <p>We've sent a verification link to your email.</p>
+    <p>Please check your inbox (and spam folder) and click the link to complete your registration.</p>
+    <p>If you don’t receive it within a few minutes, try signing up again or contact support.</p>
   </div>
-
-  <!-- 💥 Flashing Banner -->
-  <div class="alert-banner" id="alertBanner">Loading...</div>
-
-  <!-- 🚀 4-Panel Layout -->
-  <div class="content-row">
-    <!-- Panel A - Coins -->
-    <div class="panel coins-panel">
-      <h2>Select Coins</h2>
-      <form method="POST">
-        <select id="coinSelector" multiple size="10">
-          {% for coin in coins %}
-            <option value="{{ coin }}" {% if coin in selected %}selected{% endif %}>{{ coin }}</option>
-          {% endfor %}
-        </select><br><br>
-        <input type="hidden" id="selectedCoinsInput" name="coins" value="{{ selected | join(',') }}">
-        <button type="submit">Update</button>
-      </form>
-    </div>
-
-    <!-- Panel B - Prices -->
-    <div class="panel prices-panel">
-      <h2>📈 Prices & Change</h2>
-      <ul>
-        {% for coin in selected %}
-          <li>
-            {{ coin }}: {{ prices.get(coin, "Loading...") }}
-            {% set trend = trends.get(coin, "Stable") %}
-            <span class="badge {{ trend|lower }}">{{ trend }}</span>
-          </li>
-        {% endfor %}
-      </ul>
-      <h3>🚀 Top Risers</h3>
-      <ul>
-        {% for coin, gain in top_risers.items() %}
-          <li>{{ coin }}: +{{ gain }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <!-- Panel C - CryptoDog -->
-    <div class="panel cryptodog-panel">
-      <h2>🐶 CryptoDog</h2>
-      <div id="cryptoDogWidget" style="display: none;">
-        <img id="dogFace" src="/static/neutral.png" alt="Dog Face" />
-        <audio id="sniff" src="{{ url_for('static', filename='sniff.mp3') }}"></audio>
-        <audio id="bark" src="{{ url_for('static', filename='bark.mp3') }}"></audio>
-        <audio id="growl" src="{{ url_for('static', filename='growl.mp3') }}"></audio>
-      </div>
-    </div>
-
-    <!-- Panel D - Chart -->
-    <div class="panel chart-panel">
-      <h2>📊 Live Chart</h2>
-      <canvas id="priceChart"></canvas>
-    </div>
-  </div>
-</div>
-
-<!-- 🕓 Timestamp -->
-<div class="timestamp" id="timestamp">Last refreshed: --:--:--</div>
-
-<!-- 🧠 Scripts -->
-<script>
-  function toggleCryptoDog() {
-    const widget = document.getElementById("cryptoDogWidget");
-    widget.style.display = (widget.style.display === "none") ? "block" : "none";
-  }
-
-const bannerMessages = [];
-{% for coin, trend in trends.items() %}
-  {% if trend == 'WARNING' %}
-    bannerMessages.push("🚨 WARNING: {{ coin }} is falling fast!");
-  {% elif trend == 'RISER' %}
-    bannerMessages.push("📈 RISING: {{ coin }} is surging upward!");
-  {% endif %}
-{% endfor %}
-{% if news_headlines %}
-  {% for news in news_headlines %}
-    bannerMessages.push("📰 NEWS: {{ news }}");
-  {% endfor %}
-{% endif %}
-{% for coin, trend in trends.items() %}
-  {% if trend == 'WARNING' %}
-    bannerMessages.push("🚨 WARNING: {{ coin }} is falling fast!");
-  {% elif trend == 'RISER' %}
-    bannerMessages.push("📈 RISING: {{ coin }} is surging upward!");
-  {% endif %}
-{% endfor %}
-{% for news in news_headlines %}
-  bannerMessages.push("📰 NEWS: {{ news }}");
-{% endfor %}
-
-  let bannerIndex = 0;
-  function rotateBanner() {
-    if (bannerMessages.length > 0) {
-      document.getElementById('alertBanner').textContent = bannerMessages[bannerIndex];
-      bannerIndex = (bannerIndex + 1) % bannerMessages.length;
-    } else {
-      document.getElementById('alertBanner').textContent = "Welcome to CryptoKitty!";
-    }
-  }
-  setInterval(rotateBanner, 5000);
-  rotateBanner();
-
-  document.addEventListener('DOMContentLoaded', function () {
-    const coinSelector = document.getElementById('coinSelector');
-    const inputField = document.getElementById('selectedCoinsInput');
-    const selectedCoins = new Set(inputField.value.split(','));
-
-    coinSelector.addEventListener('dblclick', (e) => {
-      const coin = e.target.value;
-      if (selectedCoins.has(coin)) {
-        selectedCoins.delete(coin);
-      } else {
-        selectedCoins.add(coin);
-      }
-      inputField.value = Array.from(selectedCoins).join(',');
-    });
-
-    const timestampEl = document.getElementById('timestamp');
-    const now = new Date();
-    timestampEl.textContent = 'Last refreshed: ' +
-      now.getHours().toString().padStart(2, '0') + ':' +
-      now.getMinutes().toString().padStart(2, '0') + ':' +
-      now.getSeconds().toString().padStart(2, '0');
-
-    const rawHistory = {{ price_history | tojson | safe }};
-    const selected = {{ selected | tojson | safe }};
-    const labels = Array.from({ length: 10 }, (_, i) => {
-      const minutesAgo = (9 - i) * 5;
-      return minutesAgo === 0 ? "Now" : ${minutesAgo} min ago;
-    });
-
-    const datasets = selected.map((coin) => {
-      const prices = rawHistory[coin] || [];
-      const base = prices[0] || 1;
-      const percentChanges = prices.map(p => ((p - base) / base) * 100);
-      return {
-        label: coin,
-        data: percentChanges,
-        borderColor: "#" + Math.floor(Math.random() * 16777215).toString(16),
-        pointRadius: 3,
-        borderWidth: 2,
-        fill: false,
-        tension: 0.3
-      };
-    });
-
-    new Chart(document.getElementById('priceChart').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: datasets
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        scales: {
-          y: {
-            beginAtZero: false,
-            title: {
-              display: true,
-              text: '% Change'
-            },
-            ticks: {
-              callback: value => value.toFixed(1) + '%'
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            labels: {
-              color: '#fff'
-            }
-          }
-        }
-      }
-    });
-  });
-</script>
-
 </body>
 </html>
