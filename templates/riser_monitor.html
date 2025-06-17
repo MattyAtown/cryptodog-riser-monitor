@@ -170,12 +170,32 @@
       document.getElementById("topRiser").innerText = `${data.coin} | ${data.change} | ${data.price}`;
       updateDogFace(data.coin);
     }
+    async function fetchCoinIcon(symbol) {
+  const url = `https://cryptofonts-token-icon-api1.p.rapidapi.com/icon/${symbol.toLowerCase()}?color=original`;
+
+  const options = {
+    method: 'GET',
+    headers: {
+      'X-RapidAPI-Key': 'aa532f1f40msh291e05859835c93p10f3b6jsn302f1e4467c7',
+      'X-RapidAPI-Host': 'cryptofonts-token-icon-api1.p.rapidapi.com'
+    }
+  };
+
+  try {
+    const response = await fetch(url, options);
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.error('Icon fetch failed for', symbol, error);
+    return null;
+   }
+  }
     async function fetchStarRiser() {
-      const res = await fetch('/api/star-riser');
-      const data = await res.json();
-      document.getElementById("starRiser").innerText = data.coin 
-        ? `${data.coin} | ${data.change} | ${data.price}` 
-        : "⭐ Star Riser\n(No current match)";
+    const res = await fetch('/api/star-riser');
+    const data = await res.json();
+    document.getElementById("starRiser").innerText = data.coin 
+    ? `${data.coin} | ${data.change} | ${data.price}` 
+    : "⭐ Star Riser\n(No current match)";
     }
     async function fetchNews() {
       const res = await fetch('/api/crypto-news');
