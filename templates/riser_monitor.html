@@ -111,11 +111,30 @@
     </div>
   </div>
 
+  <div class="section">
+    <div class="box">
+      <h2>📈 Top Riser History</h2>
+      <ul class="crypto-history" id="topRiserHistory"></ul>
+    </div>
+    <div class="box">
+      <h2>🌟 Star Riser History</h2>
+      <ul class="crypto-history" id="starRiserHistory"></ul>
+    </div>
+  </div>
+
   <script>
     async function updateRiser(boxPrefix, data) {
       const { coin, change, price } = data;
       const infoDiv = document.getElementById(`${boxPrefix}Info`);
       infoDiv.innerHTML = `<strong>${coin} | +${change}% | $${price}</strong>`;
+      const historyUl = document.getElementById(`${boxPrefix}History`);
+      if (historyUl) {
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${coin}</strong> | +${change}% | $${price} <span style='color:gray;'>(${time})</span>`;
+        historyUl.prepend(li);
+        if (historyUl.children.length > 5) historyUl.removeChild(historyUl.lastChild);
+      }
     }
 
     async function fetchTopRiser() {
