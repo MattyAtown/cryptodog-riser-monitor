@@ -156,26 +156,59 @@
 </a>
 </div>
 </div>
-
 <script>
+async function fetchAndUpdate(url, boxPrefix) {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    updateRiser(boxPrefix, data);
+  } catch (error) {
+    console.error(`Failed to fetch ${boxPrefix}`, error);
+  }
+}
+
 function updateRiser(boxPrefix, data) {
   const { coin, change, price } = data;
   const lowerCoin = coin.toLowerCase();
   const iconUrl = `/static/coins/${lowerCoin}.png`;
+
   const infoDiv = document.getElementById(`${boxPrefix}Info`);
   const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
   infoDiv.innerHTML = `
-    <img src="${iconUrl}" 
-         style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;" 
+    <img src="${iconUrl}" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;" 
          onerror="this.onerror=null;this.src='/static/images/happy.png';">
     <strong>${coin}</strong> | +${change} | $${price}
   `;
 
   iconDiv.innerHTML = `
-    <img src="${iconUrl}" 
-         style="width: 80px; height: 80px;" 
+    <img src="${iconUrl}" style="width: 80px; height: 80px;" 
          onerror="this.onerror=null;this.src='/static/images/happy.png';">
   `;
 }
+
+async function updateNews() {
+  try {
+    const response = await fetch('/get_news');
+    const data = await response.json();
+    const banner = document.getElementById('newsBanner');
+    banner.innerHTML = '';
+    data.articles.forEach(article => {
+      const span = document.createElement('span');
+      span.textContent = article.title + ' • ';
+      banner.appendChild(span);
+    });
+  } catch (error) {
+    console.error('Failed to fetch news', error);
+  }
+}
+
+async function refreshAll() {
+  await fetchAndUpdate('/get_top_riser', 'topRiser');
+  await fetchAndUpdate('/get_star_riser', 'starRiser');
+  await updateNews();
+}
+
+setInterval(refreshAll, 5000);
+window.onload = refreshAll;
 </script></body></html>
