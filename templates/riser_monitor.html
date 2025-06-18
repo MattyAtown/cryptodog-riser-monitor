@@ -113,20 +113,89 @@
     </div>
   </div>
 
+  <div class="section">
+    <div class="box">
+      <h2>📈 Top Riser History</h2>
+      <ul class="crypto-history">
+        <li><strong>SOL</strong> | +6.12% | $160.45 <span style='color:gray;'>(13:05)</span></li>
+        <li><strong>ETH</strong> | +5.88% | $3,245.12 <span style='color:gray;'>(12:53)</span></li>
+        <li><strong>XRP</strong> | +5.32% | $0.58 <span style='color:gray;'>(12:41)</span></li>
+        <li><strong>ADA</strong> | +4.99% | $0.41 <span style='color:gray;'>(12:20)</span></li>
+        <li><strong>DOT</strong> | +4.80% | $6.72 <span style='color:gray;'>(12:04)</span></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>🌟 Star Riser History</h2>
+      <ul class="crypto-history">
+        <li><strong>SOL</strong> | +5.21% | $161.12 <span style='color:gray;'>(13:05)</span></li>
+        <li><strong>ETH</strong> | +5.36% | $3,251.00 <span style='color:gray;'>(11:47)</span></li>
+        <li><strong>LINK</strong> | +5.19% | $17.02 <span style='color:gray;'>(11:02)</span></li>
+        <li><strong>MATIC</strong> | +5.04% | $0.92 <span style='color:gray;'>(10:35)</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="box">
+      <h2>💸 Buy Crypto Simulator</h2>
+      <select id="coinSelect">
+        <option value="BTC">BTC</option>
+        <option value="ETH">ETH</option>
+        <option value="SOL">SOL</option>
+      </select><br>
+      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
+      <button onclick="startTracking()">Start</button>
+      <button onclick="stopTracking()">Stop</button>
+      <div class="results" id="trackingResults" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="box">
+      <h2>📊 Live Bitcoin Chart</h2>
+      <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
+              width="100%" height="200" frameborder="0" scrolling="auto"></iframe>
+    </div>
+
+    <div class="box">
+      <h2>🎓 Learn to Trade with Arnie</h2>
+      <p>Sign up to our paid GPT-powered AI mentor program.</p>
+      <p><strong>Tailored crypto strategies & insights.</strong></p>
+      <a href="/signup" style="text-decoration: none;">
+        <button>Sign Up for Arnie</button>
+      </a>
+    </div>
+  </div>
+
   <script>
-    function getLocalCoinIcon(symbol) {
-      const fileName = `${symbol.toLowerCase()}.png`;
-      return `/static/coins/${fileName}`;
+    const apiHeaders = {
+      'X-RapidAPI-Key': 'aa532f1f40msh291e05859835c93p10f3b6jsn302f1e4467c7',
+      'X-RapidAPI-Host': 'cryptofonts-token-icon-api1.p.rapidapi.com'
+    };
+
+    async function fetchCoinIcon(symbol) {
+      const url = `https://cryptofonts-token-icon-api1.p.rapidapi.com/icon/${symbol.toLowerCase()}?color=original`;
+      try {
+        const response = await fetch(url, { method: 'GET', headers: apiHeaders });
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+      } catch (error) {
+        console.error('Icon fetch failed for', symbol, error);
+        return null;
+      }
     }
 
     async function updateRiser(boxPrefix, data) {
       const { coin, change, price } = data;
-      const iconUrl = getLocalCoinIcon(coin);
+      const iconUrl = await fetchCoinIcon(coin);
       const infoDiv = document.getElementById(`${boxPrefix}Info`);
       const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
-      infoDiv.innerHTML = `<img src="${iconUrl}" alt="${coin}" style="width: 24px; height: 24px;" onerror="this.onerror=null;this.src='/static/coins/btc.png';"> <strong>${coin} | +${change}% | $${price}</strong>`;
-      iconDiv.innerHTML = `<img src="${iconUrl}" alt="${coin}" style="width: 80px; height: 80px;" onerror="this.onerror=null;this.src='/static/coins/btc.png';">`;
+      infoDiv.innerHTML = iconUrl
+        ? `<img src="${iconUrl}" style="width: 24px; height: 24px;"> <strong>${coin} | +${change} | $${price}</strong>`
+        : `<strong>${coin} | +${change} | $${price}</strong>`;
+
+      iconDiv.innerHTML = iconUrl
+        ? `<img src="${iconUrl}" style="width: 80px; height: 80px;">`
+        : "";
     }
 
     async function fetchTopRiser() {
@@ -159,12 +228,65 @@
       img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
     }
 
+    function rotateBuySignals() {
+      const signalBar = document.getElementById("buySignalBar");
+      const signals = [
+        "Scanning price momentum...",
+        "🔔 BUY SIGNAL: SOL +3.2%",
+        "🔔 BUY SIGNAL: PEPE +5.0%",
+        "🧠 CryptoDog says: Watch XRP closely...",
+        "⭐ HOT COIN ALERT: BTC +2.8%"
+      ];
+      let index = 0;
+      setInterval(() => {
+        signalBar.innerText = signals[index % signals.length];
+        index++;
+      }, 5000);
+    }
+
+    let tracking = false;
+    let coin = "BTC";
+    let buyPrice = 0;
+    let usd = 1000;
+
+    async function fetchCurrentPrice(symbol) {
+      const res = await fetch(`https://api.coinbase.com/v2/prices/${symbol}-USD/spot`);
+      const data = await res.json();
+      return parseFloat(data.data.amount);
+    }
+
+    async function startTracking() {
+      coin = document.getElementById("coinSelect").value;
+      usd = parseFloat(document.getElementById("mockAmount").value);
+      buyPrice = await fetchCurrentPrice(coin);
+      tracking = true;
+      updateTracking();
+    }
+
+    function stopTracking() {
+      tracking = false;
+      document.getElementById("trackingResults").innerText = "Tracking stopped.";
+    }
+
+    async function updateTracking() {
+      while (tracking) {
+        const current = await fetchCurrentPrice(coin);
+        const change = ((current - buyPrice) / buyPrice) * 100;
+        const value = (usd / buyPrice) * current;
+        document.getElementById("trackingResults").innerHTML = `
+          Bought: $${usd.toFixed(2)} of ${coin}<br>
+          Entry: $${buyPrice.toFixed(2)} | Now: $${current.toFixed(2)}<br>
+          Value: $${value.toFixed(2)} | Change: ${change.toFixed(2)}%
+        `;
+        await new Promise(res => setTimeout(res, 5000));
+      }
+    }
+
     fetchTopRiser();
     fetchStarRiser();
     fetchNews();
+    rotateBuySignals();
     setInterval(fetchTopRiser, 5000);
     setInterval(fetchStarRiser, 5000);
     setInterval(fetchNews, 30000);
   </script>
-</body>
-</html>
