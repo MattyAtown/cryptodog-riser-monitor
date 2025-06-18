@@ -177,7 +177,7 @@
      function updateRiser(boxPrefix, data) {
   const { coin, change, price } = data;
   const lowerCoin = coin.toLowerCase();
-  const iconUrl = `/static/images/coins/${lowerCoin}.png`;
+  const iconUrl = `/static/coins/${lowerCoin}.png`;
 
   const infoDiv = document.getElementById(`${boxPrefix}Info`);
   const iconDiv = document.getElementById(`${boxPrefix}Icon`);
@@ -194,6 +194,7 @@
          style="width: 80px; height: 80px;" 
          onerror="this.onerror=null;this.src='/static/images/happy.png';">
   `;
+}
 } = data;
     const iconUrl = fetchCoinIcon(coin);
 
