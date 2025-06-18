@@ -153,31 +153,40 @@
   </div>
 
   <script>
-    async function updateRiser(boxPrefix, data) {
+    const topRiserHistoryData = [];
+    const starRiserHistoryData = [];
+
+    async function updateRiser(boxPrefix, data, threshold, intervalLimit, historyArray) {
       const { coin, change, price } = data;
       const infoDiv = document.getElementById(`${boxPrefix}Info`);
       infoDiv.innerHTML = `<strong>${coin} | +${change}% | $${price}</strong>`;
+
       const historyUl = document.getElementById(`${boxPrefix}History`);
-      if (historyUl) {
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${coin}</strong> | +${change}% | $${price} <span style='color:gray;'>(${time})</span>`;
-        historyUl.prepend(li);
-        if (historyUl.children.length > 5) historyUl.removeChild(historyUl.lastChild);
+      if (historyUl && parseFloat(change) >= threshold) {
+        const now = Date.now();
+        if (historyArray.length === 0 || (now - historyArray[0].timestamp) >= intervalLimit) {
+          const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${coin}</strong> | +${change}% | $${price} <span style='color:gray;'>(${time})</span>`;
+          historyUl.prepend(li);
+          historyArray.unshift({ timestamp: now });
+          if (historyUl.children.length > 10) historyUl.removeChild(historyUl.lastChild);
+          if (historyArray.length > 10) historyArray.pop();
+        }
       }
     }
 
     async function fetchTopRiser() {
       const res = await fetch('/api/top-riser');
       const data = await res.json();
-      updateRiser('topRiser', data);
+      updateRiser('topRiser', data, 0.1, 10 * 60 * 1000, topRiserHistoryData);
       updateDogFace(data.coin);
     }
 
     async function fetchStarRiser() {
       const res = await fetch('/api/star-riser');
       const data = await res.json();
-      updateRiser('starRiser', data);
+      updateRiser('starRiser', data, 0.5, 60 * 60 * 1000, starRiserHistoryData);
     }
 
     async function fetchNews() {
