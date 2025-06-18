@@ -171,21 +171,22 @@
       'X-RapidAPI-Host': 'cryptofonts-token-icon-api1.p.rapidapi.com'
     };
 
-    async function fetchCoinIcon(symbol) {
-      const url = `https://cryptofonts-token-icon-api1.p.rapidapi.com/icon/${symbol.toLowerCase()}?color=original`;
-      try {
-        const response = await fetch(url, { method: 'GET', headers: apiHeaders });
-        const blob = await response.blob();
-        return URL.createObjectURL(blob);
-      } catch (error) {
-        console.error('Icon fetch failed for', symbol, error);
-        return null;
-      }
-    }
+    function getLocalCoinIcon(symbol) {
+  const lowercase = symbol.toLowerCase();
+  const testImage = new Image();
+  const defaultIcon = "/static/coins/btc.png";
+  const path = `/static/coins/${lowercase}.png`;
+
+  return new Promise((resolve) => {
+    testImage.onload = () => resolve(path);  // Found
+    testImage.onerror = () => resolve(defaultIcon); // Not found
+    testImage.src = path;
+  });
+}
 
     async function updateRiser(boxPrefix, data) {
       const { coin, change, price } = data;
-      const iconUrl = await fetchCoinIcon(coin);
+      const iconUrl = await getLocalCoinIcon(coin);
       const infoDiv = document.getElementById(`${boxPrefix}Info`);
       const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
