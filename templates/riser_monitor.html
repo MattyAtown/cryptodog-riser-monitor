@@ -109,6 +109,15 @@
       <h2>📰 Top News</h2>
       <ul id="newsList"></ul>
     </div>
+
+    <div class="box">
+      <h2>🎓 Learn to Trade with Arnie</h2>
+      <p>Sign up to our paid GPT-powered AI mentor program.</p>
+      <p><strong>Tailored crypto strategies & insights.</strong></p>
+      <a href="/signup" style="text-decoration: none;">
+        <button>Sign Up for Arnie</button>
+      </a>
+    </div>
   </div>
 
   <div class="section">
@@ -119,6 +128,27 @@
     <div class="box">
       <h2>🌟 Star Riser History</h2>
       <ul class="crypto-history" id="starRiserHistory"></ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="box">
+      <h2>💸 Buy Crypto Simulator</h2>
+      <select id="coinSelect">
+        <option value="BTC">BTC</option>
+        <option value="ETH">ETH</option>
+        <option value="SOL">SOL</option>
+      </select><br>
+      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
+      <button onclick="startTracking()">Start</button>
+      <button onclick="stopTracking()">Stop</button>
+      <div class="results" id="trackingResults" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="box">
+      <h2>📊 Live Bitcoin Chart</h2>
+      <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
+              width="100%" height="200" frameborder="0" scrolling="auto"></iframe>
     </div>
   </div>
 
