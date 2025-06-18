@@ -185,21 +185,26 @@
 
 
      function updateRiser(boxPrefix, data) {
-    const { coin, change, price } = data;
-    const iconUrl = fetchCoinIcon(coin);
+  const { coin, change, price } = data;
+  const lowerCoin = coin.toLowerCase();
+  const iconUrl = `/static/images/coins/${lowerCoin}.png`;
 
-    const infoDiv = document.getElementById(`${boxPrefix}Info`);
-    const iconDiv = document.getElementById(`${boxPrefix}Icon`);
+  const infoDiv = document.getElementById(`${boxPrefix}Info`);
+  const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
-    infoDiv.innerHTML = `
-      <img src="${iconUrl}" style="width: 24px; height: 24px;" onerror="this.src='/static/images/default-coin.png';">
-      <strong>${coin} | +${change} | $${price}</strong>
-    `;
+  infoDiv.innerHTML = `
+    <img src="${iconUrl}" 
+         style="width: 24px; height: 24px;" 
+         onerror="this.onerror=null;this.src='/static/images/happy.png';">
+    <strong>${coin} | +${change} | $${price}</strong>
+  `;
 
-    iconDiv.innerHTML = `
-      <img src="${iconUrl}" style="width: 80px; height: 80px;" onerror="this.src='/static/images/default-coin.png';">
-    `;
-  }
+  iconDiv.innerHTML = `
+    <img src="${iconUrl}" 
+         style="width: 80px; height: 80px;" 
+         onerror="this.onerror=null;this.src='/static/images/happy.png';">
+  `;
+}
 
     async function fetchTopRiser() {
       const res = await fetch('/api/top-riser');
