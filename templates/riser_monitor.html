@@ -82,15 +82,7 @@
     .crypto-history li {
       margin-bottom: 5px;
     }
-  
-#topNewsList a {
-    color: #ffff66;
-    text-decoration: none;
-}
-#topNewsList a:hover {
-    color: white;
-}
-</style>
+  </style>
 </head>
 <body>
 <div class="header">
@@ -164,6 +156,7 @@
 </a>
 </div>
 </div>
+
 <script>
 function updateRiser(boxPrefix, data) {
   const { coin, change, price } = data;
@@ -185,71 +178,4 @@ function updateRiser(boxPrefix, data) {
          onerror="this.onerror=null;this.src='/static/images/happy.png';">
   `;
 }
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  function updateTopRiser() {
-    fetch("/api/top-riser")
-      .then((res) => res.json())
-      .then((data) => {
-        const { coin, change, price } = data;
-        const info = document.getElementById("topRiserInfo");
-        const icon = document.getElementById("topRiserIcon");
-        info.innerHTML = `<strong>${coin}</strong><br>${change} | ${price}`;
-
-        const img = document.createElement("img");
-        img.src = `/static/coins/${coin.toLowerCase()}.png`;
-        img.alt = coin;
-        img.width = 40;
-        img.onerror = () => { img.src = "/static/images/Happy.png"; };
-        icon.innerHTML = "";
-        icon.appendChild(img);
-      });
-  }
-
-  function updateStarRiser() {
-    fetch("/api/star-riser")
-      .then((res) => res.json())
-      .then((data) => {
-        const { coin, change, price } = data;
-        const info = document.getElementById("starRiserInfo");
-        const icon = document.getElementById("starRiserIcon");
-        info.innerHTML = `<strong>${coin}</strong><br>${change} | ${price}`;
-
-        const img = document.createElement("img");
-        img.src = `/static/coins/${coin.toLowerCase()}.png`;
-        img.alt = coin;
-        img.width = 40;
-        img.onerror = () => { img.src = "/static/images/Happy.png"; };
-        icon.innerHTML = "";
-        icon.appendChild(img);
-      });
-  }
-
-  function updateNews() {
-    fetch("/api/crypto-news")
-      .then((res) => res.json())
-      .then((items) => {
-        const newsList = document.getElementById("newsList");
-        newsList.innerHTML = "";
-        items.forEach((item) => {
-          const li = document.createElement("li");
-          li.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
-          newsList.appendChild(li);
-        });
-      });
-  }
-
-  updateTopRiser();
-  updateStarRiser();
-  updateNews();
-
-  setInterval(() => {
-    updateTopRiser();
-    updateStarRiser();
-  }, 10000);
-
-  setInterval(updateNews, 60000);
-});
-</script>
-</body></html>
+</script></body></html>
