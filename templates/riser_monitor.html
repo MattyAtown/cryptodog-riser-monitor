@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>CryptoDog | Powered by AiM</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&amp;display=swap" rel="stylesheet"/>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CryptoDog | Powered by AiM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
     body {
       margin: 0;
       padding: 0;
@@ -85,130 +84,119 @@
   </style>
 </head>
 <body>
-<div class="header">
-<img alt="AiM Logo" src="/static/logo.png"/>
-<h1>CryptoDog Dashboard</h1>
-<img alt="CryptoDog" class="crypto-face" id="dogFace" src="/static/neutral.png"/>
-</div>
-<div class="buy-signal" id="buySignalBar">
+  <div class="header">
+    <img src="/static/logo.png" alt="AiM Logo" />
+    <h1>CryptoDog Dashboard</h1>
+    <img id="dogFace" src="/static/neutral.png" alt="CryptoDog" class="crypto-face" />
+  </div>
+
+  <div class="buy-signal" id="buySignalBar">
     Tracking Live Signals...
   </div>
-<div class="section">
-<div class="box" id="topRiserBox">
-<h2>Top Riser</h2>
-<div id="topRiserInfo"></div>
-<div id="topRiserIcon" style="margin-top: 10px;"></div>
-</div>
-<div class="box" id="starRiserBox">
-<h2>⭐ Star Riser</h2>
-<div id="starRiserInfo"></div>
-<div id="starRiserIcon" style="margin-top: 10px;"></div>
-</div>
-<div class="box" id="newsBox">
-<h2>📰 Top News</h2>
-<ul id="newsList"></ul>
-</div>
-</div>
-<div class="section">
-<div class="box">
-<h2>📈 Top Riser History</h2>
-<ul class="crypto-history">
-<li><strong>SOL</strong> | +6.12% | $160.45 <span style="color:gray;">(13:05)</span></li>
-<li><strong>ETH</strong> | +5.88% | $3,245.12 <span style="color:gray;">(12:53)</span></li>
-<li><strong>XRP</strong> | +5.32% | $0.58 <span style="color:gray;">(12:41)</span></li>
-<li><strong>ADA</strong> | +4.99% | $0.41 <span style="color:gray;">(12:20)</span></li>
-<li><strong>DOT</strong> | +4.80% | $6.72 <span style="color:gray;">(12:04)</span></li>
-</ul>
-</div>
-<div class="box">
-<h2>🌟 Star Riser History</h2>
-<ul class="crypto-history">
-<li><strong>SOL</strong> | +5.21% | $161.12 <span style="color:gray;">(13:05)</span></li>
-<li><strong>ETH</strong> | +5.36% | $3,251.00 <span style="color:gray;">(11:47)</span></li>
-<li><strong>LINK</strong> | +5.19% | $17.02 <span style="color:gray;">(11:02)</span></li>
-<li><strong>MATIC</strong> | +5.04% | $0.92 <span style="color:gray;">(10:35)</span></li>
-</ul>
-</div>
-</div>
-<div class="section">
-<div class="box">
-<h2>💸 Buy Crypto Simulator</h2>
-<select id="coinSelect">
-<option value="BTC">BTC</option>
-<option value="ETH">ETH</option>
-<option value="SOL">SOL</option>
-</select><br/>
-<input id="mockAmount" placeholder="Amount in USD" type="number" value="1000"/><br/>
-<button onclick="startTracking()">Start</button>
-<button onclick="stopTracking()">Stop</button>
-<div class="results" id="trackingResults" style="margin-top:10px;"></div>
-</div>
-<div class="box">
-<h2>📊 Live Bitcoin Chart</h2>
-<iframe frameborder="0" height="200" scrolling="auto" src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&amp;interval=30&amp;locale=en" width="100%"></iframe>
-</div>
-<div class="box">
-<h2>🎓 Learn to Trade with Arnie</h2>
-<p>Sign up to our paid GPT-powered AI mentor program.</p>
-<p><strong>Tailored crypto strategies &amp; insights.</strong></p>
-<a href="/signup" style="text-decoration: none;">
-<button>Sign Up for Arnie</button>
-</a>
-</div>
-</div>
-<script>
+
+  <div class="section">
+    <div class="box" id="topRiserBox">
+      <h2>Top Riser</h2>
+      <div id="topRiserInfo"></div>
+      <div id="topRiserIcon" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="box" id="starRiserBox">
+      <h2>⭐ Star Riser</h2>
+      <div id="starRiserInfo"></div>
+      <div id="starRiserIcon" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="box" id="newsBox">
+      <h2>📰 Top News</h2>
+      <ul id="newsList"></ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="box">
+      <h2>📈 Top Riser History</h2>
+      <ul class="crypto-history">
+        <li><strong>SOL</strong> | +6.12% | $160.45 <span style='color:gray;'>(13:05)</span></li>
+        <li><strong>ETH</strong> | +5.88% | $3,245.12 <span style='color:gray;'>(12:53)</span></li>
+        <li><strong>XRP</strong> | +5.32% | $0.58 <span style='color:gray;'>(12:41)</span></li>
+        <li><strong>ADA</strong> | +4.99% | $0.41 <span style='color:gray;'>(12:20)</span></li>
+        <li><strong>DOT</strong> | +4.80% | $6.72 <span style='color:gray;'>(12:04)</span></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>🌟 Star Riser History</h2>
+      <ul class="crypto-history">
+        <li><strong>SOL</strong> | +5.21% | $161.12 <span style='color:gray;'>(13:05)</span></li>
+        <li><strong>ETH</strong> | +5.36% | $3,251.00 <span style='color:gray;'>(11:47)</span></li>
+        <li><strong>LINK</strong> | +5.19% | $17.02 <span style='color:gray;'>(11:02)</span></li>
+        <li><strong>MATIC</strong> | +5.04% | $0.92 <span style='color:gray;'>(10:35)</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="box">
+      <h2>💸 Buy Crypto Simulator</h2>
+      <select id="coinSelect">
+        <option value="BTC">BTC</option>
+        <option value="ETH">ETH</option>
+        <option value="SOL">SOL</option>
+      </select><br>
+      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
+      <button onclick="startTracking()">Start</button>
+      <button onclick="stopTracking()">Stop</button>
+      <div class="results" id="trackingResults" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="box">
+      <h2>📊 Live Bitcoin Chart</h2>
+      <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
+              width="100%" height="200" frameborder="0" scrolling="auto"></iframe>
+    </div>
+
+    <div class="box">
+      <h2>🎓 Learn to Trade with Arnie</h2>
+      <p>Sign up to our paid GPT-powered AI mentor program.</p>
+      <p><strong>Tailored crypto strategies & insights.</strong></p>
+      <a href="/signup" style="text-decoration: none;">
+        <button>Sign Up for Arnie</button>
+      </a>
+    </div>
+  </div>
+
+  <script>
     const apiHeaders = {
       'X-RapidAPI-Key': 'aa532f1f40msh291e05859835c93p10f3b6jsn302f1e4467c7',
       'X-RapidAPI-Host': 'cryptofonts-token-icon-api1.p.rapidapi.com'
     };
 
-       function fetchCoinIcon(symbol) {
-     const lower = symbol.toLowerCase();
-     const url = `/static/coins/${lower}.png`;
-     const img = new Image();
-     img.src = url;
-     img.onerror = function () {
-       this.src = "/static/images/default-coin.png";
-     };
-     return img.src;
+    async function fetchCoinIcon(symbol) {
+      const url = `https://cryptofonts-token-icon-api1.p.rapidapi.com/icon/${symbol.toLowerCase()}?color=original`;
+      try {
+        const response = await fetch(url, { method: 'GET', headers: apiHeaders });
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+      } catch (error) {
+        console.error('Icon fetch failed for', symbol, error);
+        return null;
+      }
     }
 
+    async function updateRiser(boxPrefix, data) {
+      const { coin, change, price } = data;
+      const iconUrl = await fetchCoinIcon(coin);
+      const infoDiv = document.getElementById(`${boxPrefix}Info`);
+      const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
-     function updateRiser(boxPrefix, data) {
-  const { coin, change, price } = data;
-  const lowerCoin = coin.toLowerCase();
-  const iconUrl = `/static/images/coins/${lowerCoin}.png`;
+      infoDiv.innerHTML = iconUrl
+        ? `<img src="${iconUrl}" style="width: 24px; height: 24px;"> <strong>${coin} | +${change} | $${price}</strong>`
+        : `<strong>${coin} | +${change} | $${price}</strong>`;
 
-  const infoDiv = document.getElementById(`${boxPrefix}Info`);
-  const iconDiv = document.getElementById(`${boxPrefix}Icon`);
-
-  infoDiv.innerHTML = `
-    <img src="${iconUrl}" 
-         style="width: 24px; height: 24px;" 
-         onerror="this.onerror=null;this.src='/static/images/happy.png';">
-    <strong>${coin} | +${change} | $${price}</strong>
-  `;
-
-  iconDiv.innerHTML = `
-    <img src="${iconUrl}" 
-         style="width: 80px; height: 80px;" 
-         onerror="this.onerror=null;this.src='/static/images/happy.png';">
-  `;
-} = data;
-    const iconUrl = fetchCoinIcon(coin);
-
-    const infoDiv = document.getElementById(`${boxPrefix}Info`);
-    const iconDiv = document.getElementById(`${boxPrefix}Icon`);
-
-    infoDiv.innerHTML = `
-      <img src="${iconUrl}" style="width: 24px; height: 24px;" onerror="this.src='/static/images/default-coin.png';">
-      <strong>${coin} | +${change} | $${price}</strong>
-    `;
-
-    iconDiv.innerHTML = `
-      <img src="${iconUrl}" style="width: 80px; height: 80px;" onerror="this.src='/static/images/default-coin.png';">
-    `;
-  }
+      iconDiv.innerHTML = iconUrl
+        ? `<img src="${iconUrl}" style="width: 80px; height: 80px;">`
+        : "";
+    }
 
     async function fetchTopRiser() {
       const res = await fetch('/api/top-riser');
@@ -302,4 +290,3 @@
     setInterval(fetchStarRiser, 5000);
     setInterval(fetchNews, 30000);
   </script>
-</body></html>
