@@ -162,15 +162,14 @@ function updateRiser(boxPrefix, data) {
   const { coin, change, price } = data;
   const lowerCoin = coin.toLowerCase();
   const iconUrl = `/static/coins/${lowerCoin}.png`;
-
   const infoDiv = document.getElementById(`${boxPrefix}Info`);
   const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
   infoDiv.innerHTML = `
     <img src="${iconUrl}" 
-         style="width: 24px; height: 24px;" 
+         style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;" 
          onerror="this.onerror=null;this.src='/static/images/happy.png';">
-    <strong>${coin} | +${change} | $${price}</strong>
+    <strong>${coin}</strong> | +${change} | $${price}
   `;
 
   iconDiv.innerHTML = `
