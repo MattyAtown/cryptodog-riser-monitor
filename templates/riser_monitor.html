@@ -166,37 +166,19 @@
   </div>
 
   <script>
-    const apiHeaders = {
-      'X-RapidAPI-Key': 'aa532f1f40msh291e05859835c93p10f3b6jsn302f1e4467c7',
-      'X-RapidAPI-Host': 'cryptofonts-token-icon-api1.p.rapidapi.com'
-    };
-
     function getLocalCoinIcon(symbol) {
-  const lowercase = symbol.toLowerCase();
-  const testImage = new Image();
-  const defaultIcon = "/static/coins/btc.png";
-  const path = `/static/coins/${lowercase}.png`;
-
-  return new Promise((resolve) => {
-    testImage.onload = () => resolve(path);  // Found
-    testImage.onerror = () => resolve(defaultIcon); // Not found
-    testImage.src = path;
-  });
-}
+      const fileName = `${symbol.toLowerCase()}.png`;
+      return `/static/coins/${fileName}`;
+    }
 
     async function updateRiser(boxPrefix, data) {
       const { coin, change, price } = data;
-      const iconUrl = await getLocalCoinIcon(coin);
+      const iconUrl = getLocalCoinIcon(coin);
       const infoDiv = document.getElementById(`${boxPrefix}Info`);
       const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
-      infoDiv.innerHTML = iconUrl
-        ? `<img src="${iconUrl}" style="width: 24px; height: 24px;"> <strong>${coin} | +${change} | $${price}</strong>`
-        : `<strong>${coin} | +${change} | $${price}</strong>`;
-
-      iconDiv.innerHTML = iconUrl
-        ? `<img src="${iconUrl}" style="width: 80px; height: 80px;">`
-        : "";
+      infoDiv.innerHTML = `<img src="${iconUrl}" alt="${coin}" style="width: 24px; height: 24px;"> <strong>${coin} | +${change} | $${price}</strong>`;
+      iconDiv.innerHTML = `<img src="${iconUrl}" alt="${coin}" style="width: 80px; height: 80px;">`;
     }
 
     async function fetchTopRiser() {
@@ -212,19 +194,6 @@
       updateRiser('starRiser', data);
     }
 
-    function getLocalCoinIcon(symbol) {
-  const lowercase = symbol.toLowerCase();
-  const testImage = new Image();
-  const defaultIcon = "/static/coins/btc.png";
-  const path = `/static/coins/${lowercase}.png`;
-
-  return new Promise((resolve) => {
-    testImage.onload = () => resolve(path);  // Found
-    testImage.onerror = () => resolve(defaultIcon); // Not found
-    testImage.src = path;
-  });
-}
-    
     async function fetchNews() {
       const res = await fetch('/api/crypto-news');
       const data = await res.json();
@@ -304,3 +273,5 @@
     setInterval(fetchStarRiser, 5000);
     setInterval(fetchNews, 30000);
   </script>
+</body>
+</html>
