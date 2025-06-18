@@ -82,7 +82,15 @@
     .crypto-history li {
       margin-bottom: 5px;
     }
-  </style>
+  
+#topNewsList a {
+    color: #ffff66;
+    text-decoration: none;
+}
+#topNewsList a:hover {
+    color: white;
+}
+</style>
 </head>
 <body>
 <div class="header">
@@ -156,7 +164,6 @@
 </a>
 </div>
 </div>
-
 <script>
 function updateRiser(boxPrefix, data) {
   const { coin, change, price } = data;
@@ -245,5 +252,4 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(updateNews, 60000);
 });
 </script>
-
 </body></html>
