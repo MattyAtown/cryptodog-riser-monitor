@@ -172,15 +172,15 @@
     };
 
        function fetchCoinIcon(symbol) {
-     const lower = symbol.toLowerCase();
-     const url = `/static/coins/${lower}.png`;
-     const img = new Image();
-     img.src = url;
-     img.onerror = function () {
-       this.src = "/static/images/default-coin.png";
-     };
-     return img.src;
-    }
+  const lowerSymbol = symbol.toLowerCase();
+  const imgPath = `/static/images/coins/${lowerSymbol}.png`;
+
+  // Create image to test if it loads
+  const testImg = new Image();
+  testImg.src = imgPath;
+
+  // Immediately return the path, but fallback handled in HTML onerror
+  return imgPath;
 
 
      function updateRiser(boxPrefix, data) {
