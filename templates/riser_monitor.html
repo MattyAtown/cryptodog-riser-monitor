@@ -170,6 +170,8 @@
   const fileName = `${symbol.toLowerCase()}.png`;
   return `/static/coins/${fileName}`;
 }.png`;
+  return `/static/coins/${fileName}`;
+}.png`;
       return `/static/coins/${fileName}`;
     }
 
@@ -179,8 +181,8 @@
       const infoDiv = document.getElementById(`${boxPrefix}Info`);
       const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
-      infoDiv.innerHTML = `<img src="${iconUrl}" alt="${coin}" style="width: 24px; height: 24px;" onerror="this.onerror=null;this.src='/static/coins/btc.png';"> <strong>${coin} | +${change} | $${price}</strong>`; height: 24px;"> <strong>${coin} | +${change} | $${price}</strong>`;
-      iconDiv.innerHTML = `<img src="${iconUrl}" alt="${coin}" style="width: 80px; height: 80px;" onerror="this.onerror=null;this.src='/static/coins/btc.png';">`; height: 80px;">`;
+      infoDiv.innerHTML = `<img src="${iconUrl}" alt="${coin}" style="width: 24px; height: 24px;" onerror="this.onerror=null;this.src='/static/coins/btc.png';"> <strong>${coin} | +${change} | $${price}</strong>`; height: 24px;" onerror="this.onerror=null;this.src='/static/coins/btc.png';"> <strong>${coin} | +${change} | $${price}</strong>`; height: 24px;"> <strong>${coin} | +${change} | $${price}</strong>`;
+      iconDiv.innerHTML = `<img src="${iconUrl}" alt="${coin}" style="width: 80px; height: 80px;" onerror="this.onerror=null;this.src='/static/coins/btc.png';">`; height: 80px;" onerror="this.onerror=null;this.src='/static/coins/btc.png';">`; height: 80px;">`;
     }
 
     async function fetchTopRiser() {
