@@ -171,32 +171,34 @@
       'X-RapidAPI-Host': 'cryptofonts-token-icon-api1.p.rapidapi.com'
     };
 
-    async function fetchCoinIcon(symbol) {
-      const url = `https://cryptofonts-token-icon-api1.p.rapidapi.com/icon/${symbol.toLowerCase()}?color=original`;
-      try {
-        const response = await fetch(url, { method: 'GET', headers: apiHeaders });
-        const blob = await response.blob();
-        return URL.createObjectURL(blob);
-      } catch (error) {
-        console.error('Icon fetch failed for', symbol, error);
-        return null;
-      }
+       function fetchCoinIcon(symbol) {
+     const lower = symbol.toLowerCase();
+     const url = `/static/coins/${lower}.png`;
+     const img = new Image();
+     img.src = url;
+     img.onerror = function () {
+       this.src = "/static/images/default-coin.png";
+     };
+     return img.src;
     }
 
-    async function updateRiser(boxPrefix, data) {
-      const { coin, change, price } = data;
-      const iconUrl = await fetchCoinIcon(coin);
-      const infoDiv = document.getElementById(`${boxPrefix}Info`);
-      const iconDiv = document.getElementById(`${boxPrefix}Icon`);
 
-      infoDiv.innerHTML = iconUrl
-        ? `<img src="${iconUrl}" style="width: 24px; height: 24px;"> <strong>${coin} | +${change} | $${price}</strong>`
-        : `<strong>${coin} | +${change} | $${price}</strong>`;
+     function updateRiser(boxPrefix, data) {
+    const { coin, change, price } = data;
+    const iconUrl = fetchCoinIcon(coin);
 
-      iconDiv.innerHTML = iconUrl
-        ? `<img src="${iconUrl}" style="width: 80px; height: 80px;">`
-        : "";
-    }
+    const infoDiv = document.getElementById(`${boxPrefix}Info`);
+    const iconDiv = document.getElementById(`${boxPrefix}Icon`);
+
+    infoDiv.innerHTML = `
+      <img src="${iconUrl}" style="width: 24px; height: 24px;" onerror="this.src='/static/images/default-coin.png';">
+      <strong>${coin} | +${change} | $${price}</strong>
+    `;
+
+    iconDiv.innerHTML = `
+      <img src="${iconUrl}" style="width: 80px; height: 80px;" onerror="this.src='/static/images/default-coin.png';">
+    `;
+  }
 
     async function fetchTopRiser() {
       const res = await fetch('/api/top-riser');
