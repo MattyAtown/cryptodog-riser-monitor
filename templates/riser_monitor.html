@@ -155,6 +155,13 @@
   <script>
     const topRiserHistoryData = [];
     const starRiserHistoryData = [];
+    const rotatingMessages = [
+      "Crypto surges to all-time high with expected rises to come.",
+      "XRP and SOL backed for high ROI with lower risk.",
+      "Meme coins are volatile: tread carefully.",
+      "Get the inside tricks: sign up for Arnie’s low-risk, high-reward strategies."
+    ];
+    let messageIndex = 0;
 
     async function updateRiser(boxPrefix, data, threshold, intervalLimit, historyArray) {
       const { coin, change, price } = data;
@@ -174,6 +181,12 @@
           if (historyArray.length > 10) historyArray.pop();
         }
       }
+    }
+
+    function updateBuySignalBanner() {
+      const banner = document.getElementById("buySignalBar");
+      banner.textContent = rotatingMessages[messageIndex];
+      messageIndex = (messageIndex + 1) % rotatingMessages.length;
     }
 
     async function fetchTopRiser() {
@@ -209,9 +222,11 @@
     fetchTopRiser();
     fetchStarRiser();
     fetchNews();
+    updateBuySignalBanner();
     setInterval(fetchTopRiser, 5000);
     setInterval(fetchStarRiser, 5000);
     setInterval(fetchNews, 30000);
+    setInterval(updateBuySignalBanner, 15000);
   </script>
 </body>
 </html>
