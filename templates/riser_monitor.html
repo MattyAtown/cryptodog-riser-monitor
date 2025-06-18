@@ -212,6 +212,19 @@
       updateRiser('starRiser', data);
     }
 
+    function getLocalCoinIcon(symbol) {
+  const lowercase = symbol.toLowerCase();
+  const testImage = new Image();
+  const defaultIcon = "/static/coins/btc.png";
+  const path = `/static/coins/${lowercase}.png`;
+
+  return new Promise((resolve) => {
+    testImage.onload = () => resolve(path);  // Found
+    testImage.onerror = () => resolve(defaultIcon); // Not found
+    testImage.src = path;
+  });
+}
+    
     async function fetchNews() {
       const res = await fetch('/api/crypto-news');
       const data = await res.json();
