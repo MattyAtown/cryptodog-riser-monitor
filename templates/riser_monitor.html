@@ -104,11 +104,13 @@
     <div class="box" id="topRiserBox">
       <h2>Top Riser</h2>
       <div id="topRiserInfo"></div>
+      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
     </div>
 
     <div class="box" id="starRiserBox">
       <h2>⭐ Star Riser</h2>
       <div id="starRiserInfo"></div>
+      <img id="starRiserIcon" class="coin-icon" src="" alt="Coin Icon">
     </div>
 
     <div class="box" id="newsBox">
@@ -158,6 +160,57 @@
     </div>
   </div>
 
-  <!-- JS stays same, with logic to be updated separately if needed -->
+  <script>
+    async function updateRiser(boxPrefix, data) {
+      const { coin, change, price } = data;
+      const infoDiv = document.getElementById(`${boxPrefix}Info`);
+      infoDiv.innerHTML = `<strong>${coin} | +${change}% | $${price}</strong>`;
+      const iconImg = document.getElementById(`${boxPrefix}Icon`);
+      if (iconImg) {
+        const lowercaseCoin = coin.toLowerCase();
+        iconImg.src = `/static/coins/${lowercaseCoin}.png`;
+        iconImg.onerror = () => {
+          iconImg.src = `/${lowercaseCoin}.png`; // fallback if not in /static/coins/
+        };
+      }
+    }
+
+    async function fetchTopRiser() {
+      const res = await fetch('/api/top-riser');
+      const data = await res.json();
+      updateRiser('topRiser', data);
+      updateDogFace(data.coin);
+    }
+
+    async function fetchStarRiser() {
+      const res = await fetch('/api/star-riser');
+      const data = await res.json();
+      updateRiser('starRiser', data);
+    }
+
+    async function fetchNews() {
+      const res = await fetch('/api/crypto-news');
+      const data = await res.json();
+      const list = document.getElementById("newsList");
+      list.innerHTML = "";
+      data.slice(0, 5).forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+        list.appendChild(li);
+      });
+    }
+
+    function updateDogFace(coin) {
+      const img = document.getElementById("dogFace");
+      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
+    }
+
+    fetchTopRiser();
+    fetchStarRiser();
+    fetchNews();
+    setInterval(fetchTopRiser, 5000);
+    setInterval(fetchStarRiser, 5000);
+    setInterval(fetchNews, 30000);
+  </script>
 </body>
 </html>
