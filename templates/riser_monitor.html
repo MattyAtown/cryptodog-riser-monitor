@@ -129,11 +129,11 @@
   </div>
 
   <div class="section">
-    <div class="box">
+    <div class="box" style="min-width: 320px; min-height: 200px;">
       <h2>📈 Top Riser History</h2>
       <ul class="crypto-history" id="topRiserHistory"></ul>
     </div>
-    <div class="box">
+    <div class="box" style="min-width: 320px; min-height: 200px;">
       <h2>🌟 Star Riser History</h2>
       <ul class="crypto-history" id="starRiserHistory"></ul>
     </div>
@@ -164,13 +164,14 @@
     async function updateRiser(boxPrefix, data) {
       const { coin, change, price } = data;
       const infoDiv = document.getElementById(`${boxPrefix}Info`);
-      infoDiv.innerHTML = `<strong>${coin} | +${change}% | $${price}</strong>`;
+      infoDiv.innerHTML = `<strong>${coin} | +${change}% | $${parseFloat(price).toFixed(4)}</strong>`;
       const iconImg = document.getElementById(`${boxPrefix}Icon`);
       if (iconImg) {
         const lowercaseCoin = coin.toLowerCase();
         iconImg.src = `/static/coins/${lowercaseCoin}.png`;
         iconImg.onerror = () => {
-          iconImg.src = `/${lowercaseCoin}.png`; // fallback if not in /static/coins/
+          iconImg.onerror = null;
+          iconImg.src = `/static/btc.png`;
         };
       }
     }
@@ -205,9 +206,24 @@
       img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
     }
 
+    function rotateBannerMessages() {
+      const messages = [
+        "Crypto surges to all-time highs – more to come?",
+        "XRP and SOL showing strong momentum with lower risk.",
+        "Caution: Meme coins are highly manipulated.",
+        "Sign up to learn minimum-risk, high-reward strategies."
+      ];
+      let index = 0;
+      setInterval(() => {
+        document.getElementById("buySignalBar").innerText = messages[index];
+        index = (index + 1) % messages.length;
+      }, 8000);
+    }
+
     fetchTopRiser();
     fetchStarRiser();
     fetchNews();
+    rotateBannerMessages();
     setInterval(fetchTopRiser, 5000);
     setInterval(fetchStarRiser, 5000);
     setInterval(fetchNews, 30000);
