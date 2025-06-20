@@ -176,7 +176,7 @@
         tryImage.onerror = () => {
           const fallback = new Image();
           fallback.onload = () => iconImg.src = fallback.src;
-          fallback.onerror = () => iconImg.src = '/static/btc.png';
+          fallback.onerror = () => iconImg.src = '/static/coins/btc.png';
           fallback.src = `/${lowercaseCoin}.png`;
         };
         tryImage.src = `/static/coins/${lowercaseCoin}.png`;
