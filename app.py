@@ -24,13 +24,13 @@ STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
 # Hardcoded verified list of Coinbase USD pairs
 COINS = [
-    "BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "AVAX", "SHIB", "DOT", "LINK",
-    "MATIC", "TRX", "BCH", "NEAR", "UNI", "LTC", "ICP", "DAI", "ETC", "APT",
-    "FIL", "STX", "RNDR", "ATOM", "ARB", "HBAR", "INJ", "VET", "MKR", "THETA",
-    "PEPE", "LDO", "QNT", "AAVE", "GRT", "SUI", "USDC", "XLM", "OP", "AGIX",
-    "ALGO", "BAT", "BAL", "BNT", "CVC", "COMP", "ENS", "FTM", "GALA", "IMX",
-    "KNC", "LRC", "MANA", "MASK", "NMR", "OXT", "RLC", "SKL", "SNX", "SAND",
-    "ZRX", "ZIL", "YFI", "UMA", "TUSD"
+    "btc", "eth", "sol", "xrp", "doge", "ada", "avax", "shib", "dot", "link",
+    "matic", "trx", "bch", "near", "uni", "ltc", "icp", "dai", "etc", "apt",
+    "fil", "stx", "rndr", "atom", "arb", "hbar", "inj", "vet", "mkr", "theta",
+    "pepe", "ldo", "qnt", "aave", "grt", "sui", "usdc", "xlm", "op", "agix",
+    "algo", "bat", "bal", "bnt", "cvc", "comp", "ens", "ftm", "gala", "imx",
+    "knc", "lrc", "mana", "mask", "nmr", "oxt", "rlc", "skl", "snx", "sand",
+    "zrx", "zil", "yfi", "uma", "tusd"
 ]
 
 # Fetch spot price from Coinbase for a given coin
