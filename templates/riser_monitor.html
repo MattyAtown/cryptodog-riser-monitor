@@ -165,14 +165,28 @@
     const starHistory = [];
 
     function updateHistory(type, data) {
-      const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-      const historyArr = type === 'top' ? topHistory : starHistory;
-      const ul = document.getElementById(listId);
-      const entry = `${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)}`;
-      historyArr.unshift(entry);
-      if (historyArr.length > 5) historyArr.pop();
-      ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
-    }
+  const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+  const historyArr = type === 'top' ? topHistory : starHistory;
+  const ul = document.getElementById(listId);
+
+  const priceNum = parseFloat(data.price);
+  const priceFormatted = priceNum && !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
+
+  // Generate stars based on streaks
+  let stars = '';
+  const starCount = data.stars || 0;
+  if (starCount > 0) {
+    stars = ' ' + '★'.repeat(Math.min(5, starCount));
+  }
+
+  const timestamp = data.timestamp ? ` - ${data.timestamp}` : '';
+  const entry = `${data.coin} +${data.change}% ${priceFormatted}${timestamp}${stars}`;
+
+  historyArr.unshift(entry);
+  if (historyArr.length > 5) historyArr.pop();
+
+  ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
+}
 
     async function updateRiser(boxPrefix, data, type = null) {
       const { coin, change, price } = data;
