@@ -9,6 +9,7 @@ from collections import defaultdict
 import threading
 import time
 import feedparser
+import re
 
 app = Flask(__name__)
 
@@ -107,6 +108,21 @@ def fetch_price(coin_symbol):
     except Exception as e:
         print(f"🚨 Error fetching price for {coin_symbol}: {e}")
     return None
+
+COIN_DESCRIPTIONS = {}
+
+def fetch_coin_description(coin_symbol):
+    try:
+        url = f"https://api.coingecko.com/api/v3/coins/{coin_symbol.lower()}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            desc_html = data.get("description", {}).get("en", "")
+            desc = re.sub(r'<.*?>', '', desc_html).strip()
+            return desc[:300]  # Trim to 300 characters
+    except Exception as e:
+        print(f"⚠️ Failed to fetch description for {coin_symbol}: {e}")
+    return ""
 
 # Monitor top risers
 def monitor_risers():
@@ -213,15 +229,20 @@ def signup():
 @app.route("/api/top-riser")
 def top_riser_api():
     if TOP_RISER and TOP_RISER[0] is not None:
+        coin = TOP_RISER[0]
+        if coin not in COIN_DESCRIPTIONS:
+            COIN_DESCRIPTIONS[coin] = fetch_coin_description(coin)
         return jsonify({
-            "coin": TOP_RISER[0],
+            "coin": coin,
             "change": f"{TOP_RISER[1]:.2f}",
-            "price": f"{TOP_RISER[2]:.2f}"
+            "price": f"{TOP_RISER[2]:.2f}",
+            "description": COIN_DESCRIPTIONS[coin]
         })
     return jsonify({
         "coin": "No Riser",
         "change": "0",
-        "price": "0"
+        "price": "0",
+        "description": ""
     })
 
 @app.route("/api/star-riser")
