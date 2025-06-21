@@ -94,15 +94,13 @@ def monitor_risers():
                                 star_change = change
 
             if top_riser:
-                price = fetch_price(top_riser)
-                if price is not None:
-                    TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
-                    print(f"🚀 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
-                    now = datetime.now()
-        global LAST_TOP_RISER, LAST_TOP_RISER_TIME, TOP_RISER_HISTORY
-        global STAR_RISER, STAR_RISER_HISTORY, LAST_STAR_RISER_UPDATE
+    price = fetch_price(top_riser)
+    if price is not None:
+        TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
+        print(f"🚀 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
 
-        # --- TOP RISER HISTORY RULE ---
+        # ✅ Now safely add history logic
+        now = datetime.now()
         if LAST_TOP_RISER != top_riser:
             LAST_TOP_RISER = top_riser
             LAST_TOP_RISER_TIME = now
@@ -131,18 +129,6 @@ def monitor_risers():
                     STAR_RISER_HISTORY.appendleft(common_30)
                     print(f"📜 Star Riser History Updated: {common_30}")
             LAST_STAR_RISER_UPDATE = now
-
-            if star_riser:
-                price = fetch_price(star_riser)
-                if price is not None:
-                    STAR_RISER = (star_riser, round(star_change, 2), round(price, 2))
-                    print(f"🌟 STAR RISER: {star_riser} | Change: {star_change:.2f}% | Price: ${price:.2f}")
-
-        except Exception as e:
-            print(f"🚨 Error in riser monitor: {e}")
-
-        time.sleep(5)
-
 @app.route("/")
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
