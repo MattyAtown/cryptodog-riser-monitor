@@ -1,248 +1,176 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CryptoDog | Powered by AiM</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: url('/static/cyberpunk-bitcoin-illustration.png') no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 30px;
-      background: rgba(0, 0, 0, 0.7);
-      border-bottom: 2px solid #0ff;
-    }
-    .header img {
-      height: 60px;
-    }
-    h1 {
-      font-size: 1.8em;
-      color: #0ff;
-      text-shadow: 0 0 10px #0ff;
-    }
-    .section {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin: 30px auto;
-      max-width: 1200px;
-    }
-    .box {
-      background: rgba(0,0,0,0.7);
-      padding: 20px;
-      width: 300px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px #0ff;
-      text-align: center;
-    }
-    .box h2 {
-      font-size: 1.3em;
-      color: #ff00ff;
-      text-shadow: 0 0 8px #ff00ff;
-      margin-bottom: 10px;
-    }
-    #newsBox ul {
-      list-style-type: square;
-      text-align: left;
-      padding-left: 20px;
-      font-size: 0.9em;
-    }
-    .buy-signal {
-      background-color: rgba(255, 0, 128, 0.9);
-      padding: 10px;
-      color: white;
-      font-weight: bold;
-      text-align: center;
-      text-shadow: 0 0 5px #fff;
-      font-size: 1rem;
-      border-top: 2px solid #ff00ff;
-      border-bottom: 2px solid #ff00ff;
-    }
-    .crypto-face {
-      height: 60px;
-    }
-    ul.crypto-history {
-      list-style: none;
-      padding-left: 0;
-      text-align: left;
-      font-size: 0.9em;
-    }
-    .crypto-history li {
-      margin-bottom: 5px;
-    }
-    .coin-icon {
-      width: 40px;
-      height: 40px;
-      display: block;
-      margin: 8px auto 0 auto;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <img src="/static/logo.png" alt="AiM Logo" />
-    <h1>CryptoDog Dashboard</h1>
-    <img id="dogFace" src="/static/neutral.png" alt="CryptoDog" class="crypto-face" />
-  </div>
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
+from flask_mail import Mail, Message
+import random
+import string
+import requests
+import os
+from datetime import datetime
+from collections import defaultdict
+import threading
+import time
+import feedparser
 
-  <div class="buy-signal" id="buySignalBar">
-    Tracking Live Signals...
-  </div>
+app = Flask(__name__)
 
-  <div class="section">
-    <div class="box" id="topRiserBox">
-      <h2>Top Riser</h2>
-      <div id="topRiserInfo"></div>
-      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
-    </div>
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
-    <div class="box" id="starRiserBox">
-      <h2>⭐ Star Riser</h2>
-      <div id="starRiserInfo"></div>
-      <img id="starRiserIcon" class="coin-icon" src="" alt="Coin Icon">
-    </div>
+PRICE_HISTORY = defaultdict(list)
+TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
+STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
-    <div class="box" id="newsBox">
-      <h2>📰 Top News</h2>
-      <ul id="newsList"></ul>
-    </div>
+# Hardcoded verified list of Coinbase USD pairs
+COINS = [
+    "btc", "eth", "sol", "xrp", "doge", "ada", "avax", "shib", "dot", "link",
+    "matic", "trx", "bch", "near", "uni", "ltc", "icp", "dai", "etc", "apt",
+    "fil", "stx", "rndr", "atom", "arb", "hbar", "inj", "vet", "mkr", "theta",
+    "pepe", "ldo", "qnt", "aave", "grt", "sui", "usdc", "xlm", "op", "agix",
+    "algo", "bat", "bal", "bnt", "cvc", "comp", "ens", "ftm", "gala", "imx",
+    "knc", "lrc", "mana", "mask", "nmr", "oxt", "rlc", "skl", "snx", "sand",
+    "zrx", "zil", "yfi", "uma", "tusd"
+]
 
-    <div class="box">
-      <h2>🎓 Learn to Trade with Arnie</h2>
-      <p>Sign up to our paid GPT-powered AI mentor program.</p>
-      <p><strong>Tailored crypto strategies & insights.</strong></p>
-      <a href="/signup" style="text-decoration: none;">
-        <button>Sign Up for Arnie</button>
-      </a>
-    </div>
-  </div>
+# Fetch spot price from Coinbase for a given coin
+def fetch_price(coin_symbol):
+    try:
+        url = f"https://api.coinbase.com/v2/prices/{coin_symbol}-USD/spot"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            return round(float(data['data']['amount']), 2)
+    except Exception as e:
+        print(f"🚨 Error fetching price for {coin_symbol}: {e}")
+    return None
 
-  <div class="section">
-    <div class="box" style="min-width: 320px; min-height: 200px;">
-      <h2>📈 Top Riser History</h2>
-      <ul class="crypto-history" id="topRiserHistory"></ul>
-    </div>
-    <div class="box" style="min-width: 320px; min-height: 200px;">
-      <h2>🌟 Star Riser History</h2>
-      <ul class="crypto-history" id="starRiserHistory"></ul>
-    </div>
-  </div>
+# Monitor top risers
+def monitor_risers():
+    global TOP_RISER, STAR_RISER
+    MINIMUM_RISE_PERCENTAGE = 0.05  # 0.05% threshold for short-term
+    STAR_THRESHOLD_PERCENTAGE = 5.0  # 5% threshold for 1-hour change
 
-  <div class="section">
-    <div class="box">
-      <h2>💸 Buy Crypto Simulator</h2>
-      <select id="coinSelect">
-        <option value="BTC">BTC</option>
-        <option value="ETH">ETH</option>
-        <option value="SOL">SOL</option>
-      </select><br>
-      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
-      <button onclick="startTracking()">Start</button>
-      <button onclick="stopTracking()">Stop</button>
-      <div class="results" id="trackingResults" style="margin-top:10px;"></div>
-    </div>
+    ONE_HOUR_LIMIT = 720  # 5 sec checks = 720 in 1 hour
 
-    <div class="box">
-      <h2>📊 Live Bitcoin Chart</h2>
-      <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
-              width="100%" height="200" frameborder="0" scrolling="auto"></iframe>
-    </div>
-  </div>
+    while True:
+        try:
+            top_riser = None
+            top_change = 0
+            star_riser = None
+            star_change = 0
 
-  <script>
-    const topHistory = [];
-    const starHistory = [];
+            print("🔍 Checking for top risers...")
 
-    function updateHistory(type, data) {
-      const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-      const historyArr = type === 'top' ? topHistory : starHistory;
-      const ul = document.getElementById(listId);
-      const entry = `${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)}`;
-      historyArr.unshift(entry);
-      if (historyArr.length > 5) historyArr.pop();
-      ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
-    }
+            for coin in COINS:
+                price = fetch_price(coin)
+                if price is not None:
+                    PRICE_HISTORY[coin].append(price)
+                    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-ONE_HOUR_LIMIT:]  # Up to 1 hour
 
-    async function updateRiser(boxPrefix, data, type = null) {
-      const { coin, change, price } = data;
-      const infoDiv = document.getElementById(`${boxPrefix}Info`);
-      const priceNum = parseFloat(price);
-      infoDiv.innerHTML = priceNum && !isNaN(priceNum)
-        ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong>`
-        : `<strong>${coin} | +${change}% | $0.0000</strong>`;
-      const iconImg = document.getElementById(`${boxPrefix}Icon`);
-      if (iconImg) {
-        const lowercaseCoin = coin.toLowerCase();
-        const tryImage = new Image();
-        tryImage.onload = () => iconImg.src = tryImage.src;
-        tryImage.onerror = () => iconImg.src = `/static/coins/btc.png`;
-        tryImage.src = `/static/coins/${lowercaseCoin}.png`;
-      }
-      if (type) updateHistory(type, data);
-    }
+                    if len(PRICE_HISTORY[coin]) >= 2:
+                        initial = PRICE_HISTORY[coin][0]
+                        min_price = min(PRICE_HISTORY[coin])
+                        if initial > 0 and min_price > 0:
+                            initial_change = ((price - initial) / initial) * 100
+                            min_change = ((price - min_price) / min_price) * 100
+                            average_change = ((price - (initial + min_price) / 2) / ((initial + min_price) / 2)) * 100
+                            change = max(initial_change, min_change, average_change)
 
-    async function fetchTopRiser() {
-      const res = await fetch('/api/top-riser');
-      const data = await res.json();
-      updateRiser('topRiser', data, 'top');
-      updateDogFace(data.coin);
-    }
+                            if change > top_change and change >= MINIMUM_RISE_PERCENTAGE:
+                                top_riser = coin
+                                top_change = change
 
-    async function fetchStarRiser() {
-      const res = await fetch('/api/star-riser');
-      const data = await res.json();
-      updateRiser('starRiser', data, 'star');
-    }
+                            if change >= STAR_THRESHOLD_PERCENTAGE and change > star_change:
+                                star_riser = coin
+                                star_change = change
 
-    async function fetchNews() {
-      const res = await fetch('/api/crypto-news');
-      const data = await res.json();
-      const list = document.getElementById("newsList");
-      list.innerHTML = "";
-      data.slice(0, 5).forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
-        list.appendChild(li);
-      });
-    }
+            if top_riser:
+                price = fetch_price(top_riser)
+                if price is not None:
+                    TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
+                    print(f"🚀 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
 
-    function updateDogFace(coin) {
-      const img = document.getElementById("dogFace");
-      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
-    }
+            if star_riser:
+                price = fetch_price(star_riser)
+                if price is not None:
+                    STAR_RISER = (star_riser, round(star_change, 2), round(price, 2))
+                    print(f"🌟 STAR RISER: {star_riser} | Change: {star_change:.2f}% | Price: ${price:.2f}")
 
-    function rotateBannerMessages() {
-      const messages = [
-        "Crypto surges to all-time highs – more to come?",
-        "XRP and SOL showing strong momentum with lower risk.",
-        "Caution: Meme coins are highly manipulated.",
-        "Sign up to learn minimum-risk, high-reward strategies."
-      ];
-      let index = 0;
-      setInterval(() => {
-        document.getElementById("buySignalBar").innerText = messages[index];
-        index = (index + 1) % messages.length;
-      }, 8000);
-    }
+        except Exception as e:
+            print(f"🚨 Error in riser monitor: {e}")
 
-    fetchTopRiser();
-    fetchStarRiser();
-    fetchNews();
-    rotateBannerMessages();
-    setInterval(fetchTopRiser, 5000);
-    setInterval(fetchStarRiser, 5000);
-    setInterval(fetchNews, 30000);
-  </script>
-</body>
-</html>
+        time.sleep(5)
+
+@app.route("/")
+def index():
+    return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
+
+@app.route('/verify_email')
+def verify_email():
+    return render_template('verify.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        # handle form submission
+        ...
+        return redirect(url_for('verify_email'))
+
+    # If GET, just show the form
+    return render_template('signup.html')
+
+@app.route("/api/top-riser")
+def top_riser_api():
+    if TOP_RISER and TOP_RISER[0] is not None:
+        return jsonify({
+            "coin": TOP_RISER[0],
+            "change": f"{TOP_RISER[1]:.2f}%",
+            "price": f"${TOP_RISER[2]:.2f}"
+        })
+    return jsonify({
+        "coin": "No Riser",
+        "change": "0%",
+        "price": "N/A"
+    })
+
+@app.route("/api/star-riser")
+def star_riser_api():
+    if STAR_RISER and STAR_RISER[0] is not None:
+        return jsonify({
+            "coin": STAR_RISER[0],
+            "change": f"{STAR_RISER[1]:.2f}%",
+            "price": f"${STAR_RISER[2]:.2f}"
+        })
+    return jsonify({
+        "coin": "No Star Riser",
+        "change": "0%",
+        "price": "N/A"
+    })
+
+@app.route("/api/crypto-news")
+def crypto_news():
+    try:
+        feed = feedparser.parse("https://cointelegraph.com/rss")
+        top_items = feed.entries[:5]
+        news = []
+
+        for item in top_items:
+            news.append({
+                "title": item.title,
+                "link": item.link,
+                "published": item.published
+            })
+
+        return jsonify(news)
+    except Exception as e:
+        print(f"🚨 Failed to fetch RSS feed: {e}")
+        return jsonify([])
+
+# Start the monitor in a background thread
+threading.Thread(target=monitor_risers, daemon=True).start()
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0')
+
+
