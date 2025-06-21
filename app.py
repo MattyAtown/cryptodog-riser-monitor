@@ -129,6 +129,7 @@ def monitor_risers():
                     STAR_RISER_HISTORY.appendleft(common_30)
                     print(f"📜 Star Riser History Updated: {common_30}")
             LAST_STAR_RISER_UPDATE = now
+
 @app.route("/")
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
