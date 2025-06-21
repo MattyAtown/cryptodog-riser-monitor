@@ -125,13 +125,13 @@ def top_riser_api():
     if TOP_RISER and TOP_RISER[0] is not None:
         return jsonify({
             "coin": TOP_RISER[0],
-            "change": f"{TOP_RISER[1]:.2f}%",
-            "price": f"${TOP_RISER[2]:.2f}"
+            "change": f"{TOP_RISER[1]:.2f}",
+            "price": f"{TOP_RISER[2]:.2f}"
         })
     return jsonify({
         "coin": "No Riser",
-        "change": "0%",
-        "price": "N/A"
+        "change": "0",
+        "price": "0"
     })
 
 @app.route("/api/star-riser")
@@ -139,13 +139,13 @@ def star_riser_api():
     if STAR_RISER and STAR_RISER[0] is not None:
         return jsonify({
             "coin": STAR_RISER[0],
-            "change": f"{STAR_RISER[1]:.2f}%",
-            "price": f"${STAR_RISER[2]:.2f}"
+            "change": f"{STAR_RISER[1]:.2f}",
+            "price": f"{STAR_RISER[2]:.2f}"
         })
     return jsonify({
         "coin": "No Star Riser",
-        "change": "0%",
-        "price": "N/A"
+        "change": "0",
+        "price": "0"
     })
 
 @app.route("/api/crypto-news")
