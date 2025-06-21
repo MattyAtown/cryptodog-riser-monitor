@@ -219,6 +219,32 @@
       updateRiser('starRiser', data, 'star');
     }
 
+    async function fetchTopRiserHistory() {
+  try {
+    const res = await fetch('/api/top-riser-history');
+    const data = await res.json();
+    const ul = document.getElementById('topRiserHistory');
+    ul.innerHTML = data.map(entry =>
+      `<li>${entry.coin} - ${new Date(entry.timestamp).toLocaleTimeString()}</li>`
+    ).join('');
+  } catch (err) {
+    console.error("Error fetching top riser history", err);
+  }
+}
+
+async function fetchStarRiserHistory() {
+  try {
+    const res = await fetch('/api/star-riser-history');
+    const data = await res.json();
+    const ul = document.getElementById('starRiserHistory');
+    ul.innerHTML = data.map(entry =>
+      `<li>${entry}</li>`
+    ).join('');
+  } catch (err) {
+    console.error("Error fetching star riser history", err);
+  }
+}
+
     async function fetchNews() {
       const res = await fetch('/api/crypto-news');
       const data = await res.json();
@@ -247,9 +273,18 @@
       setInterval(() => {
         document.getElementById("buySignalBar").innerText = messages[index];
         index = (index + 1) % messages.length;
+        setInterval(fetchTopRiser, 5000);
+        setInterval(fetchStarRiser, 5000);
+        setInterval(fetchNews, 30000);
+
+       // NEW history fetches every 30 seconds
+       setInterval(fetchTopRiserHistory, 30000);
+       setInterval(fetchStarRiserHistory, 30000);
       }, 8000);
     }
-
+    
+    fetchTopRiserHistory();
+    fetchStarRiserHistory();
     fetchTopRiser();
     fetchStarRiser();
     fetchNews();
