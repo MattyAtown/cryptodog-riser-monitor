@@ -56,10 +56,9 @@ def fetch_price(coin_symbol):
 # Monitor top risers
 def monitor_risers():
     global TOP_RISER, STAR_RISER
-    MINIMUM_RISE_PERCENTAGE = 0.05  # 0.05% threshold for short-term
-    STAR_THRESHOLD_PERCENTAGE = 5.0  # 5% threshold for 1-hour change
-
-    ONE_HOUR_LIMIT = 720  # 5 sec checks = 720 in 1 hour
+    MINIMUM_RISE_PERCENTAGE = 0.05
+    STAR_THRESHOLD_PERCENTAGE = 5.0
+    ONE_HOUR_LIMIT = 720  # 5 sec checks = 1 hour
 
     while True:
         try:
@@ -74,7 +73,7 @@ def monitor_risers():
                 price = fetch_price(coin)
                 if price is not None:
                     PRICE_HISTORY[coin].append(price)
-                    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-ONE_HOUR_LIMIT:]  # Up to 1 hour
+                    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-ONE_HOUR_LIMIT:]
 
                     if len(PRICE_HISTORY[coin]) >= 2:
                         initial = PRICE_HISTORY[coin][0]
@@ -94,41 +93,49 @@ def monitor_risers():
                                 star_change = change
 
             if top_riser:
-    price = fetch_price(top_riser)
-    if price is not None:
-        TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
-        print(f"🚀 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
-
-        # ✅ Now safely add history logic
-        now = datetime.now()
-        if LAST_TOP_RISER != top_riser:
-            LAST_TOP_RISER = top_riser
-            LAST_TOP_RISER_TIME = now
-            TOP_RISER_HISTORY.appendleft({"coin": top_riser, "timestamp": now})
-        elif (now - LAST_TOP_RISER_TIME) >= timedelta(minutes=5):
-            LAST_TOP_RISER_TIME = now
-            TOP_RISER_HISTORY.appendleft({"coin": top_riser, "timestamp": now})
-
-        # --- STAR RISER TRIGGER RULE ---
-        top5 = list(TOP_RISER_HISTORY)[:5]
-        coin_counts = Counter([e["coin"] for e in top5])
-        if coin_counts:
-            most_common, freq = coin_counts.most_common(1)[0]
-            if freq >= 3 or (LAST_TOP_RISER == top_riser and (now - LAST_TOP_RISER_TIME) >= timedelta(minutes=5)):
                 price = fetch_price(top_riser)
-                if price:
-                    STAR_RISER = (top_riser, round(freq * 1.5, 2), round(price, 2))
-                    print(f"⭐ STAR RISER Updated: {STAR_RISER}")
+                if price is not None:
+                    TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
+                    print(f"🚀 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
 
-        # --- STAR RISER HISTORY EVERY 30 MINUTES ---
-        if (now - LAST_STAR_RISER_UPDATE) >= timedelta(minutes=30):
-            recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
-            if recent_30:
-                common_30, _ = Counter(recent_30).most_common(1)[0]
-                if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
-                    STAR_RISER_HISTORY.appendleft(common_30)
-                    print(f"📜 Star Riser History Updated: {common_30}")
-            LAST_STAR_RISER_UPDATE = now
+                    now = datetime.now()
+                    global LAST_TOP_RISER, LAST_TOP_RISER_TIME, TOP_RISER_HISTORY
+                    global STAR_RISER, STAR_RISER_HISTORY, LAST_STAR_RISER_UPDATE
+
+                    # ✅ Top Riser History logic
+                    if LAST_TOP_RISER != top_riser:
+                        LAST_TOP_RISER = top_riser
+                        LAST_TOP_RISER_TIME = now
+                        TOP_RISER_HISTORY.appendleft({"coin": top_riser, "timestamp": now})
+                    elif (now - LAST_TOP_RISER_TIME) >= timedelta(minutes=5):
+                        LAST_TOP_RISER_TIME = now
+                        TOP_RISER_HISTORY.appendleft({"coin": top_riser, "timestamp": now})
+
+                    # ✅ Star Riser trigger logic
+                    top5 = list(TOP_RISER_HISTORY)[:5]
+                    coin_counts = Counter([e["coin"] for e in top5])
+                    if coin_counts:
+                        most_common, freq = coin_counts.most_common(1)[0]
+                        if freq >= 3 or (LAST_TOP_RISER == top_riser and (now - LAST_TOP_RISER_TIME) >= timedelta(minutes=5)):
+                            star_price = fetch_price(top_riser)
+                            if star_price:
+                                STAR_RISER = (top_riser, round(freq * 1.5, 2), round(star_price, 2))
+                                print(f"⭐ STAR RISER Updated: {STAR_RISER}")
+
+                    # ✅ Star Riser History (every 30 mins)
+                    if (now - LAST_STAR_RISER_UPDATE) >= timedelta(minutes=30):
+                        recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
+                        if recent_30:
+                            common_30, _ = Counter(recent_30).most_common(1)[0]
+                            if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
+                                STAR_RISER_HISTORY.appendleft(common_30)
+                                print(f"📜 Star Riser History Updated: {common_30}")
+                        LAST_STAR_RISER_UPDATE = now
+
+        except Exception as e:
+            print(f"🚨 Error in riser monitor: {e}")
+
+        time.sleep(5)
 
 @app.route("/")
 def index():
