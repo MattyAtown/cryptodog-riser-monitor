@@ -110,7 +110,14 @@ def fetch_price(coin_symbol):
         print(f"🚨 Error fetching price for {coin_symbol}: {e}")
     return None
 
-COIN_DESCRIPTIONS = {}
+COIN_DESCRIPTIONS = {
+    import os
+from flask import render_template
+
+@app.route('/')
+def dashboard():
+    coingecko_api = os.getenv("COIN_GECKO_API")  # securely loaded from Render
+    return render_template('riser_monitor.html', COIN_GECKO_API=coingecko_api)
 
 def fetch_coin_description(coin_symbol):
     try:
@@ -209,11 +216,6 @@ def monitor_risers():
 
         time.sleep(5)
 
-@app.route('/')
-def dashboard():
-    coingecko_api_key = os.getenv("COIN_GECKO_API")
-    return render_template('riser_monitor.html', COIN_GECKO_API=coingecko_api_key)
-    
 @app.route("/")
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
