@@ -198,65 +198,57 @@
       const iconImg = document.getElementById(`${boxPrefix}Icon`);
       if (iconImg && coin) {
       const cleanCoin = coin.trim().split(' ')[0].toLowerCase();
+      if (iconImg) {
       const tryImage = new Image();
       tryImage.onload = () => iconImg.src = tryImage.src;
       tryImage.onerror = () => iconImg.src = `/static/coins/generic.png`;
       tryImage.src = `/static/coins/${cleanCoin}.png`;
-    } else {
-      iconImg.src = `/static/coins/generic.png`;
+    }
+
     }
     async function fetchTopRiser() {
-      const res = await fetch('/api/top-riser');
-      const data = await res.json();
-      updateRiser('topRiser', data, 'top');
-      updateDogFace(data.coin);
-    }
+  try {
+    const res = await fetch('/api/top-riser');
+    const data = await res.json();
+    updateRiser('topRiser', data, 'top');
+    updateDogFace(data.coin);
+  } catch (err) {
+    console.error("Top Riser fetch error", err);
+  }
+}
 
-    async function fetchStarRiser() {
-      const res = await fetch('/api/star-riser');
-      const data = await res.json();
-      updateRiser('starRiser', data, 'star');
-    }
+async function fetchStarRiser() {
+  try {
+    const res = await fetch('/api/star-riser');
+    const data = await res.json();
+    updateRiser('starRiser', data, 'star');
+  } catch (err) {
+    console.error("Star Riser fetch error", err);
+  }
+}
 
-    async function fetchNews() {
-      const res = await fetch('/api/crypto-news');
-      const data = await res.json();
-      const list = document.getElementById("newsList");
-      list.innerHTML = "";
-      data.slice(0, 5).forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
-        list.appendChild(li);
-      });
-    }
+async function fetchNews() {
+  try {
+    const res = await fetch('/api/crypto-news');
+    const data = await res.json();
+    const list = document.getElementById("newsList");
+    list.innerHTML = "";
+    data.slice(0, 5).forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error("News fetch error", err);
+  }
+}
 
-    function updateDogFace(coin) {
-      const img = document.getElementById("dogFace");
-      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
-    }
-
-    function rotateBannerMessages() {
-      const messages = [
-        "Bitcoin is at a good buy stage now, with expectations of a big rise later this year.",
-        "SOL is primed for swing trading with its volatility being firm around 5%.",
-        "XRP is becoming a little stagnated, there doesnt seem to be the investment levels or promotion",
-        "Caution: Meme coins are huge risks, be sure to only play with money you are prepared to lose fast",
-        "Sign up to learn minimum-risk, high-reward strategies."
-      ];
-      let index = 0;
-      setInterval(() => {
-        document.getElementById("buySignalBar").innerText = messages[index];
-        index = (index + 1) % messages.length;
-      }, 8000);
-    }
-
-    fetchTopRiser();
-    fetchStarRiser();
-    fetchNews();
-    rotateBannerMessages();
-    setInterval(fetchTopRiser, 5000);
-    setInterval(fetchStarRiser, 5000);
-    setInterval(fetchNews, 30000);
+fetchTopRiser();
+fetchStarRiser();
+fetchNews();
+setInterval(fetchTopRiser, 5000);
+setInterval(fetchStarRiser, 5000);
+setInterval(fetchNews, 30000);
   </script>
 </body>
 </html>
