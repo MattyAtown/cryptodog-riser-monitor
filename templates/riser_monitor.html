@@ -87,6 +87,13 @@
       display: block;
       margin: 8px auto 0 auto;
     }
+    .desc-text {
+      font-size: 0.75rem;
+      color: #ccc;
+      margin-top: 6px;
+      max-width: 250px;
+      line-height: 1.2em;
+    }
   </style>
 </head>
 <body>
@@ -104,12 +111,10 @@
     <div class="box" id="topRiserBox">
       <h2>Top Riser</h2>
       <div id="topRiserInfo"></div>
-      <div class="coin-info">
+      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
       <h2 id="topRiserCoin"></h2>
       <p id="topRiserChange"></p>
-      <p id="topRiserDesc" class="desc-text"></p> <!-- Auto description here -->
-    </div>
-      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
+      <p id="topRiserDesc" class="desc-text"></p>
     </div>
 
     <div class="box" id="starRiserBox">
@@ -134,11 +139,11 @@
   </div>
 
   <div class="section">
-    <div class="box" style="min-width: 320px; min-height: 200px;">
+    <div class="box">
       <h2>📈 Top Riser History</h2>
       <ul class="crypto-history" id="topRiserHistory"></ul>
     </div>
-    <div class="box" style="min-width: 320px; min-height: 200px;">
+    <div class="box">
       <h2>🌟 Star Riser History</h2>
       <ul class="crypto-history" id="starRiserHistory"></ul>
     </div>
@@ -166,100 +171,18 @@
   </div>
 
   <script>
-    const topHistory = [];
-    const starHistory = [];
-
-    function updateHistory(type, data) {
-  const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-  const historyArr = type === 'top' ? topHistory : starHistory;
-  const ul = document.getElementById(listId);
-
-  const priceNum = parseFloat(data.price);
-  const priceFormatted = priceNum && !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
-
-  // Generate stars based on streaks
-  let stars = '';
-  const starCount = data.stars || 0;
-  if (starCount > 0) {
-    stars = ' ' + '★'.repeat(Math.min(5, starCount));
-  }
-
-  const timestamp = data.timestamp ? ` - ${data.timestamp}` : '';
-  const entry = `${data.coin} +${data.change}% ${priceFormatted}${timestamp}${stars}`;
-
-  historyArr.unshift(entry);
-  if (historyArr.length > 5) historyArr.pop();
-
-  ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
-}
-
-    async function updateRiser(boxPrefix, data, type = null) {
-      const { coin, change, price } = data;
-      const infoDiv = document.getElementById(`${boxPrefix}Info`);
-      const priceNum = parseFloat(price);
-      infoDiv.innerHTML = priceNum && !isNaN(priceNum)
-        ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong>`
-        : `<strong>${coin} | +${change}% | $0.0000</strong>`;
-      const iconImg = document.getElementById(`${boxPrefix}Icon`);
-      if (iconImg) {
-        const lowercaseCoin = coin.toLowerCase();
-        const tryImage = new Image();
-        tryImage.onload = () => iconImg.src = tryImage.src;
-        tryImage.onerror = () => iconImg.src = `/static/coins/btc.png`;
-        tryImage.src = `/static/coins/${lowercaseCoin}.png`;
-      }
-      if (type) updateHistory(type, data);
-    }
-
     async function fetchTopRiser() {
       const res = await fetch('/api/top-riser');
       const data = await res.json();
-      updateRiser('topRiser', data, 'top');
-      updateDogFace(data.coin);
+      document.getElementById('topRiserCoin').textContent = data.coin;
+      document.getElementById('topRiserChange').textContent = `Change: ${data.change}% | $${data.price}`;
+      document.getElementById('topRiserDesc').textContent = data.description || "";
     }
 
     async function fetchStarRiser() {
       const res = await fetch('/api/star-riser');
       const data = await res.json();
-      updateRiser('starRiser', data, 'star');
-    }
-
-    async function fetchTopRiserHistory() {
-  try {
-    const res = await fetch('/api/top-riser-history');
-    const data = await res.json();
-    const ul = document.getElementById('topRiserHistory');
-    ul.innerHTML = data.map(entry =>
-      `<li>${entry.coin} - ${new Date(entry.timestamp).toLocaleTimeString()}</li>`
-    ).join('');
-  } catch (err) {
-    console.error("Error fetching top riser history", err);
-  }
-}
-
-async function fetchStarRiserHistory() {
-  try {
-    const res = await fetch('/api/star-riser-history');
-    const data = await res.json();
-    const ul = document.getElementById('starRiserHistory');
-    ul.innerHTML = data.map(entry =>
-      `<li>${entry}</li>`
-    ).join('');
-  } catch (err) {
-    console.error("Error fetching star riser history", err);
-  }
-}
-
-    async function fetchNews() {
-      const res = await fetch('/api/crypto-news');
-      const data = await res.json();
-      const list = document.getElementById("newsList");
-      list.innerHTML = "";
-      data.slice(0, 5).forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
-        list.appendChild(li);
-      });
+      document.getElementById('starRiserInfo').innerHTML = `${data.coin} +${data.change}%`;
     }
 
     function updateDogFace(coin) {
@@ -278,18 +201,21 @@ async function fetchStarRiserHistory() {
       setInterval(() => {
         document.getElementById("buySignalBar").innerText = messages[index];
         index = (index + 1) % messages.length;
-        setInterval(fetchTopRiser, 5000);
-        setInterval(fetchStarRiser, 5000);
-        setInterval(fetchNews, 30000);
-
-       // NEW history fetches every 30 seconds
-       setInterval(fetchTopRiserHistory, 30000);
-       setInterval(fetchStarRiserHistory, 30000);
       }, 8000);
     }
-    
-    fetchTopRiserHistory();
-    fetchStarRiserHistory();
+
+    async function fetchNews() {
+      const res = await fetch('/api/crypto-news');
+      const data = await res.json();
+      const list = document.getElementById("newsList");
+      list.innerHTML = "";
+      data.slice(0, 5).forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+        list.appendChild(li);
+      });
+    }
+
     fetchTopRiser();
     fetchStarRiser();
     fetchNews();
