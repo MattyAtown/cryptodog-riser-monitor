@@ -18,6 +18,7 @@ app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['COIN_GECKO_API'] = os.getenv('MAIL_PASSWORD')
 
 PRICE_HISTORY = defaultdict(list)
 TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
@@ -208,6 +209,11 @@ def monitor_risers():
 
         time.sleep(5)
 
+@app.route('/')
+def dashboard():
+    coingecko_api_key = os.getenv("COIN_GECKO_API")
+    return render_template('riser_monitor.html', COIN_GECKO_API=coingecko_api_key)
+    
 @app.route("/")
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
