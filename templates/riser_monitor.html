@@ -87,6 +87,71 @@
       display: block;
       margin: 8px auto 0 auto;
     }
+    .desc-text {
+      font-size: 0.75rem;
+      color: #ccc;
+      margin-top: 6px;
+      max-width: 250px;
+      line-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="/static/logo.png" alt="AiM Logo" />
+    <h1>CryptoDog Dashboard</h1>
+    <img id="dogFace" src="/static/neutral.png" alt="CryptoDog" class="crypto-face" />
+  </div>
+
+  <div class="buy-signal" id="buySignalBar">
+    Tracking Live Signals...
+  </div>
+
+  <div class="section">
+    <div class="box" id="topRiserBox">
+      <h2>Top Riser</h2>
+      <div id="topRiserInfo"></div>
+      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
+      <p id="topRiserDesc" class="desc-text"></p>
+    </div>
+
+    <div class="box" id="starRiserBox">
+      <h2>⭐ Star Riser</h2>
+      <div id="starRiserInfo"></div>
+      <img id="starRiserIcon" class="coin-icon" src="" alt="Coin Icon">
+      <p id="starRiserDesc" class="desc-text"></p>
+    </div>
+    
+    }
+    .buy-signal {
+      background-color: rgba(255, 0, 128, 0.9);
+      padding: 10px;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 0 0 5px #fff;
+      font-size: 1rem;
+      border-top: 2px solid #ff00ff;
+      border-bottom: 2px solid #ff00ff;
+    }
+    .crypto-face {
+      height: 60px;
+    }
+    ul.crypto-history {
+      list-style: none;
+      padding-left: 0;
+      text-align: left;
+      font-size: 0.9em;
+    }
+    .crypto-history li {
+      margin-bottom: 5px;
+    }
+    .coin-icon {
+      width: 40px;
+      height: 40px;
+      display: block;
+      margin: 8px auto 0 auto;
+    }
   </style>
 </head>
 <body>
