@@ -52,12 +52,6 @@
       text-shadow: 0 0 8px #ff00ff;
       margin-bottom: 10px;
     }
-    #newsBox ul {
-      list-style-type: square;
-      text-align: left;
-      padding-left: 20px;
-      font-size: 0.9em;
-    }
     .buy-signal {
       background-color: rgba(255, 0, 128, 0.9);
       padding: 10px;
@@ -75,7 +69,7 @@
     ul.crypto-history {
       list-style: none;
       padding-left: 0;
-      text-align: left;
+      text-align: center;
       font-size: 0.9em;
     }
     .crypto-history li {
@@ -86,6 +80,21 @@
       height: 40px;
       display: block;
       margin: 8px auto 0 auto;
+    }
+    .desc-text {
+      font-size: 0.75rem;
+      color: #ccc;
+      margin-top: 6px;
+      max-width: 250px;
+      line-height: 1.2em;
+    }
+    .chart-box {
+      margin-top: 5px;
+    }
+    .chart-box img {
+      width: 100%;
+      max-height: 100px;
+      object-fit: contain;
     }
   </style>
 </head>
@@ -104,27 +113,17 @@
     <div class="box" id="topRiserBox">
       <h2>Top Riser</h2>
       <div id="topRiserInfo"></div>
-      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
+      <img id="topRiserIcon" class="coin-icon" src="/static/coins/generic.png" alt="Coin Icon">
+      <p id="topRiserDesc" class="desc-text"></p>
+      <div class="chart-box"><img id="topRiserChart" src="" alt="1Y Chart"></div>
     </div>
 
     <div class="box" id="starRiserBox">
       <h2>⭐ Star Riser</h2>
       <div id="starRiserInfo"></div>
-      <img id="starRiserIcon" class="coin-icon" src="" alt="Coin Icon">
-    </div>
-
-    <div class="box" id="newsBox">
-      <h2>📰 Top News</h2>
-      <ul id="newsList"></ul>
-    </div>
-
-    <div class="box">
-      <h2>🎓 Learn to Trade with Arnie</h2>
-      <p>Sign up to our paid GPT-powered AI mentor program.</p>
-      <p><strong>Tailored crypto strategies & insights.</strong></p>
-      <a href="/signup" style="text-decoration: none;">
-        <button>Sign Up for Arnie</button>
-      </a>
+      <img id="starRiserIcon" class="coin-icon" src="/static/coins/generic.png" alt="Coin Icon">
+      <p id="starRiserDesc" class="desc-text"></p>
+      <div class="chart-box"><img id="starRiserChart" src="" alt="1Y Chart"></div>
     </div>
   </div>
 
@@ -139,125 +138,107 @@
     </div>
   </div>
 
-  <div class="section">
-    <div class="box">
-      <h2>💸 Buy Crypto Simulator</h2>
-      <select id="coinSelect">
-        <option value="BTC">BTC</option>
-        <option value="ETH">ETH</option>
-        <option value="SOL">SOL</option>
-      </select><br>
-      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
-      <button onclick="startTracking()">Start</button>
-      <button onclick="stopTracking()">Stop</button>
-      <div class="results" id="trackingResults" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="box">
-      <h2>📊 Live Bitcoin Chart</h2>
-      <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
-              width="100%" height="200" frameborder="0" scrolling="auto"></iframe>
-    </div>
-  </div>
-
   <script>
+    const apiKey = COIN_GECKO_API;
+
+    async function fetchTopRiser() {
+      try {
+        const res = await fetch('/api/top-riser');
+        const data = await res.json();
+        updateRiser('topRiser', data);
+        updateHistory('top', data);
+      } catch (err) {
+        console.error("Top Riser fetch error", err);
+      }
+    }
+
+    async function fetchStarRiser() {
+      try {
+        const res = await fetch('/api/star-riser');
+        const data = await res.json();
+        updateRiser('starRiser', data);
+        updateHistory('star', data);
+      } catch (err) {
+        console.error("Star Riser fetch error", err);
+      }
+    }
+
+    async function updateRiser(boxPrefix, data) {
+      const { coin, change, price } = data;
+      const priceNum = parseFloat(price);
+      const infoDiv = document.getElementById(`${boxPrefix}Info`);
+      const iconImg = document.getElementById(`${boxPrefix}Icon`);
+      const desc = document.getElementById(`${boxPrefix}Desc`);
+      const chart = document.getElementById(`${boxPrefix}Chart`);
+
+      infoDiv.innerHTML = `<strong>${coin} | +${change}% | ${!isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000'}</strong>`;
+
+      let cleanCoin = 'generic';
+      if (coin && typeof coin === 'string' && !coin.toLowerCase().includes('no')) {
+        cleanCoin = coin.trim().split(' ')[0].toLowerCase();
+      }
+
+      if (iconImg) {
+        const tryImage = new Image();
+        tryImage.onload = () => iconImg.src = tryImage.src;
+        tryImage.onerror = () => iconImg.src = `/static/coins/generic.png`;
+        tryImage.src = `/static/coins/${cleanCoin}.png`;
+      }
+
+      desc.innerText = `Loading info for ${cleanCoin.toUpperCase()}...`;
+      chart.src = '';
+
+      try {
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/${cleanCoin}?localization=false&tickers=false&market_data=true&sparkline=true&x_cg_pro_api_key=${apiKey}`);
+        const cg = await res.json();
+        const type = cg.categories && cg.categories.length ? cg.categories.join(', ') : 'General Asset';
+        desc.innerText = `${cg.name} — ${type}`;
+        if (cg.market_data?.sparkline_7d?.price?.length) {
+          const prices = cg.market_data.sparkline_7d.price;
+          const canvas = document.createElement('canvas');
+          canvas.width = 280; canvas.height = 80;
+          const ctx = canvas.getContext('2d');
+          ctx.beginPath();
+          const scaleX = canvas.width / prices.length;
+          const max = Math.max(...prices), min = Math.min(...prices);
+          const scaleY = canvas.height / (max - min);
+          prices.forEach((p, i) => {
+            const x = i * scaleX;
+            const y = canvas.height - (p - min) * scaleY;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          });
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          chart.src = canvas.toDataURL();
+        }
+      } catch (e) {
+        desc.innerText = "Info not available.";
+      }
+    }
+
     const topHistory = [];
     const starHistory = [];
 
     function updateHistory(type, data) {
-  const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-  const historyArr = type === 'top' ? topHistory : starHistory;
-  const ul = document.getElementById(listId);
+      const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+      const historyArr = type === 'top' ? topHistory : starHistory;
+      const ul = document.getElementById(listId);
 
-  const priceNum = parseFloat(data.price);
-  const priceFormatted = priceNum && !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
+      const priceNum = parseFloat(data.price);
+      const priceFormatted = !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
+      const entry = `${data.coin} +${data.change}% ${priceFormatted}`;
 
-  // Generate stars based on streaks
-  let stars = '';
-  const starCount = data.stars || 0;
-  if (starCount > 0) {
-    stars = ' ' + '★'.repeat(Math.min(5, starCount));
-  }
+      historyArr.unshift(entry);
+      if (historyArr.length > 5) historyArr.pop();
 
-  const timestamp = data.timestamp ? ` - ${data.timestamp}` : '';
-  const entry = `${data.coin} +${data.change}% ${priceFormatted}${timestamp}${stars}`;
-
-  historyArr.unshift(entry);
-  if (historyArr.length > 5) historyArr.pop();
-
-  ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
-}
-
-    async function updateRiser(boxPrefix, data, type = null) {
-      const { coin, change, price } = data;
-      const infoDiv = document.getElementById(`${boxPrefix}Info`);
-      const priceNum = parseFloat(price);
-      infoDiv.innerHTML = priceNum && !isNaN(priceNum)
-        ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong>`
-        : `<strong>${coin} | +${change}% | $0.0000</strong>`;
-      const iconImg = document.getElementById(`${boxPrefix}Icon`);
-      if (iconImg) {
-        const lowercaseCoin = coin.toLowerCase();
-        const tryImage = new Image();
-        tryImage.onload = () => iconImg.src = tryImage.src;
-        tryImage.onerror = () => iconImg.src = `/static/coins/generic.png`;
-        tryImage.src = `/static/coins/${lowercaseCoin}.png`;
-      }
-      if (type) updateHistory(type, data);
+      ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
     }
 
-    async function fetchTopRiser() {
-      const res = await fetch('/api/top-riser');
-      const data = await res.json();
-      updateRiser('topRiser', data, 'top');
-      updateDogFace(data.coin);
-    }
-
-    async function fetchStarRiser() {
-      const res = await fetch('/api/star-riser');
-      const data = await res.json();
-      updateRiser('starRiser', data, 'star');
-    }
-
-    async function fetchNews() {
-      const res = await fetch('/api/crypto-news');
-      const data = await res.json();
-      const list = document.getElementById("newsList");
-      list.innerHTML = "";
-      data.slice(0, 5).forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
-        list.appendChild(li);
-      });
-    }
-
-    function updateDogFace(coin) {
-      const img = document.getElementById("dogFace");
-      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
-    }
-
-    function rotateBannerMessages() {
-      const messages = [
-        "Bitcoin is at a good buy stage now, with expectations of a big rise later this year.",
-        "SOL is primed for swing trading with its volatility being firm around 5%.",
-        "XRP is becoming a little stagnated, there doesnt seem to be the investment levels or promotion",
-        "Caution: Meme coins are huge risks, be sure to only play with money you are prepared to lose fast",
-        "Sign up to learn minimum-risk, high-reward strategies."
-      ];
-      let index = 0;
-      setInterval(() => {
-        document.getElementById("buySignalBar").innerText = messages[index];
-        index = (index + 1) % messages.length;
-      }, 8000);
-    }
-
+    setInterval(fetchTopRiser, 5000);
+    setInterval(fetchStarRiser, 30000);
     fetchTopRiser();
     fetchStarRiser();
-    fetchNews();
-    rotateBannerMessages();
-    setInterval(fetchTopRiser, 5000);
-    setInterval(fetchStarRiser, 5000);
-    setInterval(fetchNews, 30000);
   </script>
 </body>
 </html>
