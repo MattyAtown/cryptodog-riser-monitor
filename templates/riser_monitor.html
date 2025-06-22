@@ -128,51 +128,30 @@
     </div>
   </div>
 
-  <div class="section">
-    <div class="box">
-      <h2>💸 Buy Crypto Simulator</h2>
-      <select id="coinSelect">
-        <option value="BTC">BTC</option>
-        <option value="ETH">ETH</option>
-        <option value="SOL">SOL</option>
-      </select><br>
-      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
-      <button onclick="startTracking()">Start</button>
-      <button onclick="stopTracking()">Stop</button>
-      <div class="results" id="trackingResults" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="box">
-      <h2>📊 Live Bitcoin Chart</h2>
-      <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
-              width="100%" height="200" frameborder="0" scrolling="auto"></iframe>
-    </div>
-
-    <div class="box">
-      <h2>🎓 Learn to Trade with Arnie</h2>
-      <p>Sign up to our paid GPT-powered AI mentor program.</p>
-      <p><strong>Tailored crypto strategies & insights.</strong></p>
-      <a href="/signup" style="text-decoration: none;">
-        <button>Sign Up for Arnie</button>
-      </a>
-    </div>
-
-    <div class="box">
-      <h2>📰 Latest Crypto News</h2>
-      <ul id="newsList" class="crypto-history"></ul>
-    </div>
-  </div>
-
   <script>
-    const coinDescriptions = {
-      BTC: "Bitcoin - The first and most well-known cryptocurrency. Store of value.",
-      ETH: "Ethereum - Smart contracts and dApp powerhouse.",
-      SOL: "Solana - High-speed blockchain optimized for DeFi and NFTs.",
-      XRP: "Ripple - Designed for fast and low-cost international payments.",
-      ADA: "Cardano - Focused on scalability, sustainability, and academic research."
-    };
+    async function fetchTopRiser() {
+      try {
+        const res = await fetch('/api/top-riser');
+        const data = await res.json();
+        updateRiser('topRiser', data);
+        updateHistory('top', data);
+      } catch (err) {
+        console.error("Top Riser fetch error", err);
+      }
+    }
 
-    function updateRiser(boxPrefix, data, type = null) {
+    async function fetchStarRiser() {
+      try {
+        const res = await fetch('/api/star-riser');
+        const data = await res.json();
+        updateRiser('starRiser', data);
+        updateHistory('star', data);
+      } catch (err) {
+        console.error("Star Riser fetch error", err);
+      }
+    }
+
+    function updateRiser(boxPrefix, data) {
       const { coin, change, price } = data;
       const priceNum = parseFloat(price);
       const infoDiv = document.getElementById(`${boxPrefix}Info`);
@@ -190,27 +169,30 @@
         tryImage.onerror = () => iconImg.src = `/static/coins/generic.png`;
         tryImage.src = `/static/coins/${cleanCoin}.png`;
       }
-
-      const descTarget = document.getElementById(`${boxPrefix}Desc`);
-      if (descTarget) descTarget.textContent = coinDescriptions[coin] || "Description not available.";
     }
 
-    function rotateBannerMessages() {
-      const messages = [
-        "Bitcoin is at a good buy stage now, with expectations of a big rise later this year.",
-        "SOL is primed for swing trading with its volatility being firm around 5%.",
-        "XRP is becoming a little stagnated, there doesnt seem to be the investment levels or promotion",
-        "Caution: Meme coins are huge risks, be sure to only play with money you are prepared to lose fast",
-        "Sign up to learn minimum-risk, high-reward strategies."
-      ];
-      let index = 0;
-      setInterval(() => {
-        document.getElementById("buySignalBar").innerText = messages[index];
-        index = (index + 1) % messages.length;
-      }, 8000);
+    const topHistory = [];
+    const starHistory = [];
+
+    function updateHistory(type, data) {
+      const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+      const historyArr = type === 'top' ? topHistory : starHistory;
+      const ul = document.getElementById(listId);
+
+      const priceNum = parseFloat(data.price);
+      const priceFormatted = !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
+      const entry = `${data.coin} +${data.change}% ${priceFormatted}`;
+
+      historyArr.unshift(entry);
+      if (historyArr.length > 5) historyArr.pop();
+
+      ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
     }
 
-    rotateBannerMessages();
+    setInterval(fetchTopRiser, 5000);
+    setInterval(fetchStarRiser, 5000);
+    fetchTopRiser();
+    fetchStarRiser();
   </script>
 </body>
 </html>
