@@ -196,7 +196,62 @@
       }, 8000);
     }
 
+    async function updateRiser(boxPrefix, data, type = null) {
+      const { coin, change, price, description } = data;
+      const priceNum = parseFloat(price);
+      document.getElementById(`${boxPrefix}Info`).innerHTML = `<strong>${coin} | +${change}% | ${!isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000'}</strong>`;
+      document.getElementById(`${boxPrefix}Icon`).src = `/static/coins/${coin.toLowerCase()}.png`;
+      document.getElementById(`${boxPrefix}Desc`).textContent = description || coinDescriptions[coin] || 'No description.';
+      if (type) updateHistory(type, data);
+    }
+
+    const topHistory = [];
+    const starHistory = [];
+
+    function updateHistory(type, data) {
+      const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+      const historyArr = type === 'top' ? topHistory : starHistory;
+      const ul = document.getElementById(listId);
+      const priceNum = parseFloat(data.price);
+      const formattedPrice = !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
+      const entry = `${data.coin} +${data.change}% ${formattedPrice}`;
+      historyArr.unshift(entry);
+      if (historyArr.length > 5) historyArr.pop();
+      ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
+    }
+
+    async function fetchTopRiser() {
+      const res = await fetch('/api/top-riser');
+      const data = await res.json();
+      updateRiser('topRiser', data, 'top');
+    }
+
+    async function fetchStarRiser() {
+      const res = await fetch('/api/star-riser');
+      const data = await res.json();
+      updateRiser('starRiser', data, 'star');
+      if (data.stars && data.stars >= 5) triggerBuySignal(`🔥 BUY SIGNAL: ${data.coin} showing long-term strength!`);
+    }
+
+    async function fetchNews() {
+      const res = await fetch('/api/crypto-news');
+      const data = await res.json();
+      const list = document.getElementById("newsList");
+      list.innerHTML = "";
+      data.slice(0, 5).forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+        list.appendChild(li);
+      });
+    }
+
+    fetchTopRiser();
+    fetchStarRiser();
+    fetchNews();
     rotateBannerMessages();
+    setInterval(fetchTopRiser, 5000);
+    setInterval(fetchStarRiser, 5000);
+    setInterval(fetchNews, 30000);
   </script>
 </body>
 </html>
