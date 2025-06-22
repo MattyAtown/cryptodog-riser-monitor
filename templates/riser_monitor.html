@@ -105,14 +105,14 @@
     <div class="box" id="topRiserBox">
       <h2>Top Riser</h2>
       <div id="topRiserInfo"></div>
-      <img id="topRiserIcon" class="coin-icon" src="/static/coins/btc.png" alt="Coin Icon">
+      <img id="topRiserIcon" class="coin-icon" src="/static/coins/generic.png" alt="Coin Icon">
       <p id="topRiserDesc" class="desc-text"></p>
     </div>
 
     <div class="box" id="starRiserBox">
       <h2>⭐ Star Riser</h2>
       <div id="starRiserInfo"></div>
-      <img id="starRiserIcon" class="coin-icon" src="/static/coins/btc.png" alt="Coin Icon">
+      <img id="starRiserIcon" class="coin-icon" src="/static/coins/generic.png" alt="Coin Icon">
       <p id="starRiserDesc" class="desc-text"></p>
     </div>
   </div>
@@ -146,12 +146,7 @@
       <h2>📊 Live Bitcoin Chart</h2>
       <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
               width="100%" height="200" frameborder="0" scrolling="auto"></iframe>
-      
-    </div><div class="box">
-      <h2>📰 Latest Crypto News</h2>
-      <ul id="newsList" class="crypto-history"></ul>
     </div>
-  </div>
 
     <div class="box">
       <h2>🎓 Learn to Trade with Arnie</h2>
@@ -160,6 +155,11 @@
       <a href="/signup" style="text-decoration: none;">
         <button>Sign Up for Arnie</button>
       </a>
+    </div>
+
+    <div class="box">
+      <h2>📰 Latest Crypto News</h2>
+      <ul id="newsList" class="crypto-history"></ul>
     </div>
   </div>
 
@@ -201,44 +201,61 @@
       }, 8000);
     }
 
-    async function updateRiser(boxPrefix, data, type = null) {
-      const { coin, change, price, description } = data;
-      const priceNum = parseFloat(price);
-      document.getElementById(`${boxPrefix}Info`).innerHTML = `<strong>${coin} | +${change}% | ${!isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000'}</strong>`;
-      document.getElementById(`${boxPrefix}Icon`).src = `/static/coins/${coin.toLowerCase()}.png`;
-      document.getElementById(`${boxPrefix}Desc`).textContent = description || coinDescriptions[coin] || 'No description.';
-      if (type) updateHistory(type, data);
+    function rotateBannerMessages() {
+      const messages = [
+        "Crypto surges to all-time highs – more to come?",
+        "XRP and SOL showing strong momentum with lower risk.",
+        "Caution: Meme coins are highly manipulated.",
+        "Sign up to learn minimum-risk, high-reward strategies."
+      ];
+      let index = 0;
+      setInterval(() => {
+        document.getElementById("buySignalBar").innerText = messages[index];
+        index = (index + 1) % messages.length;
+      }, 8000);
     }
 
-    const topHistory = [];
-    const starHistory = [];
+<script>
+  async function updateRiser(boxPrefix, data, type) {
+    const { coin, change, price } = data;
+    const priceNum = parseFloat(price);
+    document.getElementById(`${boxPrefix}Info`).innerHTML = `<strong>${coin} | +${change}% | ${!isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000'}`;
+    const iconImg = document.getElementById(`${boxPrefix}Icon`);
+    const lowercaseCoin = coin.toLowerCase();
+    iconImg.src = `/static/coins/${lowercaseCoin}.png`;
+    setCoinDescription(coin, `${boxPrefix}Desc`);
+  }
 
-    function updateHistory(type, data) {
-      const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-      const historyArr = type === 'top' ? topHistory : starHistory;
-      const ul = document.getElementById(listId);
-      const priceNum = parseFloat(data.price);
-      const formattedPrice = !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
-      const entry = `${data.coin} +${data.change}% ${formattedPrice}`;
-      historyArr.unshift(entry);
-      if (historyArr.length > 5) historyArr.pop();
-      ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
-    }
+  async function updateHistory(type, data) {
+    const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+    const ul = document.getElementById(listId);
+    const entry = `${data.coin} +${data.change}% at ${new Date().toLocaleTimeString()}`;
+    const li = document.createElement("li");
+    li.textContent = entry;
+    ul.prepend(li);
+    while (ul.childNodes.length > 5) ul.removeChild(ul.lastChild);
+  }
 
-    async function fetchTopRiser() {
+  async function fetchTopRiser() {
+    try {
       const res = await fetch('/api/top-riser');
       const data = await res.json();
       updateRiser('topRiser', data, 'top');
-    }
+      updateHistory('top', data);
+    } catch (e) { console.error('Top Riser fetch error:', e); }
+  }
 
-    async function fetchStarRiser() {
+  async function fetchStarRiser() {
+    try {
       const res = await fetch('/api/star-riser');
       const data = await res.json();
       updateRiser('starRiser', data, 'star');
-      if (data.stars && data.stars >= 5) triggerBuySignal(`🔥 BUY SIGNAL: ${data.coin} showing long-term strength!`);
-    }
+      updateHistory('star', data);
+    } catch (e) { console.error('Star Riser fetch error:', e); }
+  }
 
-    async function fetchNews() {
+  async function fetchNews() {
+    try {
       const res = await fetch('/api/crypto-news');
       const data = await res.json();
       const list = document.getElementById("newsList");
@@ -248,15 +265,15 @@
         li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
         list.appendChild(li);
       });
-    }
+    } catch (e) { console.error('News fetch error:', e); }
+  }
 
-    fetchTopRiser();
-    fetchStarRiser();
-    fetchNews();
-    rotateBannerMessages();
-    setInterval(fetchTopRiser, 5000);
-    setInterval(fetchStarRiser, 5000);
-    setInterval(fetchNews, 30000);
-  </script>
+  fetchTopRiser();
+  fetchStarRiser();
+  fetchNews();
+  setInterval(fetchTopRiser, 5000);
+  setInterval(fetchStarRiser, 5000);
+  setInterval(fetchNews, 30000);
+</script>
 </body>
 </html>
