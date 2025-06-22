@@ -17,47 +17,41 @@
     }
     .header {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 30px;
-      background: rgba(0, 0, 0, 0.7);
-      border-bottom: 2px solid #0ff;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 30px;
+      background:rgba(0,0,0,0.7);
+      border-bottom:2px solid #0ff;
     }
     .header img {
-      height: 60px;
+      height:60px;
     }
     h1 {
-      font-size: 1.8em;
-      color: #0ff;
-      text-shadow: 0 0 10px #0ff;
+      font-size:1.8em;
+      color:#0ff;
+      text-shadow:0 0 10px #0ff;
     }
     .section {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin: 30px auto;
-      max-width: 1200px;
+      display:flex;
+      justify-content:center;
+      gap:20px;
+      flex-wrap:wrap;
+      margin:30px auto;
+      max-width:1200px;
     }
     .box {
-      background: rgba(0,0,0,0.7);
-      padding: 20px;
-      width: 300px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px #0ff;
-      text-align: center;
+      background:rgba(0,0,0,0.7);
+      padding:20px;
+      width:300px;
+      border-radius:12px;
+      box-shadow:0 0 15px #0ff;
+      text-align:center;
     }
     .box h2 {
-      font-size: 1.3em;
-      color: #ff00ff;
-      text-shadow: 0 0 8px #ff00ff;
-      margin-bottom: 10px;
-    }
-    #newsBox ul {
-      list-style-type: square;
-      text-align: left;
-      padding-left: 20px;
-      font-size: 0.9em;
+      font-size:1.3em;
+      color:#ff00ff;
+      text-shadow:0 0 8px #ff00ff;
+      margin-bottom:10px;
     }
     .buy-signal {
       background-color: rgba(255, 0, 128, 0.9);
@@ -73,15 +67,6 @@
     .crypto-face {
       height: 60px;
     }
-    ul.crypto-history {
-      list-style: none;
-      padding-left: 0;
-      text-align: left;
-      font-size: 0.9em;
-    }
-    .crypto-history li {
-      margin-bottom: 5px;
-    }
     .coin-icon {
       width: 40px;
       height: 40px;
@@ -95,6 +80,15 @@
       max-width: 250px;
       line-height: 1.2em;
     }
+    ul.crypto-history {
+      list-style: none;
+      padding-left: 0;
+      text-align: left;
+      font-size: 0.9em;
+    }
+    .crypto-history li {
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
@@ -104,7 +98,9 @@
     <img id="dogFace" src="/static/neutral.png" alt="CryptoDog" class="crypto-face" />
   </div>
 
-  <div class="buy-signal" id="buySignalBar">Tracking Live Signals...</div>
+  <div class="buy-signal" id="buySignalBar">
+    Tracking Live Signals...
+  </div>
 
   <div class="section">
     <div class="box" id="topRiserBox">
@@ -112,13 +108,14 @@
       <div id="topRiserInfo"></div>
       <h2 id="topRiserCoin"></h2>
       <p id="topRiserChange"></p>
-      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
       <p id="topRiserDesc" class="desc-text"></p>
+      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
     </div>
 
     <div class="box" id="starRiserBox">
       <h2>⭐ Star Riser</h2>
       <div id="starRiserInfo"></div>
+      <p id="starRiserDesc" class="desc-text"></p>
       <img id="starRiserIcon" class="coin-icon" src="" alt="Coin Icon">
     </div>
 
@@ -130,57 +127,60 @@
     <div class="box">
       <h2>🎓 Learn to Trade with Arnie</h2>
       <p>Sign up to our paid GPT-powered AI mentor program.</p>
-      <a href="/signup"><button>Sign Up for Arnie</button></a>
+      <p><strong>Tailored crypto strategies & insights.</strong></p>
+      <a href="/signup" style="text-decoration: none;">
+        <button>Sign Up for Arnie</button>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="box">
+      <h2>📈 Top Riser History</h2>
+      <ul class="crypto-history" id="topRiserHistory"></ul>
+    </div>
+    <div class="box">
+      <h2>🌟 Star Riser History</h2>
+      <ul class="crypto-history" id="starRiserHistory"></ul>
     </div>
   </div>
 
   <script>
-    const topHistory = [], starHistory = [];
-
-    function updateDogFace(coin) {
-      const img = document.getElementById("dogFace");
-      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
-    }
-
-    function rotateBannerMessages() {
-      const messages = [
-        "Crypto surges to all-time highs – more to come?",
-        "XRP and SOL showing strong momentum with lower risk.",
-        "Caution: Meme coins are highly manipulated.",
-        "Sign up to learn minimum-risk, high-reward strategies."
-      ];
-      let index = 0;
-      setInterval(() => {
-        document.getElementById("buySignalBar").innerText = messages[index];
-        index = (index + 1) % messages.length;
-      }, 8000);
-    }
+    const topHistory = [];
+    const starHistory = [];
 
     function updateHistory(type, data) {
       const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
       const historyArr = type === 'top' ? topHistory : starHistory;
       const ul = document.getElementById(listId);
       const priceNum = parseFloat(data.price);
-      const formattedPrice = !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
-      const entry = `${data.coin} +${data.change}% ${formattedPrice}`;
+      const priceFormatted = priceNum && !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
+      const timestamp = data.timestamp ? ` - ${data.timestamp}` : '';
+      const stars = data.stars ? ' ' + '★'.repeat(Math.min(5, data.stars)) : '';
+      const entry = `${data.coin} +${data.change}% ${priceFormatted}${timestamp}${stars}`;
       historyArr.unshift(entry);
       if (historyArr.length > 5) historyArr.pop();
       ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
     }
 
-    async function updateRiser(boxPrefix, data, type) {
+    async function updateRiser(boxPrefix, data, type = null) {
       const { coin, change, price, description } = data;
-      const priceNum = parseFloat(price);
-      document.getElementById(`${boxPrefix}Info`).innerHTML = `<strong>${coin} | +${change}% | ${!isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000'}</strong>`;
+      document.getElementById(`${boxPrefix}Coin`)?.textContent = coin;
+      document.getElementById(`${boxPrefix}Change`)?.textContent = `Change: ${change}% | $${price}`;
+      document.getElementById(`${boxPrefix}Desc`)?.textContent = description || "";
+      const infoDiv = document.getElementById(`${boxPrefix}Info`);
+      infoDiv.innerHTML = `<strong>${coin} | +${change}% | $${parseFloat(price).toFixed(4)}</strong>`;
       const iconImg = document.getElementById(`${boxPrefix}Icon`);
-      const lowercaseCoin = coin.toLowerCase();
-      iconImg.src = `/static/coins/${lowercaseCoin}.png`;
-      if (type === 'top') {
-        document.getElementById('topRiserCoin').textContent = coin;
-        document.getElementById('topRiserChange').textContent = `Change: ${change}% | ${price}`;
-        document.getElementById('topRiserDesc').textContent = description || '';
+      if (iconImg) {
+        const lowercaseCoin = coin.toLowerCase();
+        iconImg.src = `/static/coins/${lowercaseCoin}.png`;
       }
       if (type) updateHistory(type, data);
+    }
+
+    function updateDogFace(coin) {
+      const img = document.getElementById("dogFace");
+      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
     }
 
     async function fetchTopRiser() {
@@ -206,6 +206,20 @@
         li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
         list.appendChild(li);
       });
+    }
+
+    function rotateBannerMessages() {
+      const messages = [
+        "Bicoin dips to the perfect buy price, catch it whilst you can",
+        "XRP and SOL showing strong momentum with lower risk.",
+        "Caution: Meme coins are highly volatile, buy with caution or go for PEPE"
+        "Sign up to learn minimum-risk, high-reward strategies."
+      ];
+      let index = 0;
+      setInterval(() => {
+        document.getElementById("buySignalBar").innerText = messages[index];
+        index = (index + 1) % messages.length;
+      }, 8000);
     }
 
     fetchTopRiser();
