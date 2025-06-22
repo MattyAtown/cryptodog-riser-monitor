@@ -52,6 +52,12 @@
       text-shadow: 0 0 8px #ff00ff;
       margin-bottom: 10px;
     }
+    #newsBox ul {
+      list-style-type: square;
+      text-align: left;
+      padding-left: 20px;
+      font-size: 0.9em;
+    }
     .buy-signal {
       background-color: rgba(255, 0, 128, 0.9);
       padding: 10px;
@@ -81,13 +87,6 @@
       display: block;
       margin: 8px auto 0 auto;
     }
-    .desc-text {
-      font-size: 0.75rem;
-      color: #ccc;
-      margin-top: 6px;
-      max-width: 250px;
-      line-height: 1.2em;
-    }
   </style>
 </head>
 <body>
@@ -105,15 +104,27 @@
     <div class="box" id="topRiserBox">
       <h2>Top Riser</h2>
       <div id="topRiserInfo"></div>
-      <img id="topRiserIcon" class="coin-icon" src="/static/coins/generic.png" alt="Coin Icon">
-      <p id="topRiserDesc" class="desc-text"></p>
+      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
     </div>
 
     <div class="box" id="starRiserBox">
       <h2>⭐ Star Riser</h2>
       <div id="starRiserInfo"></div>
-      <img id="starRiserIcon" class="coin-icon" src="/static/coins/generic.png" alt="Coin Icon">
-      <p id="starRiserDesc" class="desc-text"></p>
+      <img id="starRiserIcon" class="coin-icon" src="" alt="Coin Icon">
+    </div>
+
+    <div class="box" id="newsBox">
+      <h2>📰 Top News</h2>
+      <ul id="newsList"></ul>
+    </div>
+
+    <div class="box">
+      <h2>🎓 Learn to Trade with Arnie</h2>
+      <p>Sign up to our paid GPT-powered AI mentor program.</p>
+      <p><strong>Tailored crypto strategies & insights.</strong></p>
+      <a href="/signup" style="text-decoration: none;">
+        <button>Sign Up for Arnie</button>
+      </a>
     </div>
   </div>
 
@@ -147,43 +158,82 @@
       <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol=COINBASE:BTCUSD&interval=30&locale=en"
               width="100%" height="200" frameborder="0" scrolling="auto"></iframe>
     </div>
-
-    <div class="box">
-      <h2>🎓 Learn to Trade with Arnie</h2>
-      <p>Sign up to our paid GPT-powered AI mentor program.</p>
-      <p><strong>Tailored crypto strategies & insights.</strong></p>
-      <a href="/signup" style="text-decoration: none;">
-        <button>Sign Up for Arnie</button>
-      </a>
-    </div>
-
-    <div class="box">
-      <h2>📰 Latest Crypto News</h2>
-      <ul id="newsList" class="crypto-history"></ul>
-    </div>
   </div>
 
   <script>
-    const coinDescriptions = {
-      BTC: "Bitcoin - The first and most well-known cryptocurrency. Store of value.",
-      ETH: "Ethereum - Smart contracts and dApp powerhouse.",
-      SOL: "Solana - High-speed blockchain optimized for DeFi and NFTs.",
-      XRP: "Ripple - Designed for fast and low-cost international payments.",
-      ADA: "Cardano - Focused on scalability, sustainability, and academic research."
-    };
+    const topHistory = [];
+    const starHistory = [];
 
-    function setCoinDescription(coin, targetId) {
-      const desc = coinDescriptions[coin] || "Description not available.";
-      const el = document.getElementById(targetId);
-      if (el) el.textContent = desc;
+    function updateHistory(type, data) {
+  const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+  const historyArr = type === 'top' ? topHistory : starHistory;
+  const ul = document.getElementById(listId);
+
+  const priceNum = parseFloat(data.price);
+  const priceFormatted = priceNum && !isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000';
+
+  // Generate stars based on streaks
+  let stars = '';
+  const starCount = data.stars || 0;
+  if (starCount > 0) {
+    stars = ' ' + '★'.repeat(Math.min(5, starCount));
+  }
+
+  const timestamp = data.timestamp ? ` - ${data.timestamp}` : '';
+  const entry = `${data.coin} +${data.change}% ${priceFormatted}${timestamp}${stars}`;
+
+  historyArr.unshift(entry);
+  if (historyArr.length > 5) historyArr.pop();
+
+  ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
+}
+
+    async function updateRiser(boxPrefix, data, type = null) {
+      const { coin, change, price } = data;
+      const infoDiv = document.getElementById(`${boxPrefix}Info`);
+      const priceNum = parseFloat(price);
+      infoDiv.innerHTML = priceNum && !isNaN(priceNum)
+        ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong>`
+        : `<strong>${coin} | +${change}% | $0.0000</strong>`;
+      const iconImg = document.getElementById(`${boxPrefix}Icon`);
+      if (iconImg) {
+        const lowercaseCoin = coin.toLowerCase();
+        const tryImage = new Image();
+        tryImage.onload = () => iconImg.src = tryImage.src;
+        tryImage.onerror = () => iconImg.src = `/static/coins/generic.png`;
+        tryImage.src = `/static/coins/${lowercaseCoin}.png`;
+      }
+      if (type) updateHistory(type, data);
     }
 
-    function triggerBuySignal(message) {
-      const bar = document.getElementById("buySignalBar");
-      bar.innerText = message;
-      bar.style.backgroundColor = "rgba(0,255,0,0.9)";
-      bar.style.borderTop = "2px solid #0f0";
-      bar.style.borderBottom = "2px solid #0f0";
+    async function fetchTopRiser() {
+      const res = await fetch('/api/top-riser');
+      const data = await res.json();
+      updateRiser('topRiser', data, 'top');
+      updateDogFace(data.coin);
+    }
+
+    async function fetchStarRiser() {
+      const res = await fetch('/api/star-riser');
+      const data = await res.json();
+      updateRiser('starRiser', data, 'star');
+    }
+
+    async function fetchNews() {
+      const res = await fetch('/api/crypto-news');
+      const data = await res.json();
+      const list = document.getElementById("newsList");
+      list.innerHTML = "";
+      data.slice(0, 5).forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+        list.appendChild(li);
+      });
+    }
+
+    function updateDogFace(coin) {
+      const img = document.getElementById("dogFace");
+      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
     }
 
     function rotateBannerMessages() {
@@ -201,78 +251,13 @@
       }, 8000);
     }
 
-    function rotateBannerMessages() {
-      const messages = [
-        "Crypto surges to all-time highs – more to come?",
-        "XRP and SOL showing strong momentum with lower risk.",
-        "Caution: Meme coins are highly manipulated.",
-        "Sign up to learn minimum-risk, high-reward strategies."
-      ];
-      let index = 0;
-      setInterval(() => {
-        document.getElementById("buySignalBar").innerText = messages[index];
-        index = (index + 1) % messages.length;
-      }, 8000);
-    }
-<script>
-  async function updateRiser(boxPrefix, data, type) {
-    const { coin, change, price } = data;
-    const priceNum = parseFloat(price);
-    document.getElementById(`${boxPrefix}Info`).innerHTML = `<strong>${coin} | +${change}% | ${!isNaN(priceNum) ? `$${priceNum.toFixed(4)}` : '$0.0000'}`;
-    const iconImg = document.getElementById(`${boxPrefix}Icon`);
-    const lowercaseCoin = coin.toLowerCase();
-    iconImg.src = `/static/coins/${lowercaseCoin}.png`;
-    setCoinDescription(coin, `${boxPrefix}Desc`);
-  }
-
-  async function updateHistory(type, data) {
-    const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-    const ul = document.getElementById(listId);
-    const entry = `${data.coin} +${data.change}% at ${new Date().toLocaleTimeString()}`;
-    const li = document.createElement("li");
-    li.textContent = entry;
-    ul.prepend(li);
-    while (ul.childNodes.length > 5) ul.removeChild(ul.lastChild);
-  }
-
-  async function fetchTopRiser() {
-    try {
-      const res = await fetch('/api/top-riser');
-      const data = await res.json();
-      updateRiser('topRiser', data, 'top');
-      updateHistory('top', data);
-    } catch (e) { console.error('Top Riser fetch error:', e); }
-  }
-
-  async function fetchStarRiser() {
-    try {
-      const res = await fetch('/api/star-riser');
-      const data = await res.json();
-      updateRiser('starRiser', data, 'star');
-      updateHistory('star', data);
-    } catch (e) { console.error('Star Riser fetch error:', e); }
-  }
-
-  async function fetchNews() {
-    try {
-      const res = await fetch('/api/crypto-news');
-      const data = await res.json();
-      const list = document.getElementById("newsList");
-      list.innerHTML = "";
-      data.slice(0, 5).forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
-        list.appendChild(li);
-      });
-    } catch (e) { console.error('News fetch error:', e); }
-  }
-
-  fetchTopRiser();
-  fetchStarRiser();
-  fetchNews();
-  setInterval(fetchTopRiser, 5000);
-  setInterval(fetchStarRiser, 5000);
-  setInterval(fetchNews, 30000);
-</script>
+    fetchTopRiser();
+    fetchStarRiser();
+    fetchNews();
+    rotateBannerMessages();
+    setInterval(fetchTopRiser, 5000);
+    setInterval(fetchStarRiser, 5000);
+    setInterval(fetchNews, 30000);
+  </script>
 </body>
 </html>
