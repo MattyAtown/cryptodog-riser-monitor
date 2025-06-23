@@ -137,9 +137,65 @@
       <ul class="crypto-history" id="starRiserHistory"></ul>
     </div>
   </div>
+<script>
+  const apiKey = "{{ COIN_GECKO_API }}";
 
-  <script>
-    const apiKey = "{{ COIN_GECKO_API }}";
-  </script>
+  async function fetchCoinGeckoData(coinId) {
+    const url = `https://api.coingecko.com/api/v3/coins/${coinId}`;
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "accept": "application/json",
+          "x-cg-pro-api-key": apiKey
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("🔎 CoinGecko Data:", data);
+
+      // Example: update chart + description on topRiser
+      if (coinId === topRiserId) {
+        document.getElementById("topRiserDesc").innerText =
+          data.description.en?.slice(0, 300).replace(/(<([^>]+)>)/gi, "") || "No description.";
+        document.getElementById("topRiserChart").src =
+          data.image?.large || "/static/coins/generic.png";
+      }
+
+      // Example: update chart + description on starRiser
+      if (coinId === starRiserId) {
+        document.getElementById("starRiserDesc").innerText =
+          data.description.en?.slice(0, 300).replace(/(<([^>]+)>)/gi, "") || "No description.";
+        document.getElementById("starRiserChart").src =
+          data.image?.large || "/static/coins/generic.png";
+      }
+
+    } catch (error) {
+      console.error("❌ Error fetching from CoinGecko:", error);
+    }
+  }
+
+  let topRiserId = "";
+  let starRiserId = "";
+
+  async function initializeRisers() {
+    const topRes = await fetch("/api/top-riser");
+    const topData = await topRes.json();
+    topRiserId = topData.coin.toLowerCase();
+    document.getElementById("topRiserInfo").innerText =
+      `${topData.coin.toUpperCase()} +${topData.change}% @ $${topData.price}`;
+    fetchCoinGeckoData(topRiserId);
+
+    const starRes = await fetch("/api/star-riser");
+    const starData = await starRes.json();
+    starRiserId = starData.coin.toLowerCase();
+    document.getElementById("starRiserInfo").innerText =
+      `${starData.coin.toUpperCase()} +${starData.change}% @ $${starData.price}`;
+    fetchCoinGeckoData(starRiserId);
+  }
+
+  initializeRisers();
+</script>
 </body>
 </html>
