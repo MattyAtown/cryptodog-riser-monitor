@@ -1,104 +1,173 @@
-import os
-import re
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
+from flask_mail import Mail, Message
+import random
+import string
 import requests
-import threading
+import os
 from datetime import datetime, timedelta
-from flask import Flask, render_template, jsonify
-from collections import defaultdict, deque
+from collections import defaultdict, deque, Counter
+import threading
+import time
+import feedparser
+import re
 
 app = Flask(__name__)
 
-# Load CoinGecko API key from environment
-COINGECKO_API_KEY = os.getenv("COIN_GECKO_API")
+# Mail config
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
-# In-memory store for risers
-top_risers = deque(maxlen=5)
-star_risers = deque(maxlen=4)
-coin_streaks = defaultdict(int)
-last_star_riser_update = datetime.utcnow() - timedelta(minutes=31)
+# CoinGecko API for descriptions
+COINGECKO_API = os.getenv("COIN_GECKO_API")
 
-@app.route('/')
-def dashboard():
-    return render_template("riser_monitor.html", COIN_GECKO_API=COINGECKO_API_KEY)
+# Price tracking and history
+PRICE_HISTORY = defaultdict(list)
+TOP_RISER = (None, 0, 0.0)
+STAR_RISER = (None, 0, 0.0)
+TOP_RISER_HISTORY = deque(maxlen=50)
+STAR_RISER_HISTORY = deque(maxlen=10)
+LAST_TOP_RISER = None
+LAST_TOP_RISER_TIME = datetime.min
+LAST_STAR_RISER_UPDATE = datetime.min
+COIN_DESCRIPTIONS = {}
 
-@app.route('/api/coin-info/<coin_id>')
-def get_coin_info(coin_id):
-    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}"
-    headers = {
-        "accept": "application/json",
-        "x-cg-pro-api-key": COINGECKO_API_KEY
-    }
+# ✅ Coinbase-tracked coin list
+COINS = ["btc", "eth", "sol", "ada", "xrp", "doge", "matic", "link", "dot", "ltc"]
+
+# === Utility: Coinbase price fetch ===
+def fetch_price(coin_symbol):
     try:
-        res = requests.get(url, headers=headers)
-        if res.status_code != 200:
-            return jsonify({"error": "Failed to fetch coin info"}), 400
-
-        data = res.json()
-        desc_html = data.get("description", {}).get("en", "")
-        desc = re.sub(r'<.*?>', '', desc_html).strip()[:300]
-        info = {
-            "name": data.get("name", coin_id.upper()),
-            "category": data.get("categories", ["General"])[0],
-            "purpose": data.get("asset_platform_id", "Blockchain"),
-            "description": desc,
-            "chart_url": f"https://www.coingecko.com/coins/{coin_id}/sparkline.svg"
-        }
-        return jsonify(info)
+        url = f"https://api.coinbase.com/v2/prices/{coin_symbol}-USD/spot"
+        response = requests.get(url)
+        if response.status_code == 200:
+            return round(float(response.json()['data']['amount']), 2)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"🚨 Coinbase price error: {e}")
+    return None
 
-@app.route('/api/top-riser')
-def top_riser():
-    if not top_risers:
-        return jsonify({"coin": "none", "price": "0", "change": "0"})
-    latest = top_risers[-1]
-    return jsonify(latest)
+# === Utility: CoinGecko description fetch ===
+def fetch_coin_description(coin_id):
+    try:
+        url = f"https://api.coingecko.com/api/v3/coins/{coin_id.lower()}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            desc_html = data.get("description", {}).get("en", "")
+            desc = re.sub(r'<.*?>', '', desc_html).strip()
+            return desc[:300]
+    except Exception as e:
+        print(f"⚠️ Description error for {coin_id}: {e}")
+    return ""
 
-@app.route('/api/star-riser')
-def star_riser():
-    if not star_risers:
-        return jsonify({"coin": "none", "price": "0", "change": "0"})
-    latest = star_risers[-1]
-    return jsonify(latest)
-
-@app.route('/api/crypto-news')
-def crypto_news():
-    return jsonify([
-        {"title": "Bitcoin hits new high!", "link": "https://example.com/1"},
-        {"title": "Ethereum rises sharply", "link": "https://example.com/2"},
-        {"title": "Market update: DOGE climbs", "link": "https://example.com/3"},
-        {"title": "Altcoin season incoming?", "link": "https://example.com/4"},
-        {"title": "Regulators eye crypto", "link": "https://example.com/5"}
-    ])
-
+# === Monitor coin prices ===
 def monitor_risers():
-    import time
-    from random import choice, uniform
-    coins = ['btc', 'eth', 'sol', 'ada', 'xrp', 'doge', 'matic', 'dot', 'ltc', 'link']
+    global TOP_RISER, STAR_RISER
+    MIN_RISE = 0.05
+    STAR_THRESHOLD = 5.0
+    LIMIT = 720
+
     while True:
-        coin = choice(coins)
-        price = round(uniform(0.1, 70000), 2)
-        change = round(uniform(2, 10), 2)
+        try:
+            top_riser, top_change = None, 0
+            star_riser, star_change = None, 0
 
-        print(f"\U0001F50D Checking for top risers...")
-        print(f"\U0001F680 New Top Riser: {coin} | Change: {change}% | Price: ${price}")
+            for coin in COINS:
+                price = fetch_price(coin)
+                if price is not None:
+                    PRICE_HISTORY[coin].append(price)
+                    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-LIMIT:]
 
-        top_risers.append({"coin": coin, "price": str(price), "change": str(change)})
+                    if len(PRICE_HISTORY[coin]) >= 2:
+                        initial = PRICE_HISTORY[coin][0]
+                        min_price = min(PRICE_HISTORY[coin])
+                        change = max(
+                            ((price - initial) / initial) * 100,
+                            ((price - min_price) / min_price) * 100
+                        )
 
-        coin_streaks[coin] += 1
+                        if change > top_change and change >= MIN_RISE:
+                            top_riser, top_change = coin, change
+                        if change >= STAR_THRESHOLD and change > star_change:
+                            star_riser, star_change = coin, change
 
-        global last_star_riser_update
-        now = datetime.utcnow()
-        update_due = (now - last_star_riser_update).total_seconds() > 1800
+            if top_riser:
+                price = fetch_price(top_riser)
+                now = datetime.now()
+                if price:
+                    TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
+                    if LAST_TOP_RISER != top_riser:
+                        TOP_RISER_HISTORY.appendleft({"coin": top_riser, "timestamp": now})
+                    global LAST_TOP_RISER, LAST_TOP_RISER_TIME
+                    LAST_TOP_RISER, LAST_TOP_RISER_TIME = top_riser, now
 
-        if update_due or change > 5:
-            print(f"\u2B50 Star Riser update: {coin} | Change: {change}% | Price: ${price}")
-            star_risers.append({"coin": coin, "price": str(price), "change": str(change)})
-            last_star_riser_update = now
+                    if top_riser not in COIN_DESCRIPTIONS:
+                        COIN_DESCRIPTIONS[top_riser] = fetch_coin_description(top_riser)
 
-        time.sleep(30)
+                    if (now - LAST_STAR_RISER_UPDATE) >= timedelta(minutes=30):
+                        recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
+                        if recent_30:
+                            common_30, _ = Counter(recent_30).most_common(1)[0]
+                            if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
+                                STAR_RISER_HISTORY.appendleft(common_30)
+                                print(f"📜 Star Riser History Updated: {common_30}")
+                        global LAST_STAR_RISER_UPDATE
+                        LAST_STAR_RISER_UPDATE = now
+                        STAR_RISER = (top_riser, round(top_change, 2), round(price, 2))
 
+        except Exception as e:
+            print(f"🚨 Monitor error: {e}")
+        time.sleep(5)
+
+# === ROUTES ===
+@app.route("/")
+def index():
+    return render_template("riser_monitor.html", COIN_GECKO_API=COINGECKO_API)
+
+@app.route("/api/top-riser")
+def top_riser_api():
+    if TOP_RISER and TOP_RISER[0]:
+        coin = TOP_RISER[0]
+        return jsonify({
+            "coin": coin,
+            "change": f"{TOP_RISER[1]:.2f}",
+            "price": f"{TOP_RISER[2]:.2f}",
+            "description": COIN_DESCRIPTIONS.get(coin, "")
+        })
+    return jsonify({"coin": "none", "change": "0", "price": "0", "description": ""})
+
+@app.route("/api/star-riser")
+def star_riser_api():
+    if STAR_RISER and STAR_RISER[0]:
+        return jsonify({
+            "coin": STAR_RISER[0],
+            "change": f"{STAR_RISER[1]:.2f}",
+            "price": f"{STAR_RISER[2]:.2f}"
+        })
+    return jsonify({"coin": "none", "change": "0", "price": "0"})
+
+@app.route("/api/crypto-news")
+def crypto_news():
+    try:
+        feed = feedparser.parse("https://cointelegraph.com/rss")
+        news = [{"title": e.title, "link": e.link, "published": e.published} for e in feed.entries[:5]]
+        return jsonify(news)
+    except Exception as e:
+        print(f"📰 RSS error: {e}")
+        return jsonify([])
+
+@app.route("/api/top-riser-history")
+def top_riser_history_api():
+    return jsonify(list(TOP_RISER_HISTORY))
+
+@app.route("/api/star-riser-history")
+def star_riser_history_api():
+    return jsonify(list(STAR_RISER_HISTORY))
+
+# === Background monitor ===
 threading.Thread(target=monitor_risers, daemon=True).start()
 
-if __name__ == '__main__':
-    app.run(debug=True, port=10000)
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0')
