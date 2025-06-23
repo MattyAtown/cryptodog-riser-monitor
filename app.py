@@ -210,7 +210,13 @@ def monitor_risers():
 
 @app.route("/")
 def index():
-    return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
+    coingecko_api = os.getenv("COIN_GECKO_API")
+    return render_template(
+        "riser_monitor.html",
+        top_riser=TOP_RISER,
+        star_riser=STAR_RISER,
+        COIN_GECKO_API=coingecko_api
+    )
 
 @app.route('/verify_email')
 def verify_email():
