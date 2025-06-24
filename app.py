@@ -146,6 +146,8 @@ def monitor_risers():
                     PRICE_HISTORY[coin].append(price)
                     PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-ONE_HOUR_LIMIT:]
 
+                    print(f"💰 {coin.upper()} Price History: {PRICE_HISTORY[coin][-5:]}")
+
                     if len(PRICE_HISTORY[coin]) >= 2:
                         initial = PRICE_HISTORY[coin][0]
                         min_price = min(PRICE_HISTORY[coin])
@@ -230,14 +232,40 @@ def signup():
 def top_riser_api():
     if TOP_RISER and TOP_RISER[0] is not None:
         coin = TOP_RISER[0]
+
+        # Only fetch description/chart once per coin
         if coin not in COIN_DESCRIPTIONS:
-            COIN_DESCRIPTIONS[coin] = fetch_coin_description(coin)
+            try:
+                url = f"https://api.coingecko.com/api/v3/coins/{coin.lower()}"
+                response = requests.get(url)
+                if response.status_code == 200:
+                    data = response.json()
+                    desc_html = data.get("description", {}).get("en", "")
+                    desc = re.sub(r'<.*?>', '', desc_html).strip()[:300]
+                    img_url = data.get("image", {}).get("large", "")
+                    COIN_DESCRIPTIONS[coin] = {"desc": desc, "img": img_url}
+                else:
+                    COIN_DESCRIPTIONS[coin] = {"desc": "", "img": ""}
+            except Exception as e:
+                print(f"⚠️ Error fetching CoinGecko data for {coin}: {e}")
+                COIN_DESCRIPTIONS[coin] = {"desc": "", "img": ""}
+
         return jsonify({
             "coin": coin,
             "change": f"{TOP_RISER[1]:.2f}",
             "price": f"{TOP_RISER[2]:.2f}",
-            "description": COIN_DESCRIPTIONS[coin]
+            "description": COIN_DESCRIPTIONS[coin]["desc"],
+            "chart_url": COIN_DESCRIPTIONS[coin]["img"]
         })
+
+    return jsonify({
+        "coin": "No Riser",
+        "change": "0",
+        "price": "0",
+        "description": "",
+        "chart_url": ""
+    })
+    
     return jsonify({
         "coin": "No Riser",
         "change": "0",
