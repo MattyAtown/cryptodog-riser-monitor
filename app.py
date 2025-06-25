@@ -96,7 +96,22 @@ COINS = [
     "xns", "xor", "xrd", "xrp", "xsn", "xsr", "xtz", "xvg", "xyo", "xzc", "yfi",
     "yoyo", "zai", "zb", "zco", "zec", "zen", "zil", "zks", "zrx"
 ]
-
+def resolve_image_path(coin):
+    """
+    Resolves local image path for a coin using known folders.
+    Returns the first match or fallback to generic icon.
+    """
+    coin = coin.lower()
+    possible_paths = [
+        f'static/coins/{coin}.png',
+        f'static/cryptodog_riser_monitor/{coin}.png',
+        'static/coins/generic.png'
+    ]
+    for path in possible_paths:
+        if os.path.exists(path):
+            return '/' + path
+    return '/static/coins/generic.png'
+    
 # Fetch spot price from Coinbase for a given coin
 def fetch_price(coin_symbol):
     try:
@@ -232,8 +247,10 @@ def signup():
 def top_riser_api():
     if TOP_RISER and TOP_RISER[0] is not None:
         coin = TOP_RISER[0]
+        price = TOP_RISER[2]
+        change = TOP_RISER[1]
+        image = resolve_image_path(coin)
 
-        # Only fetch description/chart once per coin
         if coin not in COIN_DESCRIPTIONS:
             try:
                 url = f"https://api.coingecko.com/api/v3/coins/{coin.lower()}"
@@ -242,51 +259,116 @@ def top_riser_api():
                     data = response.json()
                     desc_html = data.get("description", {}).get("en", "")
                     desc = re.sub(r'<.*?>', '', desc_html).strip()[:300]
-                    img_url = data.get("image", {}).get("large", "")
-                    COIN_DESCRIPTIONS[coin] = {"desc": desc, "img": img_url}
+                    full_name = data.get("name", coin.upper())
+                    category = data.get("categories", ["N/A"])[0]
+                    chart_url = data.get("image", {}).get("large", "")
+                    volatility = data.get("market_data", {}).get("price_change_percentage_30d", 0)
+
+                    COIN_DESCRIPTIONS[coin] = {
+                        "desc": desc,
+                        "name": full_name,
+                        "category": category,
+                        "chart_url": chart_url,
+                        "volatility": round(volatility, 2)
+                    }
                 else:
-                    COIN_DESCRIPTIONS[coin] = {"desc": "", "img": ""}
+                    COIN_DESCRIPTIONS[coin] = {
+                        "desc": "", "name": coin.upper(), "category": "N/A", "chart_url": "", "volatility": 0
+                    }
             except Exception as e:
                 print(f"⚠️ Error fetching CoinGecko data for {coin}: {e}")
-                COIN_DESCRIPTIONS[coin] = {"desc": "", "img": ""}
+                COIN_DESCRIPTIONS[coin] = {
+                    "desc": "", "name": coin.upper(), "category": "N/A", "chart_url": "", "volatility": 0
+                }
 
+        meta = COIN_DESCRIPTIONS[coin]
         return jsonify({
             "coin": coin,
-            "change": f"{TOP_RISER[1]:.2f}",
-            "price": f"{TOP_RISER[2]:.2f}",
-            "description": COIN_DESCRIPTIONS[coin]["desc"],
-            "chart_url": COIN_DESCRIPTIONS[coin]["img"]
+            "name": meta["name"],
+            "category": meta["category"],
+            "description": meta["desc"],
+            "volatility": meta["volatility"],
+            "price": f"{price:.2f}",
+            "change": f"{change:.2f}",
+            "image": image,
+            "chart_url": meta["chart_url"]
         })
 
     return jsonify({
         "coin": "No Riser",
-        "change": "0",
-        "price": "0",
+        "name": "N/A",
+        "category": "N/A",
         "description": "",
-        "chart_url": ""
-    })
-    
-    return jsonify({
-        "coin": "No Riser",
-        "change": "0",
+        "volatility": 0,
         "price": "0",
-        "description": ""
+        "change": "0",
+        "image": "/static/coins/generic.png",
+        "chart_url": ""
     })
 
 @app.route("/api/star-riser")
 def star_riser_api():
     if STAR_RISER and STAR_RISER[0] is not None:
+        coin = STAR_RISER[0]
+        price = STAR_RISER[2]
+        change = STAR_RISER[1]
+        image = resolve_image_path(coin)
+
+        if coin not in COIN_DESCRIPTIONS:
+            try:
+                url = f"https://api.coingecko.com/api/v3/coins/{coin.lower()}"
+                response = requests.get(url)
+                if response.status_code == 200:
+                    data = response.json()
+                    desc_html = data.get("description", {}).get("en", "")
+                    desc = re.sub(r'<.*?>', '', desc_html).strip()[:300]
+                    full_name = data.get("name", coin.upper())
+                    category = data.get("categories", ["N/A"])[0]
+                    chart_url = data.get("image", {}).get("large", "")
+                    volatility = data.get("market_data", {}).get("price_change_percentage_30d", 0)
+
+                    COIN_DESCRIPTIONS[coin] = {
+                        "desc": desc,
+                        "name": full_name,
+                        "category": category,
+                        "chart_url": chart_url,
+                        "volatility": round(volatility, 2)
+                    }
+                else:
+                    COIN_DESCRIPTIONS[coin] = {
+                        "desc": "", "name": coin.upper(), "category": "N/A", "chart_url": "", "volatility": 0
+                    }
+            except Exception as e:
+                print(f"⚠️ Error fetching CoinGecko data for {coin}: {e}")
+                COIN_DESCRIPTIONS[coin] = {
+                    "desc": "", "name": coin.upper(), "category": "N/A", "chart_url": "", "volatility": 0
+                }
+
+        meta = COIN_DESCRIPTIONS[coin]
         return jsonify({
-            "coin": STAR_RISER[0],
-            "change": f"{STAR_RISER[1]:.2f}",
-            "price": f"{STAR_RISER[2]:.2f}"
+            "coin": coin,
+            "name": meta["name"],
+            "category": meta["category"],
+            "description": meta["desc"],
+            "volatility": meta["volatility"],
+            "price": f"{price:.2f}",
+            "change": f"{change:.2f}",
+            "image": image,
+            "chart_url": meta["chart_url"]
         })
+
     return jsonify({
         "coin": "No Star Riser",
+        "name": "N/A",
+        "category": "N/A",
+        "description": "",
+        "volatility": 0,
+        "price": "0",
         "change": "0",
-        "price": "0"
+        "image": "/static/coins/generic.png",
+        "chart_url": ""
     })
-
+    
 @app.route("/api/top-riser-history")
 def top_riser_history_api():
     return jsonify(list(TOP_RISER_HISTORY))
