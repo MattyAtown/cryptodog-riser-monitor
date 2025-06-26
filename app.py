@@ -142,28 +142,27 @@ def fetch_coin_description(coin_symbol):
     return ""
 
 from datetime import datetime, timedelta
+from collections import Counter
 
 def monitor_risers():
     global TOP_RISER, STAR_RISER
     global LAST_TOP_RISER, LAST_TOP_RISER_TIME, LAST_STAR_RISER_UPDATE
     global TOP_RISER_HISTORY, STAR_RISER_HISTORY
 
-    STEP_LIMIT = 3  # 3 x 5 seconds = 15s streak
-    MIN_STEP = 0.000000000001  # Minimal rise required each step
-    STAR_RISER_MIN_PERCENT = 1.0  # Must rise at least 1% to qualify for Star Riser
+    STEP_LIMIT = 3  # 3 checks = 15 seconds
+    MIN_STEP = 0.000000000001  # Minimum rise per step
+    STAR_RISER_MIN_PERCENT = 1.0  # Min total % rise for Star Riser eligibility
 
     print("🚀 CryptoDog Riser Monitor started.")
 
     while True:
-    try:
-        now = datetime.now()
-        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            now = datetime.now()
+            timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
 
-        # ... your code
-
-        if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
-            rise_pct = ((p3 - p1) / p1) * 100
-            print(f"[{timestamp}] ✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
+            top_riser_candidate = None
+            max_rise_pct = 0.0
+            final_price = 0.0
 
             for coin in COINS:
                 price = fetch_price(coin)
@@ -171,7 +170,7 @@ def monitor_risers():
                     continue
 
                 PRICE_HISTORY[coin].append(price)
-                PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-STEP_LIMIT:]  # Keep last 3
+                PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-STEP_LIMIT:]
 
                 if len(PRICE_HISTORY[coin]) == STEP_LIMIT:
                     p1, p2, p3 = PRICE_HISTORY[coin]
@@ -179,19 +178,18 @@ def monitor_risers():
                     if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
                         rise_pct = ((p3 - p1) / p1) * 100
 
-                        print(f"✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
+                        print(f"[{timestamp}] ✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
 
                         if rise_pct > max_rise_pct:
                             top_riser_candidate = coin
                             max_rise_pct = rise_pct
                             final_price = p3
 
-            # Update Top Riser
             if top_riser_candidate:
                 TOP_RISER = (top_riser_candidate, round(max_rise_pct, 5), round(final_price, 5))
-                print(f"\n[{timestamp}] 🔝 TOP RISER: {TOP_RISER[0].upper()} | +{TOP_RISER[1]}% | ${TOP_RISER[2]}\n")
+                print(f"[{timestamp}] 🔝 TOP RISER: {TOP_RISER[0].upper()} | +{TOP_RISER[1]}% | ${TOP_RISER[2]}")
 
-                # Update history
+                # Update Top Riser History
                 if LAST_TOP_RISER != TOP_RISER[0]:
                     LAST_TOP_RISER = TOP_RISER[0]
                     LAST_TOP_RISER_TIME = now
@@ -200,32 +198,32 @@ def monitor_risers():
                     LAST_TOP_RISER_TIME = now
                     TOP_RISER_HISTORY.appendleft({"coin": TOP_RISER[0], "timestamp": now})
 
-                # Check for Star Riser eligibility (every 60s window)
+                # Star Riser logic
                 recent_top_risers = [entry["coin"] for entry in TOP_RISER_HISTORY if (now - entry["timestamp"]) <= timedelta(seconds=60)]
                 coin_counts = Counter(recent_top_risers)
 
                 if coin_counts:
                     most_common, freq = coin_counts.most_common(1)[0]
 
-                    # Only promote to Star Riser if Top Riser’s % rise ≥ 1.0
                     if TOP_RISER[0] == most_common and TOP_RISER[1] >= STAR_RISER_MIN_PERCENT:
                         STAR_RISER = (most_common, round(freq * 1.5, 2), TOP_RISER[2])
                         print(f"[{timestamp}] 🌟 STAR RISER: {STAR_RISER[0].upper()} | Score: {STAR_RISER[1]} | Price: ${STAR_RISER[2]}")
 
-                # Optional: Update Star Riser History every 30 mins
+                # Star Riser History update every 30 mins
                 if (now - LAST_STAR_RISER_UPDATE) >= timedelta(minutes=30):
                     recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
                     if recent_30:
                         common_30, _ = Counter(recent_30).most_common(1)[0]
                         if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
                             STAR_RISER_HISTORY.appendleft(common_30)
-                            print(f"📜 Star Riser History Updated: {common_30}")
+                            print(f"[{timestamp}] 📜 Star Riser History Updated: {common_30}")
                     LAST_STAR_RISER_UPDATE = now
 
         except Exception as e:
-            print(f"🚨 Error in monitor_risers(): {e}")
+            print(f"[{timestamp}] 🚨 Error in monitor_risers(): {e}")
 
         time.sleep(5)
+        
 @app.route("/")
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
