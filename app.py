@@ -256,7 +256,7 @@ def signup():
             print(f"❌ Failed to send email: {e}")
             flash('❌ Failed to send email. Try again.', 'error')
 
-        return redirect(url_for('verify_email'))
+        return redirect(url_for('thank_you'))
 
     return render_template('signup.html')
     # If GET, just show the form
