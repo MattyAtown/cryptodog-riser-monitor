@@ -246,7 +246,15 @@ def signup():
             sender=app.config['MAIL_USERNAME'],
             recipients=[email]
         )
-        msg.body = f"Hey {first},\n\nThanks for signing up to CryptoDog! You're now subscribed to the Arnie Trading Academy."
+        msg.body = f"""Hey {first},
+
+Thanks for signing up to CryptoDog! You're now subscribed to the Arnie Trading Academy.
+
+👉 Click here to confirm your subscription and begin your journey:
+https://cryptodoglive.onrender.com/thank-you
+
+See you inside!
+– Arnie 🐶"""
 
         try:
             mail.send(msg)
@@ -256,11 +264,9 @@ def signup():
             print(f"❌ Failed to send email: {e}")
             flash('❌ Failed to send email. Try again.', 'error')
 
-        return redirect(url_for('thank_you'))
+        return redirect(url_for('verify_email'))  # ✅ keeps user experience flowing
 
-    return render_template('signup.html')
-    # If GET, just show the form
-    return render_template('signup.html')
+    return render_template('signup.html')  # ✅ necessary for showing form on GET request
 
 def resolve_image_path(coin):
     """
