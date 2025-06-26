@@ -416,6 +416,10 @@ def star_riser_api():
 def top_riser_history_api():
     return jsonify(list(TOP_RISER_HISTORY))
 
+@app.route('/thank-you')
+def thank_you():
+    return render_template('thank_you.html')
+
 @app.route("/api/star-riser-history")
 def star_riser_history_api():
     return jsonify(list(STAR_RISER_HISTORY))
