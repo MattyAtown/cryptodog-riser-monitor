@@ -20,6 +20,8 @@ app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
+mail = Mail(app)
+
 PRICE_HISTORY = defaultdict(list)
 TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
@@ -236,10 +238,27 @@ def verify_email():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        # handle form submission
-        ...
+        email = request.form.get('email')
+        first = request.form.get('first')
+
+        msg = Message(
+            subject="Welcome to CryptoDog | Learn with Arnie",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[email]
+        )
+        msg.body = f"Hey {first},\n\nThanks for signing up to CryptoDog! You're now subscribed to the Arnie Trading Academy."
+
+        try:
+            mail.send(msg)
+            print(f"✅ Email sent to {email}")
+            flash('✅ Email sent! Check your inbox.', 'success')
+        except Exception as e:
+            print(f"❌ Failed to send email: {e}")
+            flash('❌ Failed to send email. Try again.', 'error')
+
         return redirect(url_for('verify_email'))
 
+    return render_template('signup.html')
     # If GET, just show the form
     return render_template('signup.html')
 
