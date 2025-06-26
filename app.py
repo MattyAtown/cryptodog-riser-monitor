@@ -345,6 +345,11 @@ def coin_info(coin):
     coin_data = COIN_METADATA.get(coin.lower(), {})
     live_price = fetch_price(coin)
 
+    @app.route("/api/coin-info/<coin>")
+def coin_info(coin):
+    coin_data = COIN_METADATA.get(coin.lower(), {})
+    live_price = fetch_price(coin)
+
     return jsonify({
         "coin": coin,
         "name": coin_data.get("name", coin.upper()),
