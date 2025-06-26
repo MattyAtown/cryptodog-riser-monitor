@@ -1,0 +1,22 @@
+{
+  "btc": {
+    "name": "Bitcoin",
+    "category": "Store of Value"
+  },
+  "eth": {
+    "name": "Ethereum",
+    "category": "Smart Contracts"
+  },
+  "doge": {
+    "name": "Dogecoin",
+    "category": "Meme Coin"
+  },
+  "sol": {
+    "name": "Solana",
+    "category": "Fast Transactions"
+  },
+  "ada": {
+    "name": "Cardano",
+    "category": "Academic Blockchain"
+  }
+}
