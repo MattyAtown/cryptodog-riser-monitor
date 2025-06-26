@@ -259,13 +259,15 @@ def resolve_image_path(coin):
         if os.path.exists(path):
             return '/' + path
     return '/static/coins/generic.png'
+
 @app.route("/api/top-riser")
 def top_riser_api():
-    if TOP_RISER and TOP_RISER[0] is not None:
-        coin = TOP_RISER[0]
-        price = TOP_RISER[2]
-        change = TOP_RISER[1]
-        image = resolve_image_path(coin)
+    return jsonify({
+        "coin": TOP_RISER[0],
+        "change": TOP_RISER[1],
+        "price": TOP_RISER[2],
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
 
         if coin not in COIN_DESCRIPTIONS:
             try:
