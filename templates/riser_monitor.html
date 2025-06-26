@@ -175,7 +175,7 @@
     }
 
     async function updateRiser(boxPrefix, data, type = null) {
-  const { coin, change, price } = data;
+  const { coin, change, price, timestamp } = data;
   const infoDiv = document.getElementById(`${boxPrefix}Info`);
   const priceNum = parseFloat(price);
 
