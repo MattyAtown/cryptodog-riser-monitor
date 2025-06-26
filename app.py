@@ -155,11 +155,15 @@ def monitor_risers():
     print("🚀 CryptoDog Riser Monitor started.")
 
     while True:
-        try:
-            now = datetime.now(): timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-            top_riser_candidate = None
-            max_rise_pct = 0.0
-            final_price = 0.0
+    try:
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+
+        # ... your code
+
+        if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
+            rise_pct = ((p3 - p1) / p1) * 100
+            print(f"[{timestamp}] ✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
 
             for coin in COINS:
                 price = fetch_price(coin)
@@ -185,7 +189,7 @@ def monitor_risers():
             # Update Top Riser
             if top_riser_candidate:
                 TOP_RISER = (top_riser_candidate, round(max_rise_pct, 5), round(final_price, 5))
-                print(f"\n🔝 TOP RISER: {TOP_RISER[0].upper()} | +{TOP_RISER[1]}% | ${TOP_RISER[2]}\n")
+                print(f"\n[{timestamp}] 🔝 TOP RISER: {TOP_RISER[0].upper()} | +{TOP_RISER[1]}% | ${TOP_RISER[2]}\n")
 
                 # Update history
                 if LAST_TOP_RISER != TOP_RISER[0]:
@@ -206,7 +210,7 @@ def monitor_risers():
                     # Only promote to Star Riser if Top Riser’s % rise ≥ 1.0
                     if TOP_RISER[0] == most_common and TOP_RISER[1] >= STAR_RISER_MIN_PERCENT:
                         STAR_RISER = (most_common, round(freq * 1.5, 2), TOP_RISER[2])
-                        print(f"🌟 STAR RISER: {STAR_RISER[0].upper()} | Score: {STAR_RISER[1]} | Price: ${STAR_RISER[2]}")
+                        print(f"[{timestamp}] 🌟 STAR RISER: {STAR_RISER[0].upper()} | Score: {STAR_RISER[1]} | Price: ${STAR_RISER[2]}")
 
                 # Optional: Update Star Riser History every 30 mins
                 if (now - LAST_STAR_RISER_UPDATE) >= timedelta(minutes=30):
