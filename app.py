@@ -449,6 +449,11 @@ def subscribe():
 def star_riser_history_api():
     return jsonify(list(STAR_RISER_HISTORY))
 
+@app.route('/pay/crypto')
+def pay_crypto():
+    tier = request.args.get('tier', 'Tier Unknown')
+    return render_template('payment_crypto.html', tier=tier)
+
 @app.route("/api/crypto-news")
 def crypto_news():
     try:
