@@ -269,8 +269,8 @@ def top_riser_api():
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
 
- @app.route("/api/coin-info/<coin>/<float:price>/<float:change>")
- def coin_info(coin, price, change):
+@app.route("/api/coin-info/<coin>/<float:price>/<float:change>")
+def coin_info(coin, price, change):
     if coin not in COIN_DESCRIPTIONS:
         try:
             url = f"https://api.coingecko.com/api/v3/coins/{coin.lower()}"
