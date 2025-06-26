@@ -12,6 +12,7 @@ import feedparser
 import re
 
 app = Flask(__name__)
+app.secret_key = "arnie_secret_2025_crypto_dog"  # Or pull from an environment variable
 
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
