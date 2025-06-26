@@ -101,6 +101,8 @@ def resolve_image_path(coin):
     Resolves local image path for a coin using known folders.
     Returns the first match or fallback to generic icon.
     """
+    import os
+
     coin = coin.lower()
     possible_paths = [
         f'static/coins/{coin}.png',
@@ -139,92 +141,87 @@ def fetch_coin_description(coin_symbol):
         print(f"⚠️ Failed to fetch description for {coin_symbol}: {e}")
     return ""
 
-# Monitor top risers
+from datetime import datetime, timedelta
+
 def monitor_risers():
     global TOP_RISER, STAR_RISER
-    MINIMUM_RISE_PERCENTAGE = 0.05
-    STAR_THRESHOLD_PERCENTAGE = 5.0
-    ONE_HOUR_LIMIT = 720  # 5 sec checks = 1 hour
+    global LAST_TOP_RISER, LAST_TOP_RISER_TIME, LAST_STAR_RISER_UPDATE
+    global TOP_RISER_HISTORY, STAR_RISER_HISTORY
+
+    STEP_LIMIT = 3  # 3 x 5 seconds = 15s streak
+    MIN_STEP = 0.000000000001  # Minimal rise required each step
+    STAR_RISER_MIN_PERCENT = 1.0  # Must rise at least 1% to qualify for Star Riser
+
+    print("🚀 CryptoDog Riser Monitor started.")
 
     while True:
         try:
-            top_riser = None
-            top_change = 0
-            star_riser = None
-            star_change = 0
-
-            print("🔍 Checking for top risers...")
+            now = datetime.now()
+            top_riser_candidate = None
+            max_rise_pct = 0.0
+            final_price = 0.0
 
             for coin in COINS:
                 price = fetch_price(coin)
-                if price is not None:
-                    PRICE_HISTORY[coin].append(price)
-                    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-ONE_HOUR_LIMIT:]
+                if price is None:
+                    continue
 
-                    print(f"💰 {coin.upper()} Price History: {PRICE_HISTORY[coin][-5:]}")
+                PRICE_HISTORY[coin].append(price)
+                PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-STEP_LIMIT:]  # Keep last 3
 
-                    if len(PRICE_HISTORY[coin]) >= 2:
-                        initial = PRICE_HISTORY[coin][0]
-                        min_price = min(PRICE_HISTORY[coin])
-                        if initial > 0 and min_price > 0:
-                            initial_change = ((price - initial) / initial) * 100
-                            min_change = ((price - min_price) / min_price) * 100
-                            average_change = ((price - (initial + min_price) / 2) / ((initial + min_price) / 2)) * 100
-                            change = max(initial_change, min_change, average_change)
+                if len(PRICE_HISTORY[coin]) == STEP_LIMIT:
+                    p1, p2, p3 = PRICE_HISTORY[coin]
 
-                            if change > top_change and change >= MINIMUM_RISE_PERCENTAGE:
-                                top_riser = coin
-                                top_change = change
+                    if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
+                        rise_pct = ((p3 - p1) / p1) * 100
 
-                            if change >= STAR_THRESHOLD_PERCENTAGE and change > star_change:
-                                star_riser = coin
-                                star_change = change
+                        print(f"✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
 
-            if top_riser:
-                price = fetch_price(top_riser)
-                if price is not None:
-                    TOP_RISER = (top_riser, round(top_change, 2), round(price, 2))
-                    print(f"🚀 New Top Riser: {top_riser} | Change: {top_change:.2f}% | Price: ${price:.2f}")
+                        if rise_pct > max_rise_pct:
+                            top_riser_candidate = coin
+                            max_rise_pct = rise_pct
+                            final_price = p3
 
-                    now = datetime.now()
-                    global LAST_TOP_RISER, LAST_TOP_RISER_TIME, TOP_RISER_HISTORY
-                    global STAR_RISER, STAR_RISER_HISTORY, LAST_STAR_RISER_UPDATE
+            # Update Top Riser
+            if top_riser_candidate:
+                TOP_RISER = (top_riser_candidate, round(max_rise_pct, 5), round(final_price, 5))
+                print(f"\n🔝 TOP RISER: {TOP_RISER[0].upper()} | +{TOP_RISER[1]}% | ${TOP_RISER[2]}\n")
 
-                    # ✅ Top Riser History logic
-                    if LAST_TOP_RISER != top_riser:
-                        LAST_TOP_RISER = top_riser
-                        LAST_TOP_RISER_TIME = now
-                        TOP_RISER_HISTORY.appendleft({"coin": top_riser, "timestamp": now})
-                    elif (now - LAST_TOP_RISER_TIME) >= timedelta(minutes=5):
-                        LAST_TOP_RISER_TIME = now
-                        TOP_RISER_HISTORY.appendleft({"coin": top_riser, "timestamp": now})
+                # Update history
+                if LAST_TOP_RISER != TOP_RISER[0]:
+                    LAST_TOP_RISER = TOP_RISER[0]
+                    LAST_TOP_RISER_TIME = now
+                    TOP_RISER_HISTORY.appendleft({"coin": TOP_RISER[0], "timestamp": now})
+                elif (now - LAST_TOP_RISER_TIME) >= timedelta(seconds=15):
+                    LAST_TOP_RISER_TIME = now
+                    TOP_RISER_HISTORY.appendleft({"coin": TOP_RISER[0], "timestamp": now})
 
-                    # ✅ Star Riser trigger logic
-                    top5 = list(TOP_RISER_HISTORY)[:5]
-                    coin_counts = Counter([e["coin"] for e in top5])
-                    if coin_counts:
-                        most_common, freq = coin_counts.most_common(1)[0]
-                        if freq >= 3 or (LAST_TOP_RISER == top_riser and (now - LAST_TOP_RISER_TIME) >= timedelta(minutes=5)):
-                            star_price = fetch_price(top_riser)
-                            if star_price:
-                                STAR_RISER = (top_riser, round(freq * 1.5, 2), round(star_price, 2))
-                                print(f"⭐ STAR RISER Updated: {STAR_RISER}")
+                # Check for Star Riser eligibility (every 60s window)
+                recent_top_risers = [entry["coin"] for entry in TOP_RISER_HISTORY if (now - entry["timestamp"]) <= timedelta(seconds=60)]
+                coin_counts = Counter(recent_top_risers)
 
-                    # ✅ Star Riser History (every 30 mins)
-                    if (now - LAST_STAR_RISER_UPDATE) >= timedelta(minutes=30):
-                        recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
-                        if recent_30:
-                            common_30, _ = Counter(recent_30).most_common(1)[0]
-                            if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
-                                STAR_RISER_HISTORY.appendleft(common_30)
-                                print(f"📜 Star Riser History Updated: {common_30}")
-                        LAST_STAR_RISER_UPDATE = now
+                if coin_counts:
+                    most_common, freq = coin_counts.most_common(1)[0]
+
+                    # Only promote to Star Riser if Top Riser’s % rise ≥ 1.0
+                    if TOP_RISER[0] == most_common and TOP_RISER[1] >= STAR_RISER_MIN_PERCENT:
+                        STAR_RISER = (most_common, round(freq * 1.5, 2), TOP_RISER[2])
+                        print(f"🌟 STAR RISER: {STAR_RISER[0].upper()} | Score: {STAR_RISER[1]} | Price: ${STAR_RISER[2]}")
+
+                # Optional: Update Star Riser History every 30 mins
+                if (now - LAST_STAR_RISER_UPDATE) >= timedelta(minutes=30):
+                    recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
+                    if recent_30:
+                        common_30, _ = Counter(recent_30).most_common(1)[0]
+                        if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
+                            STAR_RISER_HISTORY.appendleft(common_30)
+                            print(f"📜 Star Riser History Updated: {common_30}")
+                    LAST_STAR_RISER_UPDATE = now
 
         except Exception as e:
-            print(f"🚨 Error in riser monitor: {e}")
+            print(f"🚨 Error in monitor_risers(): {e}")
 
         time.sleep(5)
-
 @app.route("/")
 def index():
     return render_template("riser_monitor.html", top_riser=TOP_RISER, star_riser=STAR_RISER)
@@ -243,6 +240,23 @@ def signup():
     # If GET, just show the form
     return render_template('signup.html')
 
+def resolve_image_path(coin):
+    """
+    Resolves local image path for a coin using known folders.
+    Returns the first match or fallback to generic icon.
+    """
+    import os
+
+    coin = coin.lower()
+    possible_paths = [
+        f'static/coins/{coin}.png',
+        f'static/cryptodog_riser_monitor/{coin}.png',
+        'static/coins/generic.png'
+    ]
+    for path in possible_paths:
+        if os.path.exists(path):
+            return '/' + path
+    return '/static/coins/generic.png'
 @app.route("/api/top-riser")
 def top_riser_api():
     if TOP_RISER and TOP_RISER[0] is not None:
