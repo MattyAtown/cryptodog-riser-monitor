@@ -340,18 +340,19 @@ import json  # Make sure this is in your imports if not already
 with open("coin_metadata.json", "r") as f:
     COIN_METADATA = json.load(f)
 
-@app.route("/api/coin-info/<coin>")
-def coin_info(coin):
+@app.route("/api/coin-info/<coin>/<float:price>/<float:change>")
+def coin_info(coin, price, change):
     coin_data = COIN_METADATA.get(coin.lower(), {})
-    live_price = fetch_price(coin)
 
     return jsonify({
         "coin": coin,
         "name": coin_data.get("name", coin.upper()),
         "category": coin_data.get("category", "N/A"),
         "description": coin_data.get("description", ""),
-        "price": f"{live_price:.2f}" if live_price else "N/A",
-        "image": resolve_image_path(coin),
+        "volatility": coin_data.get("volatility", 0),
+        "price": f"{price:.2f}",
+        "change": f"{change:.2f}",
+        "image": f"/static/coins/{coin.lower()}.png",  # or fallback to generic.png if needed
         "chart_url": coin_data.get("chart_url", "")
     })
     
@@ -415,5 +416,3 @@ threading.Thread(target=monitor_risers, daemon=True).start()
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
-
-
