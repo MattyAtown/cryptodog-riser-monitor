@@ -179,6 +179,41 @@
   const infoDiv = document.getElementById(`${boxPrefix}Info`);
   const priceNum = parseFloat(price);
 
+  // Set the core display info first
+  infoDiv.innerHTML = priceNum && !isNaN(priceNum)
+    ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong><br><small style="color:#ccc;">Updated: ${timestamp}</small>`
+    : `<strong>${coin} | +${change}% | $0.0000</strong><br><small style="color:#ccc;">Updated: ${timestamp}</small>`;
+
+  // THEN fetch and append the metadata
+  fetch(`/api/coin-info/${coin}`)
+    .then(res => res.json())
+    .then(meta => {
+      const metaInfo = `
+        <div style="font-size: 0.9em; margin-top: 10px;">
+          <strong>${meta.name}</strong><br>
+          <span style="display: inline-block; background: #0ff; color: #000; padding: 2px 6px; border-radius: 8px; font-size: 0.8em; margin-top: 4px; text-shadow: none;">
+  ${meta.category}
+</span><br>
+          ${meta.description ? `<em>${meta.description}</em>` : ""}
+        </div>`;
+      infoDiv.innerHTML += metaInfo;
+    })
+    .catch(err => {
+      console.warn("Coin info not available for", coin, err);
+    });
+
+  const iconImg = document.getElementById(`${boxPrefix}Icon`);
+  if (iconImg) {
+    const lowercaseCoin = coin.toLowerCase();
+    const tryImage = new Image();
+    tryImage.onload = () => iconImg.src = tryImage.src;
+    tryImage.onerror = () => iconImg.src = `/static/coins/generic.png`;
+    tryImage.src = `/static/coins/${lowercaseCoin}.png`;
+  }
+
+  if (type) updateHistory(type, data);
+}
+
   infoDiv.innerHTML = priceNum && !isNaN(priceNum)
     ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong><br><small style="color:#ccc;">Updated: ${data.timestamp}</small>`
     : `<strong>${coin} | +${change}% | $0.0000</strong><br><small style="color:#ccc;">Updated: ${data.timestamp}</small>`;
