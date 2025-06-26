@@ -426,6 +426,25 @@ def top_riser_history_api():
 def thank_you():
     return render_template('thank_you.html')
 
+@app.route('/subscribe', methods=['GET', 'POST'])
+def subscribe():
+    if request.method == 'POST':
+        tier = request.form.get('tier')
+        payment_method = request.form.get('payment')
+
+        # Store, process, or route accordingly
+        if payment_method == 'crypto':
+            return render_template('payment_crypto.html', tier=tier)
+        elif payment_method == 'card':
+            return render_template('payment_card.html', tier=tier)
+        elif payment_method == 'bank':
+            return render_template('payment_bank.html', tier=tier)
+        else:
+            flash("Please choose a valid payment method.", "error")
+            return redirect(url_for('subscribe'))
+
+    return render_template('subscribe.html')
+
 @app.route("/api/star-riser-history")
 def star_riser_history_api():
     return jsonify(list(STAR_RISER_HISTORY))
