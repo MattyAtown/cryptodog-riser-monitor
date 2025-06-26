@@ -292,119 +292,68 @@ def top_riser_api():
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
 
-@app.route("/api/coin-info/<coin>/<float:price>/<float:change>")
-def coin_info(coin, price, change):
-    if coin not in COIN_DESCRIPTIONS:
+@app.route("/api/coin_metadata", methods=["POST"])
+def coin_metadata():
+    import re
+    from flask import request
+    coin_ids = request.json.get("coins", [])
+
+    results = {}
+    for coin in coin_ids:
         try:
             url = f"https://api.coingecko.com/api/v3/coins/{coin.lower()}"
             response = requests.get(url)
             if response.status_code == 200:
                 data = response.json()
                 desc_html = data.get("description", {}).get("en", "")
-                desc = re.sub(r'<.*?>', '', desc_html).strip()[:300]
-                full_name = data.get("name", coin.upper())
-                category = data.get("categories", ["N/A"])[0]
-                chart_url = data.get("image", {}).get("large", "")
-                volatility = data.get("market_data", {}).get("price_change_percentage_30d", 0)
+                desc = re.sub(r'<.*?>', '', desc_html).strip().split('.')[0]
+                name = data.get("name", coin.upper())
+                categories = data.get("categories", [])
+                homepage = data.get("links", {}).get("homepage", [""])[0]
 
-                COIN_DESCRIPTIONS[coin] = {
-                    "desc": desc,
-                    "name": full_name,
-                    "category": category,
-                    "chart_url": chart_url,
-                    "volatility": round(volatility, 2)
+                results[coin] = {
+                    "name": name,
+                    "category": categories[0] if categories else "N/A",
+                    "description": desc,
+                    "homepage": homepage
                 }
             else:
-                COIN_DESCRIPTIONS[coin] = {
-                    "desc": "", "name": coin.upper(), "category": "N/A", "chart_url": "", "volatility": 0
-                }
-        except Exception as e:
-            print(f"⚠️ Error fetching CoinGecko data for {coin}: {e}")
-            COIN_DESCRIPTIONS[coin] = {
-                "desc": "", "name": coin.upper(), "category": "N/A", "chart_url": "", "volatility": 0
-            }
-
-        meta = COIN_DESCRIPTIONS[coin]
-
-    return jsonify({
-        "coin": coin,
-        "name": meta["name"],
-        "category": meta["category"],
-        "description": meta["desc"],
-        "volatility": meta["volatility"],
-        "price": f"{price:.2f}",
-        "change": f"{change:.2f}",
-        "image": meta["chart_url"],
-        "chart_url": meta["chart_url"]
-    })
-
-# Optional fallback route, but must not be inside the function above
-@app.route("/api/coin-info")
-def no_coin_info():
-    return jsonify({
-        "coin": "No Riser",
-        "name": "N/A",
-        "category": "N/A",
-        "description": "",
-        "volatility": 0,
-        "price": "0",
-        "change": "0",
-        "image": "/static/coins/generic.png",
-        "chart_url": ""
-    })
-
-@app.route("/api/coin-info/<coin>/<float:price>/<float:change>")
-def coin_info(coin, price, change):
-    if coin not in COIN_DESCRIPTIONS:
-        try:
-            url = f"https://api.coingecko.com/api/v3/coins/{coin.lower()}"
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                desc_html = data.get("description", {}).get("en", "")
-                desc = re.sub(r'<.*?>', '', desc_html).strip()[:300]
-                full_name = data.get("name", coin.upper())
-                category = data.get("categories", ["N/A"])[0]
-                chart_url = data.get("image", {}).get("large", "")
-                volatility = data.get("market_data", {}).get("price_change_percentage_30d", 0)
-
-                COIN_DESCRIPTIONS[coin] = {
-                    "desc": desc,
-                    "name": full_name,
-                    "category": category,
-                    "chart_url": chart_url,
-                    "volatility": round(volatility, 2)
-                }
-            else:
-                COIN_DESCRIPTIONS[coin] = {
-                    "desc": "",
+                results[coin] = {
                     "name": coin.upper(),
                     "category": "N/A",
-                    "chart_url": "",
-                    "volatility": 0
+                    "description": "",
+                    "homepage": ""
                 }
         except Exception as e:
-            print(f"⚠️ Error fetching CoinGecko data for {coin}: {e}")
-            COIN_DESCRIPTIONS[coin] = {
-                "desc": "",
+            results[coin] = {
                 "name": coin.upper(),
                 "category": "N/A",
-                "chart_url": "",
-                "volatility": 0
+                "description": "",
+                "homepage": ""
             }
 
-    meta = COIN_DESCRIPTIONS[coin]
+    return jsonify(results)
+    
+import json  # Make sure this is in your imports if not already
+
+# Load the metadata once when the app starts
+with open("coin_metadata.json", "r") as f:
+    COIN_METADATA = json.load(f)
+
+@app.route("/api/coin-info/<coin>/<float:price>/<float:change>")
+def coin_info(coin, price, change):
+    coin_data = COIN_METADATA.get(coin.lower(), {})
 
     return jsonify({
         "coin": coin,
-        "name": meta["name"],
-        "category": meta["category"],
-        "description": meta["desc"],
-        "volatility": meta["volatility"],
+        "name": coin_data.get("name", coin.upper()),
+        "category": coin_data.get("category", "N/A"),
+        "description": coin_data.get("description", ""),
+        "volatility": coin_data.get("volatility", 0),
         "price": f"{price:.2f}",
         "change": f"{change:.2f}",
-        "image": meta["chart_url"],
-        "chart_url": meta["chart_url"]
+        "image": f"/static/coins/{coin.lower()}.png",  # or fallback to generic.png if needed
+        "chart_url": coin_data.get("chart_url", "")
     })
     
 @app.route("/api/top-riser-history")
