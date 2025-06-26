@@ -156,7 +156,7 @@ def monitor_risers():
 
     while True:
         try:
-            now = datetime.now()
+            now = datetime.now(): timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
             top_riser_candidate = None
             max_rise_pct = 0.0
             final_price = 0.0
