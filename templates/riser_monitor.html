@@ -164,11 +164,11 @@
         <option value="ETH">ETH</option>
         <option value="SOL">SOL</option>
       </select><br>
-      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br
-      <button onclick="simulateBuy()">Fake Buy</button>
-      <button onclick="checkBuy()">Check Gains</button>
+      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
+      <button onclick="simulateBuy()">Buy & Track</button>
+      <button onclick="stopTracking()">Stop</button>
 
-<div id="buyResults" style="color: lime; font-size: 0.9em; margin-top: 10px;"></div>
+     <div id="buyResults" style="color: lime; font-size: 0.9em; margin-top: 10px;"></div>
       <button onclick="startTracking()">Start</button>
       <button onclick="stopTracking()">Stop</button>
       <div class="results" id="trackingResults" style="margin-top:10px;"></div>
@@ -208,6 +208,13 @@ async function simulateBuy() {
     unitsBought: parseFloat(cryptoAmount),
     buyPrice: price
   };
+
+  buyResults.innerText = `✅ Purchase Recorded!\nYou bought ${cryptoAmount} ${coin} for $${amount} @ $${price.toFixed(4)}`;
+
+  // Immediately check and start tracking
+  checkBuy();
+  startTracking();
+}
 
   buyResults.innerText = `Current Price: $${price.toFixed(4)}\nYou bought ${cryptoAmount} ${coin} for $${amount}`;
 }
