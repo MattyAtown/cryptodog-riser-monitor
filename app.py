@@ -99,20 +99,6 @@ COINS = [
     "xns", "xor", "xrd", "xrp", "xsn", "xsr", "xtz", "xvg", "xyo", "xzc", "yfi",
     "yoyo", "zai", "zb", "zco", "zec", "zen", "zil", "zks", "zrx"
 ]
-def resolve_image_path(coin):
-    if not coin or not isinstance(coin, str):
-        return '/static/coins/generic.png'
-
-    coin = coin.lower()
-    possible_paths = [
-        f'static/coins/{coin}.png',
-        f'static/cryptodog_riser_monitor/{coin}.png',
-        'static/coins/generic.png'
-    ]
-    for path in possible_paths:
-        if os.path.exists(path):
-            return '/' + path
-    return '/static/coins/generic.png'
     
 # Fetch spot price from Coinbase for a given coin
 def fetch_price(coin_symbol):
@@ -364,7 +350,7 @@ def coin_info(coin, price, change):
         "volatility": coin_data.get("volatility", 0),
         "price": f"{price:.2f}",
         "change": f"{change:.2f}",
-        "image": f"/static/coins/{coin.lower()}.png",  # or fallback to generic.png if needed
+        "image": resolve_image_path(coin),
         "chart_url": coin_data.get("chart_url", "")
     })
     
