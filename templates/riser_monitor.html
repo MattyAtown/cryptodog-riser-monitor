@@ -164,7 +164,11 @@
         <option value="ETH">ETH</option>
         <option value="SOL">SOL</option>
       </select><br>
-      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
+      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br
+      <button onclick="simulateBuy()">Fake Buy</button>
+      <button onclick="checkBuy()">Check Gains</button>
+
+<div id="buyResults" style="color: lime; font-size: 0.9em; margin-top: 10px;"></div>
       <button onclick="startTracking()">Start</button>
       <button onclick="stopTracking()">Stop</button>
       <div class="results" id="trackingResults" style="margin-top:10px;"></div>
@@ -178,43 +182,69 @@
   </div>
 
   <script>
-    const topHistory = [];
-    const starHistory = [];
-    let lastTopRiserCoin = null;
-    let lastStarRiserCoin = null;
+  const topHistory = [];
+  const starHistory = [];
+  let lastTopRiserCoin = null;
+  let lastStarRiserCoin = null;
+  let trackingInterval = null;
 
-    let trackingInterval = null;
+  // 👇 NEW - Buy Simulator Tracking
+  let sessionBuyData = null;
 
-    function startTracking() {
-    const coin = document.getElementById("coinSelect").value;
-    const usdAmount = parseFloat(document.getElementById("mockAmount").value);
+async function simulateBuy() {
+  const coin = document.getElementById("coinSelect").value;
+  const amount = parseFloat(document.getElementById("mockAmount").value);
+  const buyResults = document.getElementById("buyResults");
 
-    if (!coin || isNaN(usdAmount) || usdAmount <= 0) {
-    document.getElementById("trackingResults").innerHTML = "<span style='color:red;'>Please enter a valid amount.</span>";
+  const res = await fetch(`/api/price/${coin}`);
+  const data = await res.json();
+  const price = data.price;
+
+  const cryptoAmount = (amount / price).toFixed(6);
+
+  sessionBuyData = {
+    coin,
+    usdSpent: amount,
+    unitsBought: parseFloat(cryptoAmount),
+    buyPrice: price
+  };
+
+  buyResults.innerText = `Current Price: $${price.toFixed(4)}\nYou bought ${cryptoAmount} ${coin} for $${amount}`;
+}
+
+async function checkBuy() {
+  const resultBox = document.getElementById("trackingResults");
+
+  if (!sessionBuyData) {
+    resultBox.innerText = "No fake purchase found. Please click 'Fake Buy' first.";
     return;
-   }
+  }
 
-  async function fetchPrice() {
-    try {
-      const res = await fetch(`/api/price/${coin}`);
-      const data = await res.json();
+  const { coin, unitsBought, usdSpent } = sessionBuyData;
 
-      const price = parseFloat(data.price);
-      const quantity = usdAmount / price;
-      const output = `
-        <strong>${coin}</strong><br>
-        Current Price: $${price.toFixed(4)}<br>
-        You could buy: ${quantity.toFixed(6)} ${coin}
-      `;
-      document.getElementById("trackingResults").innerHTML = output;
-    } catch (err) {
-      document.getElementById("trackingResults").innerHTML = "<span style='color:red;'>Error fetching price.</span>";
-    }
-   }
+  const res = await fetch(`/api/price/${coin}`);
+  const data = await res.json();
+  const currentPrice = data.price;
 
-    fetchPrice();
-    trackingInterval = setInterval(fetchPrice, 10000);
-   }
+  const currentValue = currentPrice * unitsBought;
+  const difference = currentValue - usdSpent;
+  const profitLoss = difference.toFixed(2);
+  const change = (difference >= 0) ? `🟢 Profit: $${profitLoss}` : `🔴 Loss: $${Math.abs(profitLoss)}`;
+
+  resultBox.innerText = `🕒 Current Value of Your ${unitsBought} ${coin}: $${currentValue.toFixed(2)}\n💰 ${change}`;
+}
+
+  function startTracking() {
+  const coin = document.getElementById("coinSelect").value;
+  const usdAmount = parseFloat(document.getElementById("mockAmount").value);
+
+  if (!coin || isNaN(usdAmount) || usdAmount <= 0) {
+  document.getElementById("trackingResults").innerHTML = "<span style='color:red;'>Please enter a valid amount.</span>";
+  return;
+  }
+
+  trackingInterval = setInterval(checkBuy, 10000);  // checks value every 10 seconds
+}
 
     function stopTracking() {
     clearInterval(trackingInterval);
