@@ -161,90 +161,91 @@
   </div>
 
   <script>
-    const topHistory = [];
-    const starHistory = [];
+  const topHistory = [];
+  const starHistory = [];
 
-    function updateHistory(type, data) {
-  const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-  const historyArr = type === 'top' ? topHistory : starHistory;
-  const ul = document.getElementById(listId);
-  const entry = `${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)}`;
-  historyArr.unshift(entry);
-  if (historyArr.length > 5) historyArr.pop();
-  ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
-}
-
-    async function updateRiser(boxPrefix, data, type = null) {
-  const { coin, change, price, timestamp } = data;
-  const infoDiv = document.getElementById(`${boxPrefix}Info`);
-  const priceNum = parseFloat(price);
-
-  infoDiv.innerHTML = priceNum && !isNaN(priceNum)
-    ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong><br><small style="color:#ccc;">Updated: ${timestamp}</small>`
-    : `<strong>${coin} | +${change}% | $0.0000</strong><br><small style="color:#ccc;">Updated: ${timestamp}</small>`;
-
-  const iconImg = document.getElementById(`${boxPrefix}Icon`);
-  if (iconImg) {
-    const lowercaseCoin = coin.toLowerCase();
-    const tryImage = new Image();
-    tryImage.onload = () => iconImg.src = tryImage.src;
-    tryImage.onerror = () => iconImg.src = /static/coins/generic.png;
-    tryImage.src = `/static/coins/${lowercaseCoin}.png`;
+  function updateHistory(type, data) {
+    const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+    const historyArr = type === 'top' ? topHistory : starHistory;
+    const ul = document.getElementById(listId);
+    const entry = `${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)}`;
+    historyArr.unshift(entry);
+    if (historyArr.length > 5) historyArr.pop();
+    ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
   }
 
-  if (type) updateHistory(type, data);
-}
+  async function updateRiser(boxPrefix, data, type = null) {
+    const { coin, change, price, timestamp } = data;
+    const infoDiv = document.getElementById(`${boxPrefix}Info`);
+    const priceNum = parseFloat(price);
 
-    async function fetchTopRiser() {
-      const res = await fetch('/api/top-riser');
-      const data = await res.json();
-      updateRiser('topRiser', data, 'top');
-      updateDogFace(data.coin);
+    infoDiv.innerHTML = priceNum && !isNaN(priceNum)
+      ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong><br><small style="color:#ccc;">Updated: ${timestamp}</small>`
+      : `<strong>${coin} | +${change}% | $0.0000</strong><br><small style="color:#ccc;">Updated: ${timestamp}</small>`;
+
+    const iconImg = document.getElementById(`${boxPrefix}Icon`);
+    if (iconImg) {
+      const lowercaseCoin = coin.toLowerCase();
+      const tryImage = new Image();
+      tryImage.onload = () => { iconImg.src = tryImage.src; };
+      tryImage.onerror = () => { iconImg.src = "/static/coins/generic.png"; };
+      tryImage.src = `/static/coins/${lowercaseCoin}.png`;
     }
 
-    async function fetchStarRiser() {
-      const res = await fetch('/api/star-riser');
-      const data = await res.json();
-      updateRiser('starRiser', data, 'star');
-    }
+    if (type) updateHistory(type, data);
+  }
 
-    async function fetchNews() {
-  const res = await fetch('/api/crypto-news');
-  const data = await res.json();
-  const list = document.getElementById("newsList");
-  list.innerHTML = "";
-  data.slice(0, 5).forEach(item => {
-    const li = document.createElement("li");
-    li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
-    list.appendChild(li);
-  });
-}
-    function updateDogFace(coin) {
-      const img = document.getElementById("dogFace");
-      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
-    }
+  async function fetchTopRiser() {
+    const res = await fetch('/api/top-riser');
+    const data = await res.json();
+    updateRiser('topRiser', data, 'top');
+    updateDogFace(data.coin);
+  }
 
-    function rotateBannerMessages() {
-      const messages = [
-        "Crypto surges to all-time highs – more to come?",
-        "XRP and SOL showing strong momentum with lower risk.",
-        "Caution: Meme coins are highly manipulated.",
-        "Sign up to learn minimum-risk, high-reward strategies."
-      ];
-      let index = 0;
-      setInterval(() => {
-        document.getElementById("buySignalBar").innerText = messages[index];
-        index = (index + 1) % messages.length;
-      }, 8000);
-    }
+  async function fetchStarRiser() {
+    const res = await fetch('/api/star-riser');
+    const data = await res.json();
+    updateRiser('starRiser', data, 'star');
+  }
 
-    fetchTopRiser();
-    fetchStarRiser();
-    fetchNews();
-    rotateBannerMessages();
-    setInterval(fetchTopRiser, 5000);
-    setInterval(fetchStarRiser, 5000);
-    setInterval(fetchNews, 30000);
-  </script>
+  async function fetchNews() {
+    const res = await fetch('/api/crypto-news');
+    const data = await res.json();
+    const list = document.getElementById("newsList");
+    list.innerHTML = "";
+    data.slice(0, 5).forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+      list.appendChild(li);
+    });
+  }
+
+  function updateDogFace(coin) {
+    const img = document.getElementById("dogFace");
+    img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
+  }
+
+  function rotateBannerMessages() {
+    const messages = [
+      "Crypto surges to all-time highs – more to come?",
+      "XRP and SOL showing strong momentum with lower risk.",
+      "Caution: Meme coins are highly manipulated.",
+      "Sign up to learn minimum-risk, high-reward strategies."
+    ];
+    let index = 0;
+    setInterval(() => {
+      document.getElementById("buySignalBar").innerText = messages[index];
+      index = (index + 1) % messages.length;
+    }, 8000);
+  }
+
+  fetchTopRiser();
+  fetchStarRiser();
+  fetchNews();
+  rotateBannerMessages();
+  setInterval(fetchTopRiser, 5000);
+  setInterval(fetchStarRiser, 5000);
+  setInterval(fetchNews, 30000);
+</script>
 </body>
 </html>
