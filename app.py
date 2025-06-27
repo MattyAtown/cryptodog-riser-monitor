@@ -99,22 +99,45 @@ COINS = [
     "xns", "xor", "xrd", "xrp", "xsn", "xsr", "xtz", "xvg", "xyo", "xzc", "yfi",
     "yoyo", "zai", "zb", "zco", "zec", "zen", "zil", "zks", "zrx"
 ]
-    
-# Fetch spot price from Coinbase for a given coin
+
+def get_local_coin_list():
+    image_dir = os.path.join("static", "coins")
+    try:
+        return [f.split(".")[0] for f in os.listdir(image_dir) if f.endswith(".png")]
+    except Exception as e:
+        print(f"⚠️ Error reading local coin icons: {e}")
+        return []
+        
 def fetch_price(coin_symbol):
     try:
+        # First try Coinbase
         url = f"https://api.coinbase.com/v2/prices/{coin_symbol}-USD/spot"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()
-            return round(float(data['data']['amount']), 2)
+            return round(float(data['data']['amount']), 6)
     except Exception as e:
-        print(f"🚨 Error fetching price for {coin_symbol}: {e}")
+        print(f"⚠️ Coinbase error for {coin_symbol}: {e}")
+
+    # Fallback to CoinGecko
+    try:
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_symbol.lower()}&vs_currencies=usd"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            price = data.get(coin_symbol.lower(), {}).get("usd")
+            if price:
+                return round(float(price), 6)
+    except Exception as e:
+        print(f"❌ CoinGecko fallback failed for {coin_symbol}: {e}")
+
     return None
 
-COIN_DESCRIPTIONS = {}
 
 def fetch_coin_description(coin_symbol):
+    if coin_symbol.lower() in COIN_METADATA:
+        return COIN_METADATA[coin_symbol.lower()].get("description", "")
+
     try:
         url = f"https://api.coingecko.com/api/v3/coins/{coin_symbol.lower()}"
         response = requests.get(url)
@@ -122,7 +145,7 @@ def fetch_coin_description(coin_symbol):
             data = response.json()
             desc_html = data.get("description", {}).get("en", "")
             desc = re.sub(r'<.*?>', '', desc_html).strip()
-            return desc[:300]  # Trim to 300 characters
+            return desc[:300]
     except Exception as e:
         print(f"⚠️ Failed to fetch description for {coin_symbol}: {e}")
     return ""
