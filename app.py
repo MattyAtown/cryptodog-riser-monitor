@@ -415,6 +415,40 @@ def simulate_buy():
         "timestamp": now.isoformat()
     })
 
+@app.route("/api/buy-summary", methods=["POST"])
+def buy_summary():
+    data = request.get_json()
+    coin = data.get("coin")
+
+    if coin not in BUY_SESSION:
+        return jsonify({"error": "No active buy session for this coin"}), 400
+
+    session = BUY_SESSION[coin]
+    current_price = fetch_price(coin)
+    if current_price is None:
+        return jsonify({"error": "Current price not available"}), 400
+
+    bought_amount = session["amount"]
+    buy_price = session["buy_price"]
+    buy_time = session["timestamp"]
+
+    # Calculate gain/loss
+    coins_bought = bought_amount / buy_price
+    current_value = coins_bought * current_price
+    difference = round(current_value - bought_amount, 2)
+    percentage = round((difference / bought_amount) * 100, 2)
+
+    return jsonify({
+        "coin": coin.upper(),
+        "initial_investment": bought_amount,
+        "buy_price": buy_price,
+        "current_price": current_price,
+        "current_value": round(current_value, 2),
+        "gain_loss": difference,
+        "percent_change": percentage,
+        "since": buy_time.isoformat()
+    })
+
 @app.route('/thank-you')
 def thank_you():
     return render_template('thank_you.html')
