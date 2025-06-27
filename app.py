@@ -292,10 +292,12 @@ def star_riser_api():
 
 @app.route('/api/price/<coin>')
 def get_price(coin):
-    price_data = fetch_price(coin.upper())
+    price_data = fetch_price(coin.upper())  # This is your own function fetching the price
+    
     if price_data is None:
         return jsonify({"error": "Price not available"}), 404
-    return jsonify({"price": price_data})
+
+    return jsonify({"price": round(price_data, 6)})
 
 @app.route("/api/coin_metadata", methods=["POST"])
 def coin_metadata():
