@@ -29,10 +29,11 @@ STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 from collections import deque, Counter
 
 TOP_RISER_HISTORY = deque(maxlen=50)
-STAR_RISER_HISTORY = deque(maxlen=10)
 LAST_TOP_RISER = None
 LAST_TOP_RISER_TIME = datetime.min
 LAST_STAR_RISER_UPDATE = datetime.min
+BUY_SESSION = {}
+STAR_RISER_HISTORY = deque(maxlen=10)
 
 # Hardcoded verified list of Coinbase USD pairs
 COINS = [
@@ -389,6 +390,30 @@ def coin_info(coin, price, change):
 @app.route("/api/top-riser-history")
 def top_riser_history_api():
     return jsonify(list(TOP_RISER_HISTORY))
+
+@app.route("/api/buy", methods=["POST"])
+def simulate_buy():
+    data = request.get_json()
+    coin = data.get("coin")
+    amount = float(data.get("amount", 0))
+
+    price = fetch_price(coin)
+    if price is None:
+        return jsonify({"error": "Price not available"}), 400
+
+    now = datetime.utcnow()
+    BUY_SESSION[coin] = {
+        "amount": amount,
+        "buy_price": price,
+        "timestamp": now
+    }
+    return jsonify({
+        "status": "buy_confirmed",
+        "coin": coin,
+        "amount": amount,
+        "buy_price": price,
+        "timestamp": now.isoformat()
+    })
 
 @app.route('/thank-you')
 def thank_you():
