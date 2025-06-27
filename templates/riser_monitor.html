@@ -183,6 +183,44 @@
     let lastTopRiserCoin = null;
     let lastStarRiserCoin = null;
 
+    let trackingInterval = null;
+
+    function startTracking() {
+    const coin = document.getElementById("coinSelect").value;
+    const usdAmount = parseFloat(document.getElementById("mockAmount").value);
+
+    if (!coin || isNaN(usdAmount) || usdAmount <= 0) {
+    document.getElementById("trackingResults").innerHTML = "<span style='color:red;'>Please enter a valid amount.</span>";
+    return;
+   }
+
+  async function fetchPrice() {
+    try {
+      const res = await fetch(`/api/price/${coin}`);
+      const data = await res.json();
+
+      const price = parseFloat(data.price);
+      const quantity = usdAmount / price;
+      const output = `
+        <strong>${coin}</strong><br>
+        Current Price: $${price.toFixed(4)}<br>
+        You could buy: ${quantity.toFixed(6)} ${coin}
+      `;
+      document.getElementById("trackingResults").innerHTML = output;
+    } catch (err) {
+      document.getElementById("trackingResults").innerHTML = "<span style='color:red;'>Error fetching price.</span>";
+    }
+   }
+
+    fetchPrice();
+    trackingInterval = setInterval(fetchPrice, 10000);
+   }
+
+    function stopTracking() {
+    clearInterval(trackingInterval);
+    trackingInterval = null;
+    document.getElementById("trackingResults").innerHTML = "<em>Tracking stopped.</em>";
+   }
     function updateHistory(type, data) {
       const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
       const historyArr = type === 'top' ? topHistory : starHistory;
@@ -220,8 +258,7 @@
         tryImage.onload = () => { iconImg.src = tryImage.src; };
         tryImage.onerror = () => { iconImg.src = "/static/coins/generic.png"; };
         tryImage.src = `/static/coins/${lowercaseCoin}.png`;
-        iconImg.src = tryImage.src;
-      }
+        }
 
       fetch(`/api/coin-info/${coin}/${price}/${change}`)
         .then(res => res.json())
