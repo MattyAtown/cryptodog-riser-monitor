@@ -292,6 +292,15 @@ def top_riser_api():
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
 
+@app.route("/api/star-riser")
+def star_riser_api():
+    return jsonify({
+        "coin": STAR_RISER[0],
+        "change": STAR_RISER[1],
+        "price": STAR_RISER[2],
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
+
 @app.route("/api/coin_metadata", methods=["POST"])
 def coin_metadata():
     import re
