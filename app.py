@@ -267,20 +267,23 @@ See you inside!
 
 def resolve_image_path(coin):
     """
-    Resolves local image path for a coin using known folders.
-    Returns the first match or fallback to generic icon.
+    Returns the accessible URL path to the coin image.
+    Searches known folders and falls back to generic image if not found.
     """
-    import os
+    if not coin or coin.lower() in ['no riser', 'no star riser']:
+        return '/static/coins/generic.png'
 
     coin = coin.lower()
-    possible_paths = [
+
+    search_paths = [
         f'static/coins/{coin}.png',
-        f'static/cryptodog_riser_monitor/{coin}.png',
-        'static/coins/generic.png'
+        f'static/cryptodog_riser_monitor/{coin}.png'
     ]
-    for path in possible_paths:
-        if os.path.exists(path):
-            return '/' + path
+
+    for path in search_paths:
+        if os.path.isfile(path):
+            return '/' + path  # URL-relative
+
     return '/static/coins/generic.png'
 
 @app.route("/api/top-riser")
