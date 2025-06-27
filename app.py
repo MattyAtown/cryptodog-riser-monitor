@@ -290,6 +290,13 @@ def star_riser_api():
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
 
+@app.route('/api/price/<coin>')
+def get_price(coin):
+    price_data = fetch_price(coin.upper())
+    if price_data is None:
+        return jsonify({"error": "Price not available"}), 404
+    return jsonify({"price": price_data})
+
 @app.route("/api/coin_metadata", methods=["POST"])
 def coin_metadata():
     import re
