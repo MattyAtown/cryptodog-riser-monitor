@@ -39,12 +39,15 @@
       max-width: 1200px;
     }
     .box {
-      background: rgba(0,0,0,0.7);
-      padding: 20px;
-      width: 300px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px #0ff;
-      text-align: center;
+    width: 180px;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #333;
+    background: #111;
+    border-radius: 10px;
+    box-shadow: 0 0 8px #0ff;
+    }
+
     }
     .box h2 {
       font-size: 1.3em;
@@ -100,18 +103,41 @@
     Tracking Live Signals...
   </div>
 
-  <div class="section">
-    <div class="box" id="topRiserBox">
-      <h2>Top Riser</h2>
-      <div id="topRiserInfo"></div>
-      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
-    </div>
+  <!-- TOP RISER BOX -->
+<div class="box" id="topRiserBox">
+  
+  <!-- Coin Image -->
+  <img id="topRiserIcon" src="/static/coins/generic.png" alt="Top Riser Icon" style="width:60px; margin-bottom: 5px;" />
+  
+  <!-- Coin Info (Name + % + Price + Timestamp) -->
+  <div id="topRiserInfo" style="font-size: 0.9em; margin-bottom: 5px;">
+    <!-- JS will inject: "BTC | +3.20% | $123.4567" + timestamp -->
+  </div>
 
-    <div class="box" id="starRiserBox">
-      <h2>⭐ Star Riser</h2>
-      <div id="starRiserInfo"></div>
-      <img id="starRiserIcon" class="coin-icon" src="" alt="Coin Icon">
-    </div>
+  <!-- Metadata (Name, Category, Description) -->
+  <div id="topRiserMeta" style="font-size: 0.75em; color: #aaa;">
+    <!-- JS will inject this too -->
+  </div>
+
+</div>
+
+    <!-- STAR RISER BOX -->
+<div class="box" id="starRiserBox">
+  
+  <!-- Coin Image -->
+  <img id="starRiserIcon" src="/static/coins/generic.png" alt="Star Riser Icon" style="width:60px; margin-bottom: 5px;" />
+  
+  <!-- Coin Info -->
+  <div id="starRiserInfo" style="font-size: 0.9em; margin-bottom: 5px;">
+    <!-- JS will inject coin info -->
+  </div>
+
+  <!-- Metadata -->
+  <div id="starRiserMeta" style="font-size: 0.75em; color: #aaa;">
+    <!-- JS will inject coin metadata -->
+  </div>
+
+</div>
 
     <div class="box" id="newsBox">
       <h2>📰 Top News</h2>
