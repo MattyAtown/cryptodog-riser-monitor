@@ -163,7 +163,9 @@
   <script>
   const topHistory = [];
   const starHistory = [];
-
+  let lastTopRiserCoin = null;
+  let lastStarRiserCoin = null;
+    
   function updateHistory(type, data) {
     const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
     const historyArr = type === 'top' ? topHistory : starHistory;
@@ -174,40 +176,65 @@
     ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
   }
 
-  async function updateRiser(boxPrefix, data, type = null) {
+async function updateRiser(boxPrefix, data, type = null) {
   let { coin, change, price, timestamp } = data;
 
-  // Set defaults if values are null or undefined
-  coin = coin || "Tracking New Riser";
+  // RULE: Exit early if no valid coin
+  if (!coin || coin === "null" || coin === "No Riser" || coin === "Tracking New Riser") return;
+
+  // RULE: Only update if new coin
+  if (boxPrefix === "topRiser" && lastTopRiserCoin === coin) return;
+  if (boxPrefix === "starRiser" && lastStarRiserCoin === coin) return;
+
+  // Save last known coin
+  if (boxPrefix === "topRiser") lastTopRiserCoin = coin;
+  if (boxPrefix === "starRiser") lastStarRiserCoin = coin;
+
+  // Defaults
   change = change || "0.00";
   price = parseFloat(price);
   timestamp = timestamp || new Date().toLocaleString();
 
-  // Update info text with fallbacks
+  // Update main info
   const infoDiv = document.getElementById(`${boxPrefix}Info`);
   infoDiv.innerHTML = `
     <strong>${coin} | +${change}% | $${!isNaN(price) ? price.toFixed(4) : "0.0000"}</strong>
     <br><small style="color:#ccc;">Updated: ${timestamp}</small>
   `;
 
-  // Handle image fallback if not found
+  // Handle coin image
   const iconImg = document.getElementById(`${boxPrefix}Icon`);
   if (iconImg) {
     const lowercaseCoin = coin.toLowerCase().replace(/\s+/g, '');
-
     const tryImage = new Image();
-    tryImage.onload = () => {
-      iconImg.src = tryImage.src;
-    };
-    tryImage.onerror = () => {
-      iconImg.src = "/static/coins/generic.png";
-    };
-
-    // Attempt paths based on backend storage
+    tryImage.onload = () => { iconImg.src = tryImage.src; };
+    tryImage.onerror = () => { iconImg.src = "/static/coins/generic.png"; };
     tryImage.src = `/static/coins/${lowercaseCoin}.png`;
   }
 
-  // Update history box (if provided)
+  // Coin metadata fetch
+  fetch(`/api/coin-info/${coin}/${price}/${change}`)
+    .then(res => res.json())
+    .then(meta => {
+      const metaBox = document.getElementById(`${boxPrefix}Meta`);
+      if (metaBox) {
+        metaBox.innerHTML = `
+          <div style="font-size: 0.8em; margin-top: 10px;">
+            <strong>${meta.name}</strong><br>
+            Category: ${meta.category}<br>
+            ${meta.description ? meta.description : ''}
+          </div>
+        `;
+      }
+    })
+    .catch(() => {
+      const metaBox = document.getElementById(`${boxPrefix}Meta`);
+      if (metaBox) {
+        metaBox.innerHTML = `<div style="font-size: 0.8em; margin-top: 10px; color: #999;">No additional info available.</div>`;
+      }
+    });
+
+  // Add to history
   if (type) updateHistory(type, data);
 }
 
