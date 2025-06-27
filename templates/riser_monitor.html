@@ -14,6 +14,7 @@
       background-size: cover;
       color: #fff;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
@@ -22,14 +23,17 @@
       background: rgba(0, 0, 0, 0.7);
       border-bottom: 2px solid #0ff;
     }
+
     .header img {
       height: 60px;
     }
+
     h1 {
       font-size: 1.8em;
       color: #0ff;
       text-shadow: 0 0 10px #0ff;
     }
+
     .section {
       display: flex;
       justify-content: center;
@@ -38,14 +42,15 @@
       margin: 30px auto;
       max-width: 1200px;
     }
+
     .box {
-    width: 180px;
-    padding: 12px;
-    text-align: center;
-    border: 1px solid #333;
-    background: #111;
-    border-radius: 10px;
-    box-shadow: 0 0 8px #0ff;
+      width: 220px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #333;
+      background: #111;
+      border-radius: 10px;
+      box-shadow: 0 0 8px #0ff;
     }
 
     .box h2 {
@@ -54,12 +59,14 @@
       text-shadow: 0 0 8px #ff00ff;
       margin-bottom: 10px;
     }
+
     #newsBox ul {
       list-style-type: square;
       text-align: left;
       padding-left: 20px;
       font-size: 0.9em;
     }
+
     .buy-signal {
       background-color: rgba(255, 0, 128, 0.9);
       padding: 10px;
@@ -71,18 +78,22 @@
       border-top: 2px solid #ff00ff;
       border-bottom: 2px solid #ff00ff;
     }
+
     .crypto-face {
       height: 60px;
     }
+
     ul.crypto-history {
       list-style: none;
       padding-left: 0;
       text-align: left;
       font-size: 0.9em;
     }
+
     .crypto-history li {
       margin-bottom: 5px;
     }
+
     .coin-icon {
       width: 40px;
       height: 40px;
@@ -98,51 +109,30 @@
     <img id="dogFace" src="/static/neutral.png" alt="CryptoDog" class="crypto-face" />
   </div>
 
-  <div class="buy-signal" id="buySignalBar">
-    Tracking Live Signals...
-  </div>
+  <div class="buy-signal" id="buySignalBar">Tracking Live Signals...</div>
 
-  <!-- TOP RISER BOX -->
-<div class="box" id="topRiserBox">
-  
-  <!-- Coin Image -->
-  <img id="topRiserIcon" src="/static/coins/generic.png" alt="Top Riser Icon" style="width:60px; margin-bottom: 5px;" />
-  
-  <!-- Coin Info (Name + % + Price + Timestamp) -->
-  <div id="topRiserInfo" style="font-size: 0.9em; margin-bottom: 5px;">
-    <!-- JS will inject: "BTC | +3.20% | $123.4567" + timestamp -->
-  </div>
-
-  <!-- Metadata (Name, Category, Description) -->
-  <div id="topRiserMeta" style="font-size: 0.75em; color: #aaa;">
-    <!-- JS will inject this too -->
-  </div>
-
-</div>
+  <div class="section">
+    <!-- TOP RISER BOX -->
+    <div class="box" id="topRiserBox">
+      <img id="topRiserIcon" src="/static/coins/generic.png" alt="Top Riser Icon" style="width:60px; margin-bottom: 5px;" />
+      <div id="topRiserInfo" style="font-size: 0.9em; margin-bottom: 5px;"></div>
+      <div id="topRiserMeta" style="font-size: 0.75em; color: #aaa;"></div>
+    </div>
 
     <!-- STAR RISER BOX -->
-<div class="box" id="starRiserBox">
-  
-  <!-- Coin Image -->
-  <img id="starRiserIcon" src="/static/coins/generic.png" alt="Star Riser Icon" style="width:60px; margin-bottom: 5px;" />
-  
-  <!-- Coin Info -->
-  <div id="starRiserInfo" style="font-size: 0.9em; margin-bottom: 5px;">
-    <!-- JS will inject coin info -->
-  </div>
+    <div class="box" id="starRiserBox">
+      <img id="starRiserIcon" src="/static/coins/generic.png" alt="Star Riser Icon" style="width:60px; margin-bottom: 5px;" />
+      <div id="starRiserInfo" style="font-size: 0.9em; margin-bottom: 5px;"></div>
+      <div id="starRiserMeta" style="font-size: 0.75em; color: #aaa;"></div>
+    </div>
 
-  <!-- Metadata -->
-  <div id="starRiserMeta" style="font-size: 0.75em; color: #aaa;">
-    <!-- JS will inject coin metadata -->
-  </div>
-
-</div>
-
+    <!-- NEWS -->
     <div class="box" id="newsBox">
       <h2>📰 Top News</h2>
       <ul id="newsList"></ul>
     </div>
 
+    <!-- LEARN -->
     <div class="box">
       <h2>🎓 Learn to Trade with Arnie</h2>
       <p>Sign up to our paid GPT-powered AI mentor program.</p>
@@ -186,134 +176,126 @@
   </div>
 
   <script>
-  const topHistory = [];
-  const starHistory = [];
-  let lastTopRiserCoin = null;
-  let lastStarRiserCoin = null;
-    
-  function updateHistory(type, data) {
-    const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-    const historyArr = type === 'top' ? topHistory : starHistory;
-    const ul = document.getElementById(listId);
-    const entry = `${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)}`;
-    historyArr.unshift(entry);
-    if (historyArr.length > 5) historyArr.pop();
-    ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
-  }
+    const topHistory = [];
+    const starHistory = [];
+    let lastTopRiserCoin = null;
+    let lastStarRiserCoin = null;
 
-async function updateRiser(boxPrefix, data, type = null) {
-  let { coin, change, price, timestamp } = data;
+    function updateHistory(type, data) {
+      const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+      const historyArr = type === 'top' ? topHistory : starHistory;
+      const ul = document.getElementById(listId);
+      const entry = `${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)}`;
+      historyArr.unshift(entry);
+      if (historyArr.length > 5) historyArr.pop();
+      ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
+    }
 
-  // RULE: Exit early if no valid coin
-  if (!coin || coin === "null" || coin === "No Riser" || coin === "Tracking New Riser") return;
+    async function updateRiser(boxPrefix, data, type = null) {
+      let { coin, change, price, timestamp } = data;
 
-  // RULE: Only update if new coin
-  if (boxPrefix === "topRiser" && lastTopRiserCoin === coin) return;
-  if (boxPrefix === "starRiser" && lastStarRiserCoin === coin) return;
+      if (!coin || coin === "null" || coin === "No Riser" || coin === "Tracking New Riser") return;
+      if (boxPrefix === "topRiser" && lastTopRiserCoin === coin) return;
+      if (boxPrefix === "starRiser" && lastStarRiserCoin === coin) return;
 
-  // Save last known coin
-  if (boxPrefix === "topRiser") lastTopRiserCoin = coin;
-  if (boxPrefix === "starRiser") lastStarRiserCoin = coin;
+      if (boxPrefix === "topRiser") lastTopRiserCoin = coin;
+      if (boxPrefix === "starRiser") lastStarRiserCoin = coin;
 
-  // Defaults
-  change = change || "0.00";
-  price = parseFloat(price);
-  timestamp = timestamp || new Date().toLocaleString();
+      change = change || "0.00";
+      price = parseFloat(price);
+      timestamp = timestamp || new Date().toLocaleString();
 
-  // Update main info
-  const infoDiv = document.getElementById(`${boxPrefix}Info`);
-  infoDiv.innerHTML = `
-    <strong>${coin} | +${change}% | $${!isNaN(price) ? price.toFixed(4) : "0.0000"}</strong>
-    <br><small style="color:#ccc;">Updated: ${timestamp}</small>
-  `;
+      const infoDiv = document.getElementById(`${boxPrefix}Info`);
+      infoDiv.innerHTML = `
+        <strong>${coin} | +${change}% | $${!isNaN(price) ? price.toFixed(4) : "0.0000"}</strong>
+        <br><small style="color:#ccc;">Updated: ${timestamp}</small>
+      `;
 
-  // Handle coin image
-  const iconImg = document.getElementById(`${boxPrefix}Icon`);
-  if (iconImg) {
-    const lowercaseCoin = coin.toLowerCase().replace(/\s+/g, '');
-    const tryImage = new Image();
-    tryImage.onload = () => { iconImg.src = tryImage.src; };
-    tryImage.onerror = () => { iconImg.src = "/static/coins/generic.png"; };
-    tryImage.src = `/static/coins/${lowercaseCoin}.png`;
-  }
-
-  // Coin metadata fetch
-  fetch(`/api/coin-info/${coin}/${price}/${change}`)
-    .then(res => res.json())
-    .then(meta => {
-      const metaBox = document.getElementById(`${boxPrefix}Meta`);
-      if (metaBox) {
-        metaBox.innerHTML = `
-          <div style="font-size: 0.8em; margin-top: 10px;">
-            <strong>${meta.name}</strong><br>
-            Category: ${meta.category}<br>
-            ${meta.description ? meta.description : ''}
-          </div>
-        `;
+      const iconImg = document.getElementById(`${boxPrefix}Icon`);
+      if (iconImg) {
+        const lowercaseCoin = coin.toLowerCase().replace(/\s+/g, '');
+        const tryImage = new Image();
+        tryImage.onload = () => { iconImg.src = tryImage.src; };
+        tryImage.onerror = () => { iconImg.src = "/static/coins/generic.png"; };
+        tryImage.src = `/static/coins/${lowercaseCoin}.png`;
+        iconImg.src = tryImage.src;
       }
-    })
-    .catch(() => {
-      const metaBox = document.getElementById(`${boxPrefix}Meta`);
-      if (metaBox) {
-        metaBox.innerHTML = `<div style="font-size: 0.8em; margin-top: 10px; color: #999;">No additional info available.</div>`;
-      }
-    });
 
-  // Add to history
-  if (type) updateHistory(type, data);
-}
+      fetch(`/api/coin-info/${coin}/${price}/${change}`)
+        .then(res => res.json())
+        .then(meta => {
+          const metaBox = document.getElementById(`${boxPrefix}Meta`);
+          if (metaBox) {
+            metaBox.innerHTML = `
+              <div style="font-size: 0.8em; margin-top: 10px;">
+                <strong>${meta.name}</strong><br>
+                Category: ${meta.category}<br>
+                ${meta.description ? meta.description : 'No description available.'}
+              </div>
+            `;
+          }
+        })
+        .catch(() => {
+          const metaBox = document.getElementById(`${boxPrefix}Meta`);
+          if (metaBox) {
+            metaBox.innerHTML = `<div style="font-size: 0.8em; margin-top: 10px; color: #999;">No additional info available.</div>`;
+          }
+        });
 
-  async function fetchTopRiser() {
-    const res = await fetch('/api/top-riser');
-    const data = await res.json();
-    updateRiser('topRiser', data, 'top');
-    updateDogFace(data.coin);
-  }
+      if (type) updateHistory(type, data);
+    }
 
-  async function fetchStarRiser() {
-    const res = await fetch('/api/star-riser');
-    const data = await res.json();
-    updateRiser('starRiser', data, 'star');
-  }
+    async function fetchTopRiser() {
+      const res = await fetch('/api/top-riser');
+      const data = await res.json();
+      updateRiser('topRiser', data, 'top');
+      updateDogFace(data.coin);
+    }
 
-  async function fetchNews() {
-    const res = await fetch('/api/crypto-news');
-    const data = await res.json();
-    const list = document.getElementById("newsList");
-    list.innerHTML = "";
-    data.slice(0, 5).forEach(item => {
-      const li = document.createElement("li");
-      li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
-      list.appendChild(li);
-    });
-  }
+    async function fetchStarRiser() {
+      const res = await fetch('/api/star-riser');
+      const data = await res.json();
+      updateRiser('starRiser', data, 'star');
+    }
 
-  function updateDogFace(coin) {
-    const img = document.getElementById("dogFace");
-    img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
-  }
+    async function fetchNews() {
+      const res = await fetch('/api/crypto-news');
+      const data = await res.json();
+      const list = document.getElementById("newsList");
+      list.innerHTML = "";
+      data.slice(0, 5).forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+        list.appendChild(li);
+      });
+    }
 
-  function rotateBannerMessages() {
-    const messages = [
-      "Crypto surges to all-time highs – more to come?",
-      "XRP and SOL showing strong momentum with lower risk.",
-      "Caution: Meme coins are highly manipulated.",
-      "Sign up to learn minimum-risk, high-reward strategies."
-    ];
-    let index = 0;
-    setInterval(() => {
-      document.getElementById("buySignalBar").innerText = messages[index];
-      index = (index + 1) % messages.length;
-    }, 8000);
-  }
+    function updateDogFace(coin) {
+      const img = document.getElementById("dogFace");
+      img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
+    }
 
-  fetchTopRiser();
-  fetchStarRiser();
-  fetchNews();
-  rotateBannerMessages();
-  setInterval(fetchTopRiser, 5000);
-  setInterval(fetchStarRiser, 5000);
-  setInterval(fetchNews, 30000);
-</script>
+    function rotateBannerMessages() {
+      const messages = [
+        "Crypto surges to all-time highs – more to come?",
+        "XRP and SOL showing strong momentum with lower risk.",
+        "Caution: Meme coins are highly manipulated.",
+        "Sign up to learn minimum-risk, high-reward strategies."
+      ];
+      let index = 0;
+      setInterval(() => {
+        document.getElementById("buySignalBar").innerText = messages[index];
+        index = (index + 1) % messages.length;
+      }, 8000);
+    }
+
+    fetchTopRiser();
+    fetchStarRiser();
+    fetchNews();
+    rotateBannerMessages();
+    setInterval(fetchTopRiser, 5000);
+    setInterval(fetchStarRiser, 5000);
+    setInterval(fetchNews, 30000);
+  </script>
 </body>
 </html>
