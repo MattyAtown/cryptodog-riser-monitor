@@ -196,6 +196,11 @@ async function simulateBuy() {
   const amount = parseFloat(document.getElementById("mockAmount").value);
   const buyResults = document.getElementById("buyResults");
 
+  if (!coin || isNaN(amount) || amount <= 0) {
+    buyResults.innerHTML = "<span style='color:red;'>Please enter a valid amount.</span>";
+    return;
+  }
+
   const res = await fetch(`/api/price/${coin}`);
   const data = await res.json();
   const price = data.price;
@@ -209,7 +214,13 @@ async function simulateBuy() {
     buyPrice: price
   };
 
-  buyResults.innerText = `✅ Purchase Recorded!\nYou bought ${cryptoAmount} ${coin} for $${amount} @ $${price.toFixed(4)}`;
+  buyResults.innerText = `Current Price: $${price.toFixed(4)}\nYou bought ${cryptoAmount} ${coin} for $${amount}`;
+
+  // ✅ Start tracking after fake buy
+  clearInterval(trackingInterval); // avoid overlapping intervals
+  checkBuy(); // show first value
+  trackingInterval = setInterval(checkBuy, 10000); // then every 10s
+}
 
   // Immediately check and start tracking
   checkBuy();
