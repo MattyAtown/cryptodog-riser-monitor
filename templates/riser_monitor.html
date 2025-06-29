@@ -145,34 +145,25 @@
     </div>
   </div>
 
-  <div class="section">
-    <div class="box" style="min-width: 320px; min-height: 200px;">
-      <h2>📈 Top Riser History</h2>
-      <ul class="crypto-history" id="topRiserHistory"></ul>
-    </div>
-    <div class="box" style="min-width: 320px; min-height: 200px;">
-      <h2>🌟 Star Riser History</h2>
-      <ul class="crypto-history" id="starRiserHistory"></ul>
-    </div>
+<div class="section">
+  <div class="box">
+    <h2>💸 Buy Crypto Simulator</h2>
+    
+    <select id="coinSelect">
+      <option value="BTC">BTC</option>
+      <option value="ETH">ETH</option>
+      <option value="SOL">SOL</option>
+    </select><br>
+
+    <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
+
+    <button onclick="simulateBuy()">Buy & Track</button>
+    <button onclick="stopTracking()">Stop</button>
+
+    <div id="buyResults" style="color: lime; font-size: 0.9em; margin-top: 10px;"></div>
+    <div class="results" id="trackingResults" style="margin-top:10px;"></div> 
   </div>
-
-  <div class="section">
-    <div class="box">
-      <h2>💸 Buy Crypto Simulator</h2>
-      <select id="coinSelect">
-        <option value="BTC">BTC</option>
-        <option value="ETH">ETH</option>
-        <option value="SOL">SOL</option>
-      </select><br>
-      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
-      <button onclick="simulateBuy()">Buy & Track</button>
-      <button onclick="stopTracking()">Stop</button>
-
-     <div id="buyResults" style="color: lime; font-size: 0.9em; margin-top: 10px;"></div>
-      <button onclick="startTracking()">Start</button>
-      <button onclick="stopTracking()">Stop</button>
-      <div class="results" id="trackingResults" style="margin-top:10px;"></div>
-    </div>
+</div>
 
     <div class="box">
       <h2>📊 Live Bitcoin Chart</h2>
@@ -216,18 +207,9 @@ async function simulateBuy() {
 
   buyResults.innerText = `Current Price: $${price.toFixed(4)}\nYou bought ${cryptoAmount} ${coin} for $${amount}`;
 
-  // ✅ Start tracking after fake buy
-  clearInterval(trackingInterval); // avoid overlapping intervals
-  checkBuy(); // show first value
-  trackingInterval = setInterval(checkBuy, 10000); // then every 10s
-}
-
-  // Immediately check and start tracking
-  checkBuy();
-  startTracking();
-}
-
-  buyResults.innerText = `Current Price: $${price.toFixed(4)}\nYou bought ${cryptoAmount} ${coin} for $${amount}`;
+  clearInterval(trackingInterval); // stop old loop if any
+  checkBuy();                      // show first result
+  trackingInterval = setInterval(checkBuy, 10000); // track every 10s
 }
 
 async function checkBuy() {
