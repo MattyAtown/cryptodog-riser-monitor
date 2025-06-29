@@ -296,6 +296,30 @@ def resolve_image_path(coin):
 
     return '/static/coins/generic.png'
 
+@app.route('/subscribe', methods=['GET', 'POST'])
+def subscribe():
+    if request.method == 'POST':
+        tier = request.form.get('tier')
+        session['subscription'] = tier
+
+        # ✅ If it's Tier 1, skip payment entirely
+        if tier == 'Tier 1':
+            session['verified'] = True
+            flash('✅ Tier 1 Activated! Start your free course.', 'success')
+            return redirect('/tier1')
+
+        # 🔒 For paid tiers, require payment method
+        payment_method = request.form.get('payment')
+        if not payment_method:
+            flash('❌ Please select a payment method.', 'error')
+            return redirect('/subscribe')
+
+        session['payment_method'] = payment_method
+        return redirect('/payment_crypto')
+
+    # Default GET request
+    return render_template('subscribe.html')
+
 @app.route("/api/top-riser")
 def top_riser_api():
     return jsonify({
