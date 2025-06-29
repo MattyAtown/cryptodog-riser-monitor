@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tier 1: Crypto Basics | CryptoDog Academy</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
@@ -44,13 +44,31 @@
     }
 
     .box {
-      background: rgba(17, 17, 17, 0.8);
+      background: rgba(17, 17, 17, 0.85);
       border: 1px solid #333;
       border-radius: 12px;
       box-shadow: 0 0 10px #0ff;
       padding: 20px;
       font-size: 1.1em;
-      min-height: 100px;
+      min-height: 120px;
+      position: relative;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .progress {
+      text-align: right;
+      font-size: 0.9em;
+      color: #0ff;
     }
 
     .response-buttons button {
@@ -81,16 +99,17 @@
 </head>
 <body>
   <div class="header">
-    <img src="/static/logo.png" alt="CryptoDog Logo">
+    <img src="/static/logo.png" alt="CryptoDog Logo" />
     <h1>CryptoDog Academy: Tier 1 Free Trial</h1>
-    <img src="/static/neutral.png" alt="Dog Face" height="60">
+    <img src="/static/neutral.png" alt="Dog Face" height="60" />
   </div>
 
   <div class="section">
+    <div class="progress" id="progressBar">Step 1 of 3</div>
     <div class="box" id="questionBox"></div>
     <div class="box" id="answerBox"></div>
     <div class="response-buttons" id="responseButtons" style="display:none">
-      <button onclick="handleResponse(true)">✅ Makes Sense</button>
+      <button id="yesBtn" onclick="handleResponse(true)">✅ Makes Sense</button>
       <button onclick="handleResponse(false)">❌ Don’t Understand</button>
     </div>
   </div>
@@ -119,22 +138,33 @@
     const questionBox = document.getElementById("questionBox");
     const answerBox = document.getElementById("answerBox");
     const responseButtons = document.getElementById("responseButtons");
+    const progressBar = document.getElementById("progressBar");
+    const yesBtn = document.getElementById("yesBtn");
 
     function typeText(element, text, callback) {
       element.innerHTML = "";
       let i = 0;
+      const cursor = document.createElement("span");
+      cursor.classList.add("cursor");
+      cursor.textContent = "|";
+      element.appendChild(cursor);
+
       const interval = setInterval(() => {
-        element.innerHTML += text.charAt(i);
-        i++;
-        if (i >= text.length) {
+        if (i < text.length) {
+          element.innerHTML = text.substring(0, i + 1);
+          element.appendChild(cursor);
+          i++;
+        } else {
           clearInterval(interval);
+          cursor.remove();
           if (callback) callback();
         }
-      }, 40);
+      }, 30);
     }
 
     function loadStep(index) {
       responseButtons.style.display = "none";
+      progressBar.textContent = `Step ${index + 1} of ${flow.length}`;
       typeText(questionBox, flow[index].question, () => {
         setTimeout(() => {
           typeText(answerBox, flow[index].answer, () => {
@@ -145,14 +175,15 @@
     }
 
     function handleResponse(understood) {
+      responseButtons.style.display = "none";
       if (understood) {
         currentStep++;
         if (currentStep < flow.length) {
           loadStep(currentStep);
         } else {
+          progressBar.textContent = "✅ All Steps Complete";
           typeText(questionBox, "🎉 You’ve completed Tier 1: Crypto Basics!", null);
           answerBox.innerHTML = "Come back soon to unlock Tier 2 and dive deeper into trading!";
-          responseButtons.style.display = "none";
         }
       } else {
         typeText(answerBox, "Think of crypto like internet money. It’s stored safely, can be sent anywhere, and no one can change it without permission.", () => {
