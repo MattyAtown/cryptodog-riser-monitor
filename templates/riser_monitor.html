@@ -300,16 +300,17 @@
       }, 8000);
     }
 
-    fetchTopRiser();
+       fetchTopRiser();
     fetchStarRiser();
     fetchNews();
     rotateBannerMessages();
     setInterval(fetchTopRiser, 5000);
     setInterval(fetchStarRiser, 5000);
     setInterval(fetchNews, 30000);
-  <script>
-    
-  <script>
+</script> <!-- ✅ This closes your main logic script correctly -->
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
   let trackingInterval = null;
 
   function startTracking() {
@@ -329,7 +330,7 @@
           Tracking live...
         `;
 
-        if (trackingInterval) clearInterval(trackingInterval);
+        if (trackingInterval) clearInterval(trackingInterval); // Prevent duplicates
 
         trackingInterval = setInterval(() => {
           fetch("/api/buy-summary", {
@@ -350,7 +351,7 @@
               `;
             }
           });
-        }, 5000);
+        }, 5000); // Live tracking every 5s
       }
     });
   }
@@ -361,15 +362,19 @@
     document.getElementById("trackingResults").innerHTML += "<br>❌ Tracking Stopped.";
   }
 
-  // Add PEPE to dropdown (if it's not already present)
+  // ✅ Dynamically add PEPE to dropdown if needed
   const coinSelect = document.getElementById("coinSelect");
-  if (![...coinSelect.options].some(opt => opt.value === "PEPE")) {
+  if (coinSelect && ![...coinSelect.options].some(opt => opt.value === "PEPE")) {
     const opt = document.createElement("option");
     opt.value = "PEPE";
     opt.innerText = "PEPE";
     coinSelect.appendChild(opt);
   }
-</script>
 
+  // ✅ Expose start/stop globally for button use
+  window.startTracking = startTracking;
+  window.stopTracking = stopTracking;
+});
+</script>
 </body>
 </html>
