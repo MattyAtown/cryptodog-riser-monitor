@@ -1,79 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Subscribe to Learn with Arnie | CryptoDog</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Orbitron', sans-serif;
-      background: url('/static/cyberpunk-bitcoin-illustration.png') no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 700px;
-      margin: 60px auto;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px #0ff;
-    }
-    h2 {
-      text-align: center;
-      color: #0ff;
-      text-shadow: 0 0 10px #0ff;
-    }
-    label, select, input[type="radio"] {
-      display: block;
-      margin: 15px auto;
-      font-size: 1em;
-    }
-    select, input[type="submit"] {
-      padding: 10px;
-      width: 100%;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      font-size: 1em;
-    }
-    .payment-options label {
-      margin-top: 10px;
-    }
-    .description {
-      font-size: 0.9em;
-      color: #ccc;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Choose Your Plan</h2>
-    <form method="post" action="/subscribe">
-      <label for="tier">Select Tier:</label>
-      <select id="tier" name="tier" required>
-        <option value="Tier 1">Tier 1 - $5 USD - The Basics of Crypto</option>
-        <option value="Tier 2">Tier 2 - $10 USD - Types of Trading Methods</option>
-        <option value="Tier 3">Tier 3 - $20 USD - Choose Your Trading Style</option>
-        <option value="Tier 4">Tier 4 - $25 USD - Master the Process</option>
-        <option value="Full Access">CryptoDog Full Access - $100 Initial + $10/mo</option>
-      </select>
+@app.route('/subscribe', methods=['GET', 'POST'])
+def subscribe():
+    if request.method == 'POST':
+        tier = request.form.get('tier')
+        session['subscription'] = tier
 
-      <div class="payment-options">
-        <label>Choose Payment Method:</label>
-        <label><input type="radio" name="payment" value="crypto" required> Crypto Payment (wallet address)</label>
-        <label><input type="radio" name="payment" value="card"> Secure Card Payment</label>
-        <label><input type="radio" name="payment" value="bank"> Bank Transfer (PayID)</label>
-      </div>
+        # If it's Tier 1, skip payment
+        if tier == 'Tier 1':
+            session['verified'] = True
+            flash('✅ Tier 1 Activated! Start your free course.', 'success')
+            return redirect('/tier1')
 
-      <input type="submit" value="Continue to Payment">
-    </form>
+        # Else, redirect to payment page
+        payment_method = request.form.get('payment')
+        if not payment_method:
+            flash('❌ Please select a payment method.', 'error')
+            return redirect('/subscribe')
 
-    <p class="description">
-      ⚡ Want the GOLD STANDARD? The Full Access plan includes daily tips, style-tailored automation, and a premium AI BOT build-out.
-    </p>
-  </div>
-</body>
-</html>
+        session['payment_method'] = payment_method
+        return redirect('/payment_crypto')  # or wherever payment flows next
+
+    return render_template('subscribe.html')
