@@ -452,6 +452,7 @@ def buy_summary():
 @app.route('/thank-you')
 def thank_you():
     session['verified'] = True
+    session['subscription'] = 'Tier 1'  # 👈 auto-assign Tier 1 access after verifying
     return render_template('thank_you.html')
 
 @app.route('/subscribe', methods=['GET', 'POST'])
