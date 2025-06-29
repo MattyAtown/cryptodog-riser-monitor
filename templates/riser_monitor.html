@@ -14,7 +14,6 @@
       background-size: cover;
       color: #fff;
     }
-
     .header {
       display: flex;
       justify-content: space-between;
@@ -23,17 +22,14 @@
       background: rgba(0, 0, 0, 0.7);
       border-bottom: 2px solid #0ff;
     }
-
     .header img {
       height: 60px;
     }
-
     h1 {
       font-size: 1.8em;
       color: #0ff;
       text-shadow: 0 0 10px #0ff;
     }
-
     .section {
       display: flex;
       justify-content: center;
@@ -42,31 +38,26 @@
       margin: 30px auto;
       max-width: 1200px;
     }
-
     .box {
-      width: 220px;
-      padding: 12px;
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      width: 300px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #0ff;
       text-align: center;
-      border: 1px solid #333;
-      background: #111;
-      border-radius: 10px;
-      box-shadow: 0 0 8px #0ff;
     }
-
     .box h2 {
       font-size: 1.3em;
       color: #ff00ff;
       text-shadow: 0 0 8px #ff00ff;
       margin-bottom: 10px;
     }
-
     #newsBox ul {
       list-style-type: square;
       text-align: left;
       padding-left: 20px;
       font-size: 0.9em;
     }
-
     .buy-signal {
       background-color: rgba(255, 0, 128, 0.9);
       padding: 10px;
@@ -78,22 +69,18 @@
       border-top: 2px solid #ff00ff;
       border-bottom: 2px solid #ff00ff;
     }
-
     .crypto-face {
       height: 60px;
     }
-
     ul.crypto-history {
       list-style: none;
       padding-left: 0;
       text-align: left;
       font-size: 0.9em;
     }
-
     .crypto-history li {
       margin-bottom: 5px;
     }
-
     .coin-icon {
       width: 40px;
       height: 40px;
@@ -109,32 +96,28 @@
     <img id="dogFace" src="/static/neutral.png" alt="CryptoDog" class="crypto-face" />
   </div>
 
-  <div class="buy-signal" id="buySignalBar">Tracking Live Signals...</div>
-
-  <div class="section">
-    <!-- TOP RISER BOX -->
-  <div class="box" id="topRiserBox">
-    <h2 class="riser-title">Top Riser</h2>
-    <img id="topRiserIcon" src="/static/coins/generic.png" alt="Top Riser Icon" style="width:60px; margin-bottom: 5px;" />
-    <div id="topRiserInfo" style="font-size: 0.9em; margin-bottom: 5px;"></div>
-    <div id="topRiserMeta" style="font-size: 0.75em; color: #aaa;"></div>
-   </div>
-
-    <!-- STAR RISER BOX -->
-  <div class="box" id="starRiserBox">
-    <h2 class="riser-title">Star Riser</h2>
-    <img id="starRiserIcon" src="/static/coins/generic.png" alt="Star Riser Icon" style="width:60px; margin-bottom: 5px;" />
-    <div id="starRiserInfo" style="font-size: 0.9em; margin-bottom: 5px;"></div>
-    <div id="starRiserMeta" style="font-size: 0.75em; color: #aaa;"></div>
+  <div class="buy-signal" id="buySignalBar">
+    Tracking Live Signals...
   </div>
 
-    <!-- NEWS -->
+  <div class="section">
+    <div class="box" id="topRiserBox">
+      <h2>Top Riser</h2>
+      <div id="topRiserInfo"></div>
+      <img id="topRiserIcon" class="coin-icon" src="" alt="Coin Icon">
+    </div>
+
+    <div class="box" id="starRiserBox">
+      <h2>⭐ Star Riser</h2>
+      <div id="starRiserInfo"></div>
+      <img id="starRiserIcon" class="coin-icon" src="" alt="Coin Icon">
+    </div>
+
     <div class="box" id="newsBox">
       <h2>📰 Top News</h2>
       <ul id="newsList"></ul>
     </div>
 
-    <!-- LEARN -->
     <div class="box">
       <h2>🎓 Learn to Trade with Arnie</h2>
       <p>Sign up to our paid GPT-powered AI mentor program.</p>
@@ -164,11 +147,7 @@
         <option value="ETH">ETH</option>
         <option value="SOL">SOL</option>
       </select><br>
-      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br
-      <button onclick="simulateBuy()">Fake Buy</button>
-      <button onclick="checkBuy()">Check Gains</button>
-
-<div id="buyResults" style="color: lime; font-size: 0.9em; margin-top: 10px;"></div>
+      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
       <button onclick="startTracking()">Start</button>
       <button onclick="stopTracking()">Stop</button>
       <div class="results" id="trackingResults" style="margin-top:10px;"></div>
@@ -182,129 +161,39 @@
   </div>
 
   <script>
-  const topHistory = [];
-  const starHistory = [];
-  let lastTopRiserCoin = null;
-  let lastStarRiserCoin = null;
-  let trackingInterval = null;
+    const topHistory = [];
+    const starHistory = [];
 
-  // 👇 NEW - Buy Simulator Tracking
-  let sessionBuyData = null;
-
-async function simulateBuy() {
-  const coin = document.getElementById("coinSelect").value;
-  const amount = parseFloat(document.getElementById("mockAmount").value);
-  const buyResults = document.getElementById("buyResults");
-
-  const res = await fetch(/api/price/${coin});
-  const data = await res.json();
-  const price = data.price;
-
-  const cryptoAmount = (amount / price).toFixed(6);
-
-  sessionBuyData = {
-    coin,
-    usdSpent: amount,
-    unitsBought: parseFloat(cryptoAmount),
-    buyPrice: price
-  };
-
-  buyResults.innerText = Current Price: $${price.toFixed(4)}\nYou bought ${cryptoAmount} ${coin} for $${amount};
-}
-
-async function checkBuy() {
-  const resultBox = document.getElementById("trackingResults");
-
-  if (!sessionBuyData) {
-    resultBox.innerText = "No fake purchase found. Please click 'Fake Buy' first.";
-    return;
-  }
-
-  const { coin, unitsBought, usdSpent } = sessionBuyData;
-
-  const res = await fetch(/api/price/${coin});
-  const data = await res.json();
-  const currentPrice = data.price;
-
-  const currentValue = currentPrice * unitsBought;
-  const difference = currentValue - usdSpent;
-  const profitLoss = difference.toFixed(2);
-  const change = (difference >= 0) ? 🟢 Profit: $${profitLoss} : 🔴 Loss: $${Math.abs(profitLoss)};
-
-  resultBox.innerText = 🕒 Current Value of Your ${unitsBought} ${coin}: $${currentValue.toFixed(2)}\n💰 ${change};
-}
-
-    fetchPrice();
-    trackingInterval = setInterval(fetchPrice, 10000);
-   }
-
-    function stopTracking() {
-    clearInterval(trackingInterval);
-    trackingInterval = null;
-    document.getElementById("trackingResults").innerHTML = "<em>Tracking stopped.</em>";
-   }
     function updateHistory(type, data) {
-      const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
-      const historyArr = type === 'top' ? topHistory : starHistory;
-      const ul = document.getElementById(listId);
-      const entry = ${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)};
-      historyArr.unshift(entry);
-      if (historyArr.length > 5) historyArr.pop();
-      ul.innerHTML = historyArr.map(i => <li>${i}</li>).join('');
-    }
+  const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
+  const historyArr = type === 'top' ? topHistory : starHistory;
+  const ul = document.getElementById(listId);
+  const entry = `${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)}`;
+  historyArr.unshift(entry);
+  if (historyArr.length > 5) historyArr.pop();
+  ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
+}
 
     async function updateRiser(boxPrefix, data, type = null) {
-      let { coin, change, price, timestamp } = data;
+  const { coin, change, price, timestamp } = data;
+  const infoDiv = document.getElementById(`${boxPrefix}Info`);
+  const priceNum = parseFloat(price);
 
-      if (!coin || coin === "null" || coin === "No Riser" || coin === "Tracking New Riser") return;
-      if (boxPrefix === "topRiser" && lastTopRiserCoin === coin) return;
-      if (boxPrefix === "starRiser" && lastStarRiserCoin === coin) return;
+  infoDiv.innerHTML = priceNum && !isNaN(priceNum)
+    ? `<strong>${coin} | +${change}% | $${priceNum.toFixed(4)}</strong><br><small style="color:#ccc;">Updated: ${timestamp}</small>`
+    : `<strong>${coin} | +${change}% | $0.0000</strong><br><small style="color:#ccc;">Updated: ${timestamp}</small>`;
 
-      if (boxPrefix === "topRiser") lastTopRiserCoin = coin;
-      if (boxPrefix === "starRiser") lastStarRiserCoin = coin;
+  const iconImg = document.getElementById(`${boxPrefix}Icon`);
+  if (iconImg) {
+    const lowercaseCoin = coin.toLowerCase();
+    const tryImage = new Image();
+    tryImage.onload = () => iconImg.src = tryImage.src;
+    tryImage.onerror = () => iconImg.src = /static/coins/generic.png;
+    tryImage.src = `/static/coins/${lowercaseCoin}.png`;
+  }
 
-      change = change || "0.00";
-      price = parseFloat(price);
-      timestamp = timestamp || new Date().toLocaleString();
-
-      const infoDiv = document.getElementById(${boxPrefix}Info);
-      infoDiv.innerHTML = 
-        <strong>${coin} | +${change}% | $${!isNaN(price) ? price.toFixed(4) : "0.0000"}</strong>
-        <br><small style="color:#ccc;">Updated: ${timestamp}</small>
-      ;
-
-      const iconImg = document.getElementById(${boxPrefix}Icon);
-      if (iconImg) {
-        const lowercaseCoin = coin.toLowerCase().replace(/\s+/g, '');
-        const tryImage = new Image();
-        tryImage.onload = () => { iconImg.src = tryImage.src; };
-        tryImage.onerror = () => { iconImg.src = "/static/coins/generic.png"; };
-        tryImage.src = /static/coins/${lowercaseCoin}.png;
-        }
-
-      fetch(/api/coin-info/${coin}/${price}/${change})
-        .then(res => res.json())
-        .then(meta => {
-          const metaBox = document.getElementById(${boxPrefix}Meta);
-          if (metaBox) {
-            metaBox.innerHTML = 
-              <div style="font-size: 0.8em; margin-top: 10px;">
-                <strong>${meta.name}</strong><br>
-                Category: ${meta.category}<br>
-                ${meta.description ? meta.description : 'No description available.'}
-              </div>
-            ;
-          }
-        })
-        .catch(() => {
-          const metaBox = document.getElementById(${boxPrefix}Meta);
-          if (metaBox) {
-            metaBox.innerHTML = <div style="font-size: 0.8em; margin-top: 10px; color: #999;">No additional info available.</div>;
-          }
-        });
-
-      if (type) updateHistory(type, data);
-    }
+  if (type) updateHistory(type, data);
+}
 
     async function fetchTopRiser() {
       const res = await fetch('/api/top-riser');
@@ -320,17 +209,16 @@ async function checkBuy() {
     }
 
     async function fetchNews() {
-      const res = await fetch('/api/crypto-news');
-      const data = await res.json();
-      const list = document.getElementById("newsList");
-      list.innerHTML = "";
-      data.slice(0, 5).forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = <a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>;
-        list.appendChild(li);
-      });
-    }
-
+  const res = await fetch('/api/crypto-news');
+  const data = await res.json();
+  const list = document.getElementById("newsList");
+  list.innerHTML = "";
+  data.slice(0, 5).forEach(item => {
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+    list.appendChild(li);
+  });
+}
     function updateDogFace(coin) {
       const img = document.getElementById("dogFace");
       img.src = (!coin || coin === "No Riser") ? "/static/angry.png" : "/static/excited.png";
@@ -338,11 +226,10 @@ async function checkBuy() {
 
     function rotateBannerMessages() {
       const messages = [
-        "Pay attention to Bitcoin, the decent coins follow at higher percentage swings",
-        "No need to panic, if you read the daily news, you can see what is coming.",
-        "Be cautious around Meme coins, high risk, often controlled, many fall victim but some get lucky.",
-        "Sign up to to Arnie Trade School - learn minimum-risk, high-reward strategies.",
-        "Try the Virtual Money Investment calculator, it shows you what you could have if you did.",
+        "Crypto surges to all-time highs – more to come?",
+        "XRP and SOL showing strong momentum with lower risk.",
+        "Caution: Meme coins are highly manipulated.",
+        "Sign up to learn minimum-risk, high-reward strategies."
       ];
       let index = 0;
       setInterval(() => {
