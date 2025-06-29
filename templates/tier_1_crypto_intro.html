@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tier 1: What is Crypto?</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #0a0a0a;
+      color: #ffffff;
+      padding: 20px;
+    }
+    .card {
+      background-color: #111;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #00ffff66;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    h1, h2 {
+      color: #00ffff;
+      text-shadow: 0 0 6px #0ff;
+    }
+    .response-box {
+      margin-top: 20px;
+    }
+    button {
+      background-color: #00ffff;
+      color: #000;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #00cccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Tier 1: Crypto Trading Basics</h1>
+    <h2 id="questionTitle">What is Crypto?</h2>
+    <p id="explanation">
+      Crypto is digital money that runs without a central bank, using a technology called blockchain.
+      Instead of trusting one big system (like a bank), people agree on what's real using math, code,
+      and network consensus.
+    </p>
+
+    <div class="response-box">
+      <p><strong>Does that make sense?</strong></p>
+      <button onclick="handleResponse(true)">Yes</button>
+      <button onclick="handleResponse(false)">No</button>
+    </div>
+
+    <div id="nextStep" style="margin-top: 20px;"></div>
+  </div>
+
+  <script>
+    let retryCount = 0;
+
+    function handleResponse(understood) {
+      const nextStep = document.getElementById("nextStep");
+      const questionTitle = document.getElementById("questionTitle");
+      const explanation = document.getElementById("explanation");
+
+      if (understood) {
+        // Proceed to next step
+        questionTitle.innerText = "What is Blockchain?";
+        explanation.innerText = "Blockchain is like a shared online notebook where every transaction is written down and can't be changed. It's public, permanent, and updated by the network, not a company or government.";
+        nextStep.innerHTML = `<p><strong>Does that make sense?</strong><br><button onclick="handleSecondResponse(true)">Yes</button><button onclick="handleSecondResponse(false)">No</button></p>`;
+      } else {
+        retryCount++;
+        if (retryCount === 1) {
+          explanation.innerText = "Think of crypto like online Lego bricks. Each block holds info like 'Matt sent 1 coin to Sarah.' When many people agree that the block is legit, it gets locked into the chain. That’s what keeps it fair — without a bank.";
+        } else {
+          explanation.innerText = "Crypto = digital money. Instead of banks keeping score, everyone keeps a copy. It's like Google Docs vs Word files: live, shared, uneditable history.";
+        }
+      }
+    }
+
+    function handleSecondResponse(understood) {
+      const nextStep = document.getElementById("nextStep");
+      const questionTitle = document.getElementById("questionTitle");
+      const explanation = document.getElementById("explanation");
+
+      if (understood) {
+        questionTitle.innerText = "Why is Crypto Potentially a Good Investment?";
+        explanation.innerText = "Crypto has shown massive growth in short periods. It offers access to global markets, decentralized ownership, and alternatives to traditional finance. But prices are volatile and can fall sharply too.";
+        nextStep.innerHTML = `<p><strong>Want to continue to the next topic?</strong><br><button onclick="alert('Great! Coming soon...')">Yes</button><button onclick="alert('Okay, you can return anytime.')">No</button></p>`;
+      } else {
+        explanation.innerText = "Imagine a blockchain like a notebook everyone can write in, but no one can erase. Once a transaction is recorded, it stays visible and verified forever by the community. That's the power behind crypto.";
+      }
+    }
+  </script>
+</body>
+</html>
