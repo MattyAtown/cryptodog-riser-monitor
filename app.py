@@ -451,9 +451,12 @@ def buy_summary():
 
 @app.route('/thank-you')
 def thank_you():
-    session['verified'] = True
-    session['subscription'] = 'Tier 1'  # 👈 auto-assign Tier 1 access after verifying
-    return render_template('thank_you.html')
+    if 'user_email' not in session:
+        return redirect('/signup')  # Or login page if more appropriate
+
+    # Only allow if verified and on Tier 1
+    if session.get('subscription') != 'Tier 1' or not session.get('verified'):
+        return redirect('/subscribe')
 
 @app.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
