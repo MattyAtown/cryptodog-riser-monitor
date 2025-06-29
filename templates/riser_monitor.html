@@ -144,37 +144,32 @@
     </div>
 
   <div class="box">
-  {% if not session.get('user_email') %}
-    <!-- NOT LOGGED IN -->
-    <h2>🎓 Learn to Trade with Arnie</h2>
-    <p>Sign up to our GPT-powered mentor program.</p>
-    <p><strong>Start with a Free Trial – Tier 1</strong></p>
-    <a href="/signup" style="text-decoration: none;">
-      <button>Sign Up for Arnie</button>
-    </a>
-
-  {% elif session.get('user_email') and session.get('subscription') == 'Tier 1' and session.get('verified') == True %}
-    <!-- LOGGED IN + VERIFIED + ON FREE TIER -->
-    <h2>🎓 Welcome to Tier 1</h2>
-    <p>You're on the Free Trial: <strong>Crypto Trading Basics</strong>.</p>
-    <a href="/tier1" style="text-decoration: none;">
-      <button>Start Learning</button>
-    </a>
-
-  {% elif session.get('user_email') %}
-    <!-- LOGGED IN BUT NOT VERIFIED OR NO TIER SELECTED -->
-    <h2>🎓 Unlock Your Crypto Journey</h2>
-    <p>You’re logged in as <strong>{{ session['user_email'] }}</strong></p>
-    <form action="/subscribe" method="POST">
-      <select name="tier">
-        <option value="Tier 1">Free Trial - Entry to Crypto</option>
-        <option value="Tier 2">Technical Analysis Tools</option>
-        <option value="Tier 3">AiM Coaching & Alerts</option>
-      </select><br><br>
-      <button type="submit">Activate Tier</button>
-    </form>
-  {% endif %}
-</div>
+  {% if session.get('user_email') and session.get('subscription') == 'Tier 1' and session.get('verified') %}
+  <h2>🎓 Welcome to Tier 1</h2>
+  <p>You’re on the Free Trial: <strong>Crypto Trading Basics</strong>.</p>
+  <a href="/tier1" style="text-decoration: none;">
+    <button>Start Learning</button>
+  </a>
+{% elif session.get('user_email') %}
+  <h2>🎓 Unlock Your Crypto Journey</h2>
+  <p>You’re logged in as <strong>{{ session['user_email'] }}</strong></p>
+  <form action="/subscribe" method="POST">
+    <select name="tier" required>
+      <option value="Tier 1">Free Trial - Entry to Crypto</option>
+      <option value="Tier 2">Technical Analysis Tools</option>
+      <option value="Tier 3">AiM Coaching & Alerts</option>
+    </select>
+    <br><br>
+    <button type="submit">Activate Tier</button>
+  </form>
+{% else %}
+  <h2>🎓 Learn to Trade with Arnie</h2>
+  <p>Sign up to our GPT-powered mentor program.</p>
+  <p><strong>Start with a Free Trial – Tier 1</strong></p>
+  <a href="/signup" style="text-decoration: none;">
+    <button>Sign Up for Arnie</button>
+  </a>
+{% endif %}
     
 </div>
   <div class="section">
