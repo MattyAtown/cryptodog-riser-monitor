@@ -451,6 +451,7 @@ def buy_summary():
 
 @app.route('/thank-you')
 def thank_you():
+    session['verified'] = True
     return render_template('thank_you.html')
 
 @app.route('/subscribe', methods=['GET', 'POST'])
