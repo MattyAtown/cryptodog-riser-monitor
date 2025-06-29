@@ -320,6 +320,13 @@ def subscribe():
     # Default GET request
     return render_template('subscribe.html')
 
+@app.route('/tier1')
+def tier1():
+    if 'user_email' not in session or session.get('subscription') != 'Tier 1' or not session.get('verified'):
+        flash("⛔ Please sign up, verify your email, and activate Tier 1 to access.", "error")
+        return redirect('/signup')
+    return render_template('tier_1_crypto_intro.html')
+
 @app.route("/api/top-riser")
 def top_riser_api():
     return jsonify({
