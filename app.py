@@ -267,13 +267,19 @@ See you inside!
             mail.send(msg)
             print(f"✅ Email sent to {email}")
             flash('✅ Email sent! Check your inbox.', 'success')
+
+            # 🔐 Set session so user has free Tier 1 access
+            session['user_email'] = email
+            session['user_name'] = first
+            session['subscription'] = 'Tier 1'  # 🆓 Free trial tier
+
         except Exception as e:
             print(f"❌ Failed to send email: {e}")
             flash('❌ Failed to send email. Try again.', 'error')
 
-        return redirect(url_for('verify_email'))  # ✅ keeps user experience flowing
+        return redirect(url_for('verify_email'))  # ⬅️ This flow stays exactly the same
 
-    return render_template('signup.html')  # ✅ necessary for showing form on GET request
+    return render_template('signup.html')
 
 def resolve_image_path(coin):
     """
@@ -310,6 +316,14 @@ def login():
             return redirect(url_for('login'))
 
     return render_template('login.html')
+
+@app.route("/tier1")
+def tier1_page():
+    if "user_email" in session and session.get("subscription") == "Tier 1":
+        return render_template("tier_1_crypto_intro.html")
+    else:
+        flash("Please log in or sign up to access Tier 1.", "warning")
+        return redirect("/login")
 
 @app.route('/logout')
 def logout():
