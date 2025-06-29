@@ -295,6 +295,35 @@ def resolve_image_path(coin):
             return '/' + path  # URL-relative
 
     return '/static/coins/generic.png'
+    
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        # For demo purposes, we accept any email (no password validation)
+        if email:
+            session['user_email'] = email
+            flash('✅ Logged in successfully!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('❌ Please enter your email.', 'error')
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('🚪 You have been logged out.', 'info')
+    return redirect(url_for('login'))
+    
+@app.route('/dashboard')
+def dashboard():
+    if 'user_email' not in session:
+        flash('⚠️ Please log in to access your dashboard.', 'error')
+        return redirect(url_for('login'))
+
+    return render_template('dashboard.html', user_email=session['user_email'])
 
 @app.route("/api/top-riser")
 def top_riser_api():
