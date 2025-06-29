@@ -472,6 +472,10 @@ def subscribe():
 
     return render_template('subscribe.html')
 
+@app.route('/tier-1')
+def tier_one():
+    return render_template('tier_1_crypto_intro.html')
+
 @app.route("/api/star-riser-history")
 def star_riser_history_api():
     return jsonify(list(STAR_RISER_HISTORY))
