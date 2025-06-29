@@ -143,8 +143,7 @@
       <ul id="newsList"></ul>
     </div>
 
-   <!-- LEARN -->
-<div class="box" style="min-width: 320px;">
+  <div class="box">
   {% if not session.get('user_email') %}
     <!-- NOT LOGGED IN -->
     <h2>🎓 Learn to Trade with Arnie</h2>
@@ -154,16 +153,16 @@
       <button>Sign Up for Arnie</button>
     </a>
 
-  {% elif session.get('subscription') == 'Tier 1' %}
-    <!-- LOGGED IN + ON FREE TIER -->
+  {% elif session.get('user_email') and session.get('subscription') == 'Tier 1' and session.get('verified') == True %}
+    <!-- LOGGED IN + VERIFIED + ON FREE TIER -->
     <h2>🎓 Welcome to Tier 1</h2>
-    <p>You’re on the Free Trial: <strong>Crypto Trading Basics</strong>.</p>
+    <p>You're on the Free Trial: <strong>Crypto Trading Basics</strong>.</p>
     <a href="/tier1" style="text-decoration: none;">
       <button>Start Learning</button>
     </a>
 
-  {% else %}
-    <!-- LOGGED IN + NO SUB YET -->
+  {% elif session.get('user_email') %}
+    <!-- LOGGED IN BUT NOT VERIFIED OR NO TIER SELECTED -->
     <h2>🎓 Unlock Your Crypto Journey</h2>
     <p>You’re logged in as <strong>{{ session['user_email'] }}</strong></p>
     <form action="/subscribe" method="POST">
