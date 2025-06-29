@@ -145,25 +145,34 @@
     </div>
   </div>
 
-<div class="section">
-  <div class="box">
-    <h2>💸 Buy Crypto Simulator</h2>
-    
-    <select id="coinSelect">
-      <option value="BTC">BTC</option>
-      <option value="ETH">ETH</option>
-      <option value="SOL">SOL</option>
-    </select><br>
-
-    <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br>
-
-    <button onclick="simulateBuy()">Buy & Track</button>
-    <button onclick="stopTracking()">Stop</button>
-
-    <div id="buyResults" style="color: lime; font-size: 0.9em; margin-top: 10px;"></div>
-    <div class="results" id="trackingResults" style="margin-top:10px;"></div> 
+  <div class="section">
+    <div class="box" style="min-width: 320px; min-height: 200px;">
+      <h2>📈 Top Riser History</h2>
+      <ul class="crypto-history" id="topRiserHistory"></ul>
+    </div>
+    <div class="box" style="min-width: 320px; min-height: 200px;">
+      <h2>🌟 Star Riser History</h2>
+      <ul class="crypto-history" id="starRiserHistory"></ul>
+    </div>
   </div>
-</div>
+
+  <div class="section">
+    <div class="box">
+      <h2>💸 Buy Crypto Simulator</h2>
+      <select id="coinSelect">
+        <option value="BTC">BTC</option>
+        <option value="ETH">ETH</option>
+        <option value="SOL">SOL</option>
+      </select><br>
+      <input type="number" id="mockAmount" placeholder="Amount in USD" value="1000"><br
+      <button onclick="simulateBuy()">Fake Buy</button>
+      <button onclick="checkBuy()">Check Gains</button>
+
+<div id="buyResults" style="color: lime; font-size: 0.9em; margin-top: 10px;"></div>
+      <button onclick="startTracking()">Start</button>
+      <button onclick="stopTracking()">Stop</button>
+      <div class="results" id="trackingResults" style="margin-top:10px;"></div>
+    </div>
 
     <div class="box">
       <h2>📊 Live Bitcoin Chart</h2>
@@ -187,12 +196,7 @@ async function simulateBuy() {
   const amount = parseFloat(document.getElementById("mockAmount").value);
   const buyResults = document.getElementById("buyResults");
 
-  if (!coin || isNaN(amount) || amount <= 0) {
-    buyResults.innerHTML = "<span style='color:red;'>Please enter a valid amount.</span>";
-    return;
-  }
-
-  const res = await fetch(`/api/price/${coin}`);
+  const res = await fetch(/api/price/${coin});
   const data = await res.json();
   const price = data.price;
 
@@ -205,11 +209,7 @@ async function simulateBuy() {
     buyPrice: price
   };
 
-  buyResults.innerText = `Current Price: $${price.toFixed(4)}\nYou bought ${cryptoAmount} ${coin} for $${amount}`;
-
-  clearInterval(trackingInterval); // stop old loop if any
-  checkBuy();                      // show first result
-  trackingInterval = setInterval(checkBuy, 10000); // track every 10s
+  buyResults.innerText = Current Price: $${price.toFixed(4)}\nYou bought ${cryptoAmount} ${coin} for $${amount};
 }
 
 async function checkBuy() {
@@ -222,29 +222,21 @@ async function checkBuy() {
 
   const { coin, unitsBought, usdSpent } = sessionBuyData;
 
-  const res = await fetch(`/api/price/${coin}`);
+  const res = await fetch(/api/price/${coin});
   const data = await res.json();
   const currentPrice = data.price;
 
   const currentValue = currentPrice * unitsBought;
   const difference = currentValue - usdSpent;
   const profitLoss = difference.toFixed(2);
-  const change = (difference >= 0) ? `🟢 Profit: $${profitLoss}` : `🔴 Loss: $${Math.abs(profitLoss)}`;
+  const change = (difference >= 0) ? 🟢 Profit: $${profitLoss} : 🔴 Loss: $${Math.abs(profitLoss)};
 
-  resultBox.innerText = `🕒 Current Value of Your ${unitsBought} ${coin}: $${currentValue.toFixed(2)}\n💰 ${change}`;
+  resultBox.innerText = 🕒 Current Value of Your ${unitsBought} ${coin}: $${currentValue.toFixed(2)}\n💰 ${change};
 }
 
-  function startTracking() {
-  const coin = document.getElementById("coinSelect").value;
-  const usdAmount = parseFloat(document.getElementById("mockAmount").value);
-
-  if (!coin || isNaN(usdAmount) || usdAmount <= 0) {
-  document.getElementById("trackingResults").innerHTML = "<span style='color:red;'>Please enter a valid amount.</span>";
-  return;
-  }
-
-  trackingInterval = setInterval(checkBuy, 10000);  // checks value every 10 seconds
-}
+    fetchPrice();
+    trackingInterval = setInterval(fetchPrice, 10000);
+   }
 
     function stopTracking() {
     clearInterval(trackingInterval);
@@ -255,10 +247,10 @@ async function checkBuy() {
       const listId = type === 'top' ? 'topRiserHistory' : 'starRiserHistory';
       const historyArr = type === 'top' ? topHistory : starHistory;
       const ul = document.getElementById(listId);
-      const entry = `${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)}`;
+      const entry = ${data.coin} +${data.change}% | $${parseFloat(data.price).toFixed(4)};
       historyArr.unshift(entry);
       if (historyArr.length > 5) historyArr.pop();
-      ul.innerHTML = historyArr.map(i => `<li>${i}</li>`).join('');
+      ul.innerHTML = historyArr.map(i => <li>${i}</li>).join('');
     }
 
     async function updateRiser(boxPrefix, data, type = null) {
@@ -275,39 +267,39 @@ async function checkBuy() {
       price = parseFloat(price);
       timestamp = timestamp || new Date().toLocaleString();
 
-      const infoDiv = document.getElementById(`${boxPrefix}Info`);
-      infoDiv.innerHTML = `
+      const infoDiv = document.getElementById(${boxPrefix}Info);
+      infoDiv.innerHTML = 
         <strong>${coin} | +${change}% | $${!isNaN(price) ? price.toFixed(4) : "0.0000"}</strong>
         <br><small style="color:#ccc;">Updated: ${timestamp}</small>
-      `;
+      ;
 
-      const iconImg = document.getElementById(`${boxPrefix}Icon`);
+      const iconImg = document.getElementById(${boxPrefix}Icon);
       if (iconImg) {
         const lowercaseCoin = coin.toLowerCase().replace(/\s+/g, '');
         const tryImage = new Image();
         tryImage.onload = () => { iconImg.src = tryImage.src; };
         tryImage.onerror = () => { iconImg.src = "/static/coins/generic.png"; };
-        tryImage.src = `/static/coins/${lowercaseCoin}.png`;
+        tryImage.src = /static/coins/${lowercaseCoin}.png;
         }
 
-      fetch(`/api/coin-info/${coin}/${price}/${change}`)
+      fetch(/api/coin-info/${coin}/${price}/${change})
         .then(res => res.json())
         .then(meta => {
-          const metaBox = document.getElementById(`${boxPrefix}Meta`);
+          const metaBox = document.getElementById(${boxPrefix}Meta);
           if (metaBox) {
-            metaBox.innerHTML = `
+            metaBox.innerHTML = 
               <div style="font-size: 0.8em; margin-top: 10px;">
                 <strong>${meta.name}</strong><br>
                 Category: ${meta.category}<br>
                 ${meta.description ? meta.description : 'No description available.'}
               </div>
-            `;
+            ;
           }
         })
         .catch(() => {
-          const metaBox = document.getElementById(`${boxPrefix}Meta`);
+          const metaBox = document.getElementById(${boxPrefix}Meta);
           if (metaBox) {
-            metaBox.innerHTML = `<div style="font-size: 0.8em; margin-top: 10px; color: #999;">No additional info available.</div>`;
+            metaBox.innerHTML = <div style="font-size: 0.8em; margin-top: 10px; color: #999;">No additional info available.</div>;
           }
         });
 
@@ -334,7 +326,7 @@ async function checkBuy() {
       list.innerHTML = "";
       data.slice(0, 5).forEach(item => {
         const li = document.createElement("li");
-        li.innerHTML = `<a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>`;
+        li.innerHTML = <a href="${item.link}" target="_blank" style="color:#0ff;">${item.title}</a>;
         list.appendChild(li);
       });
     }
@@ -348,7 +340,7 @@ async function checkBuy() {
       const messages = [
         "Pay attention to Bitcoin, the decent coins follow at higher percentage swings",
         "No need to panic, if you read the daily news, you can see what is coming.",
-        "Be cautious around Meme coins, they are traps and many fall victim but some get lucky.",
+        "Be cautious around Meme coins, high risk, often controlled, many fall victim but some get lucky.",
         "Sign up to to Arnie Trade School - learn minimum-risk, high-reward strategies.",
         "Try the Virtual Money Investment calculator, it shows you what you could have if you did.",
       ];
