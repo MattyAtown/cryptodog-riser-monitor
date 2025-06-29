@@ -1,101 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tier 1: What is Crypto?</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tier 1: Crypto Basics | CryptoDog Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #0a0a0a;
-      color: #ffffff;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: url('/static/cyberpunk-bitcoin-illustration.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
     }
-    .card {
-      background-color: #111;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 30px;
+      background: rgba(0, 0, 0, 0.7);
+      border-bottom: 2px solid #0ff;
+    }
+
+    .header img {
+      height: 60px;
+    }
+
+    h1 {
+      font-size: 1.6em;
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
+    }
+
+    .section {
+      max-width: 900px;
+      margin: 40px auto;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .box {
+      background: rgba(17, 17, 17, 0.8);
+      border: 1px solid #333;
       border-radius: 12px;
-      box-shadow: 0 0 15px #00ffff66;
-      max-width: 700px;
-      margin: 0 auto;
+      box-shadow: 0 0 10px #0ff;
+      padding: 20px;
+      font-size: 1.1em;
+      min-height: 100px;
     }
-    h1, h2 {
-      color: #00ffff;
-      text-shadow: 0 0 6px #0ff;
-    }
-    .response-box {
-      margin-top: 20px;
-    }
-    button {
-      background-color: #00ffff;
-      color: #000;
-      border: none;
-      padding: 10px 15px;
-      margin: 5px;
+
+    .response-buttons button {
+      margin-right: 10px;
+      padding: 10px 20px;
       font-weight: bold;
+      background: #0ff;
+      border: none;
       border-radius: 8px;
+      color: #000;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #00cccc;
+
+    .response-buttons {
+      margin-top: 15px;
+    }
+
+    .back-home {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .back-home a {
+      color: #0ff;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Tier 1: Crypto Trading Basics</h1>
-    <h2 id="questionTitle">What is Crypto?</h2>
-    <p id="explanation">
-      Crypto is digital money that runs without a central bank, using a technology called blockchain.
-      Instead of trusting one big system (like a bank), people agree on what's real using math, code,
-      and network consensus.
-    </p>
+  <div class="header">
+    <img src="/static/logo.png" alt="CryptoDog Logo">
+    <h1>CryptoDog Academy: Tier 1 Free Trial</h1>
+    <img src="/static/neutral.png" alt="Dog Face" height="60">
+  </div>
 
-    <div class="response-box">
-      <p><strong>Does that make sense?</strong></p>
-      <button onclick="handleResponse(true)">Yes</button>
-      <button onclick="handleResponse(false)">No</button>
+  <div class="section">
+    <div class="box" id="questionBox"></div>
+    <div class="box" id="answerBox"></div>
+    <div class="response-buttons" id="responseButtons" style="display:none">
+      <button onclick="handleResponse(true)">✅ Makes Sense</button>
+      <button onclick="handleResponse(false)">❌ Don’t Understand</button>
     </div>
+  </div>
 
-    <div id="nextStep" style="margin-top: 20px;"></div>
+  <div class="back-home">
+    <a href="/">⬅ Return to Dashboard</a>
   </div>
 
   <script>
-    let retryCount = 0;
+    const flow = [
+      {
+        question: "👋 Welcome to Tier 1! Let’s start simple: What is cryptocurrency?",
+        answer: "Cryptocurrency is digital money. It works without banks or governments, using technology called blockchain to keep it safe and honest."
+      },
+      {
+        question: "💡 Why do people invest in crypto?",
+        answer: "Because crypto can grow in value, like investing in gold or stocks. It also lets people control their own money, anywhere in the world."
+      },
+      {
+        question: "⚠️ What are the risks?",
+        answer: "Crypto prices can go up and down quickly. If you're not careful, you could lose money. That’s why learning is important!"
+      }
+    ];
+
+    let currentStep = 0;
+    const questionBox = document.getElementById("questionBox");
+    const answerBox = document.getElementById("answerBox");
+    const responseButtons = document.getElementById("responseButtons");
+
+    function typeText(element, text, callback) {
+      element.innerHTML = "";
+      let i = 0;
+      const interval = setInterval(() => {
+        element.innerHTML += text.charAt(i);
+        i++;
+        if (i >= text.length) {
+          clearInterval(interval);
+          if (callback) callback();
+        }
+      }, 40);
+    }
+
+    function loadStep(index) {
+      responseButtons.style.display = "none";
+      typeText(questionBox, flow[index].question, () => {
+        setTimeout(() => {
+          typeText(answerBox, flow[index].answer, () => {
+            responseButtons.style.display = "block";
+          });
+        }, 500);
+      });
+    }
 
     function handleResponse(understood) {
-      const nextStep = document.getElementById("nextStep");
-      const questionTitle = document.getElementById("questionTitle");
-      const explanation = document.getElementById("explanation");
-
       if (understood) {
-        // Proceed to next step
-        questionTitle.innerText = "What is Blockchain?";
-        explanation.innerText = "Blockchain is like a shared online notebook where every transaction is written down and can't be changed. It's public, permanent, and updated by the network, not a company or government.";
-        nextStep.innerHTML = `<p><strong>Does that make sense?</strong><br><button onclick="handleSecondResponse(true)">Yes</button><button onclick="handleSecondResponse(false)">No</button></p>`;
-      } else {
-        retryCount++;
-        if (retryCount === 1) {
-          explanation.innerText = "Think of crypto like online Lego bricks. Each block holds info like 'Matt sent 1 coin to Sarah.' When many people agree that the block is legit, it gets locked into the chain. That’s what keeps it fair — without a bank.";
+        currentStep++;
+        if (currentStep < flow.length) {
+          loadStep(currentStep);
         } else {
-          explanation.innerText = "Crypto = digital money. Instead of banks keeping score, everyone keeps a copy. It's like Google Docs vs Word files: live, shared, uneditable history.";
+          typeText(questionBox, "🎉 You’ve completed Tier 1: Crypto Basics!", null);
+          answerBox.innerHTML = "Come back soon to unlock Tier 2 and dive deeper into trading!";
+          responseButtons.style.display = "none";
         }
-      }
-    }
-
-    function handleSecondResponse(understood) {
-      const nextStep = document.getElementById("nextStep");
-      const questionTitle = document.getElementById("questionTitle");
-      const explanation = document.getElementById("explanation");
-
-      if (understood) {
-        questionTitle.innerText = "Why is Crypto Potentially a Good Investment?";
-        explanation.innerText = "Crypto has shown massive growth in short periods. It offers access to global markets, decentralized ownership, and alternatives to traditional finance. But prices are volatile and can fall sharply too.";
-        nextStep.innerHTML = `<p><strong>Want to continue to the next topic?</strong><br><button onclick="alert('Great! Coming soon...')">Yes</button><button onclick="alert('Okay, you can return anytime.')">No</button></p>`;
       } else {
-        explanation.innerText = "Imagine a blockchain like a notebook everyone can write in, but no one can erase. Once a transaction is recorded, it stays visible and verified forever by the community. That's the power behind crypto.";
+        typeText(answerBox, "Think of crypto like internet money. It’s stored safely, can be sent anywhere, and no one can change it without permission.", () => {
+          responseButtons.style.display = "block";
+        });
       }
     }
+
+    loadStep(currentStep);
   </script>
 </body>
 </html>
