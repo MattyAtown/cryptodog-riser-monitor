@@ -308,5 +308,68 @@
     setInterval(fetchStarRiser, 5000);
     setInterval(fetchNews, 30000);
   </script>
+
+  <script>
+  let trackingInterval = null;
+
+  function startTracking() {
+    const coin = document.getElementById("coinSelect").value;
+    const usdAmount = parseFloat(document.getElementById("mockAmount").value);
+
+    fetch("/api/buy", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coin: coin, amount: usdAmount })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "buy_confirmed") {
+        document.getElementById("trackingResults").innerHTML = `
+          ✅ Simulated Buy: ${data.amount} USD of ${coin} at $${data.buy_price}<br>
+          Tracking live...
+        `;
+
+        if (trackingInterval) clearInterval(trackingInterval);
+
+        trackingInterval = setInterval(() => {
+          fetch("/api/buy-summary", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ coin: coin })
+          })
+          .then(res => res.json())
+          .then(summary => {
+            if (!summary.error) {
+              document.getElementById("trackingResults").innerHTML = `
+                Coin: <strong>${summary.coin}</strong><br>
+                Buy Price: $${summary.buy_price}<br>
+                Current Price: $${summary.current_price}<br>
+                Coin Amount: ${(summary.initial_investment / summary.buy_price).toFixed(6)}<br>
+                Value Now: $${summary.current_value}<br>
+                <strong>${summary.gain_loss >= 0 ? 'Gain' : 'Loss'}:</strong> $${summary.gain_loss} (${summary.percent_change}%)
+              `;
+            }
+          });
+        }, 5000);
+      }
+    });
+  }
+
+  function stopTracking() {
+    clearInterval(trackingInterval);
+    trackingInterval = null;
+    document.getElementById("trackingResults").innerHTML += "<br>❌ Tracking Stopped.";
+  }
+
+  // Add PEPE to dropdown (if it's not already present)
+  const coinSelect = document.getElementById("coinSelect");
+  if (![...coinSelect.options].some(opt => opt.value === "PEPE")) {
+    const opt = document.createElement("option");
+    opt.value = "PEPE";
+    opt.innerText = "PEPE";
+    coinSelect.appendChild(opt);
+  }
+</script>
+
 </body>
 </html>
