@@ -1,22 +1,71 @@
-@app.route('/subscribe', methods=['GET', 'POST'])
-def subscribe():
-    if request.method == 'POST':
-        tier = request.form.get('tier')
-        session['subscription'] = tier
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Subscription | CryptoDog Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: url('/static/cyberpunk-bitcoin-illustration.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+      padding-top: 100px;
+    }
+    .box {
+      background: rgba(0,0,0,0.8);
+      margin: auto;
+      padding: 30px;
+      max-width: 500px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px #0ff;
+    }
+    h2 {
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
+    }
+    select, input[type="submit"] {
+      margin: 15px auto;
+      padding: 10px;
+      font-size: 1em;
+      width: 80%;
+      border-radius: 8px;
+      border: none;
+    }
+    input[type="submit"] {
+      background-color: #0ff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .note {
+      font-size: 0.9em;
+      color: #ff0080;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Choose Your CryptoDog Subscription</h2>
+    <form action="/subscribe" method="POST">
+      <select name="tier" required>
+        <option value="">-- Select Tier --</option>
+        <option value="Tier 1">Tier 1 (Free Trial)</option>
+        <option value="Tier 2">Tier 2 (Analysis Tools)</option>
+        <option value="Tier 3">Tier 3 (AiM Coaching)</option>
+      </select>
 
-        # If it's Tier 1, skip payment
-        if tier == 'Tier 1':
-            session['verified'] = True
-            flash('✅ Tier 1 Activated! Start your free course.', 'success')
-            return redirect('/tier1')
+      <select name="payment">
+        <option value="">-- Select Payment Method --</option>
+        <option value="crypto">Crypto</option>
+        <option value="card">Credit/Debit Card</option>
+      </select>
 
-        # Else, redirect to payment page
-        payment_method = request.form.get('payment')
-        if not payment_method:
-            flash('❌ Please select a payment method.', 'error')
-            return redirect('/subscribe')
-
-        session['payment_method'] = payment_method
-        return redirect('/payment_crypto')  # or wherever payment flows next
-
-    return render_template('subscribe.html')
+      <input type="submit" value="Continue">
+    </form>
+    <p class="note">Tier 1 skips payment and gives you instant access.</p>
+  </div>
+</body>
+</html>
