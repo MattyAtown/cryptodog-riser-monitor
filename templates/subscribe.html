@@ -67,5 +67,24 @@
     </form>
     <p class="note">Tier 1 skips payment and gives you instant access.</p>
   </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const tierSelect = document.getElementById('tierSelect');
+      const paymentSelect = document.getElementById('paymentSelect');
+
+      function togglePaymentField() {
+        if (tierSelect.value === "Tier 1") {
+          paymentSelect.style.display = "none";
+          paymentSelect.name = "";  // prevent it from being submitted
+        } else {
+          paymentSelect.style.display = "inline-block";
+          paymentSelect.name = "payment";  // include for POST
+        }
+      }
+
+      tierSelect.addEventListener("change", togglePaymentField);
+      togglePaymentField(); // Run once on load in case default is Tier 1
+    });
+  </script>
 </body>
 </html>
