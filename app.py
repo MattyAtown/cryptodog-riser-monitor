@@ -308,13 +308,13 @@ def subscribe():
         tier = request.form.get('tier')
         session['subscription'] = tier
 
-        # ✅ If it's Tier 1, skip payment entirely
         if tier == 'Tier 1':
-            session['verified'] = True
+            if not session.get('verified'):
+                flash("⚠️ You must verify your email first.", "error")
+                return redirect('/verify_email')
             flash('✅ Tier 1 Activated! Start your free course.', 'success')
             return redirect('/tier1')
 
-        # 🔒 For paid tiers, require payment method
         payment_method = request.form.get('payment')
         if not payment_method:
             flash('❌ Please select a payment method.', 'error')
@@ -323,7 +323,6 @@ def subscribe():
         session['payment_method'] = payment_method
         return redirect('/payment_crypto')
 
-    # Default GET request
     return render_template('subscribe.html')
 
 @app.route('/tier1')
