@@ -304,16 +304,17 @@ def resolve_image_path(coin):
 
 @app.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
+    if not session.get('verified'):
+        flash("⚠️ Please verify your email before subscribing.", "error")
+        return redirect('/verify_email')
+
     if request.method == 'POST':
         tier = request.form.get('tier')
         session['subscription'] = tier
 
         if tier == 'Tier 1':
-            if not session.get('verified'):
-                flash("⚠️ You must verify your email first.", "error")
-                return redirect('/verify_email')
-            flash('✅ Tier 1 Activated! Start your free course.', 'success')
-            return redirect('/tier1')
+            flash('✅ Tier 1 Activated! You can now begin your free training.', 'success')
+            return redirect('/')  # ✅ Go to dashboard, NOT tier1 directly
 
         payment_method = request.form.get('payment')
         if not payment_method:
