@@ -242,6 +242,12 @@ def index():
 def verify_email():
     return render_template('verify.html')
 
+@app.route('/verify_complete')
+def verify_complete():
+    session['verified'] = True
+    flash("✅ Email verified! Now choose your subscription.", "success")
+    return redirect('/subscribe')
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
