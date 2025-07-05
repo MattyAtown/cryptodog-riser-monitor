@@ -435,8 +435,14 @@ def coin_metadata():
     return jsonify(updated)
 
 # Coin info endpoint with on-the-fly fallback
-@app.route("/api/coin-info/<coin>/<float:price>/<float:change>")
+@app.route("/api/coin-info/<coin>/<price>/<change>")
 def coin_info(coin, price, change):
+    try:
+        price = float(price)
+        change = float(change)
+    except ValueError:
+        return jsonify({"error": "Invalid price or change format"}), 400
+
     coin_lower = coin.lower()
     coin_data = COIN_METADATA.get(coin_lower)
 
