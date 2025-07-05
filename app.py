@@ -57,8 +57,22 @@ PRICE_HISTORY = {coin: [] for coin in COINS}
 TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
+
 def get_price_from_coinbase(coin_symbol):
-    try:def populate_coin_metadata(coins):
+    try:
+        coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
+        response = requests.get(coinbase_url)
+        if response.status_code == 200:
+            data = response.json()
+            amount = data.get("data", {}).get("amount")
+            if amount:
+                return float(amount)
+        print(f"⚠️ Coinbase failed for {coin_symbol} with status {response.status_code}")
+    except Exception as e:
+        print(f"🚨 Coinbase error for {coin_symbol}: {e}")
+    return None
+    
+    def populate_coin_metadata(coins):
     global COIN_METADATA
     COIN_METADATA = {}
     try:
