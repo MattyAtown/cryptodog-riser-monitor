@@ -48,17 +48,7 @@ def get_top_market_cap_symbols(limit=100):
         print(f"⚠️ Failed to fetch top coins: {e}")
     return ["btc", "eth", "xrp", "sol", "ada"]  # fallback
 
-def populate_coin_metadata(coins):
-    global COIN_METADATA
-    try:
-        with open("static/coin_metadata.json", "r") as f:
-            all_data = json.load(f)
-            for coin in coins:
-                if coin in all_data:
-                    COIN_METADATA[coin] = all_data[coin]
-        print("✅ Coin metadata populated for top coins.")
-    except Exception as e:
-        print(f"⚠️ Failed to populate metadata: {e}")
+
 
 COIN_METADATA = {}
 COINS = get_top_market_cap_symbols(100)
@@ -68,7 +58,24 @@ TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
 def get_price_from_coinbase(coin_symbol):
+    try:def populate_coin_metadata(coins):
+    global COIN_METADATA
+    COIN_METADATA = {}
     try:
+        with open("static/coin_metadata.json", "r") as f:
+            all_data = json.load(f)
+            for coin in coins:
+                if coin in all_data:
+                    COIN_METADATA[coin] = all_data[coin]
+                else:
+                    COIN_METADATA[coin] = {
+                        "name": coin.upper(),
+                        "category": "Unknown",
+                        "description": "No description available."
+                    }
+        print(f"✅ Coin metadata populated for {len(COIN_METADATA)} coins.")
+    except Exception as e:
+        print(f"⚠️ Failed to populate metadata: {e}")
         coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
         response = requests.get(coinbase_url)
         if response.status_code == 200:
