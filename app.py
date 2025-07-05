@@ -48,53 +48,24 @@ def get_top_market_cap_symbols(limit=100):
         print(f"⚠️ Failed to fetch top coins: {e}")
     return ["btc", "eth", "xrp", "sol", "ada"]  # fallback
 
+def populate_coin_metadata(coins):
+    global COIN_METADATA
+    try:
+        with open("static/coin_metadata.json", "r") as f:
+            all_data = json.load(f)
+            for coin in coins:
+                if coin in all_data:
+                    COIN_METADATA[coin] = all_data[coin]
+        print("✅ Coin metadata populated for top coins.")
+    except Exception as e:
+        print(f"⚠️ Failed to populate metadata: {e}")
+
+COIN_METADATA = {}
 COINS = get_top_market_cap_symbols(100)
 populate_coin_metadata(COINS)
 PRICE_HISTORY = {coin: [] for coin in COINS}
 TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
-
-def populate_coin_metadata(coins):
-    print("📊 Populating COIN_METADATA...")
-    for symbol in coins:
-        try:
-            # First, find CoinGecko's internal ID for this symbol
-            list_url = "https://api.coingecko.com/api/v3/coins/list"
-            response = requests.get(list_url)
-            if response.status_code != 200:
-                continue
-
-            coin_list = response.json()
-            match = next((c for c in coin_list if c["symbol"].lower() == symbol.lower()), None)
-            if not match:
-                print(f"⚠️ No match found for symbol: {symbol}")
-                continue
-
-            coin_id = match["id"]
-
-            # Now fetch metadata
-            meta_url = f"https://api.coingecko.com/api/v3/coins/{coin_id}"
-            meta_response = requests.get(meta_url)
-            if meta_response.status_code != 200:
-                continue
-
-            data = meta_response.json()
-
-            COIN_METADATA[symbol.lower()] = {
-                "name": data.get("name", ""),
-                "symbol": symbol.lower(),
-                "category": ", ".join(data.get("categories", [])) or "Uncategorized",
-                "description": data.get("description", {}).get("en", "").strip()[:300],
-                "image": data.get("image", {}).get("large", "")
-            }
-
-            print(f"✅ Metadata loaded for {symbol.upper()}")
-
-            # Optional: Sleep briefly to avoid rate limiting
-            time.sleep(0.5)
-
-        except Exception as e:
-            print(f"❌ Error fetching metadata for {symbol}: {e}")
 
 def get_price_from_coinbase(coin_symbol):
     try:
