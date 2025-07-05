@@ -43,22 +43,15 @@ def get_top_market_cap_symbols(limit=100):
         response = requests.get(url, params=params)
         if response.status_code == 200:
             data = response.json()
-            # Return only lowercase symbols like ['btc', 'eth', 'xrp']
             return [coin["symbol"].lower() for coin in data]
     except Exception as e:
         print(f"⚠️ Failed to fetch top coins: {e}")
-    return ["btc", "eth", "xrp", "sol", "ada"]  # fallback
+    return ["btc", "eth", "xrp", "sol", "ada"]  # fallback list
 
-
-COIN_METADATA = {}
-COINS = get_top_market_cap_symbols(100)
-populate_coin_metadata(COINS)
-PRICE_HISTORY = {coin: [] for coin in COINS}
-TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
-STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
-
-
+# --- Function to populate metadata ---
 def populate_coin_metadata(coins):
+    global COIN_METADATA
+    COIN_METADATA = {}
     try:
         with open("static/coin_metadata.json", "r") as f:
             all_data = json.load(f)
@@ -74,17 +67,14 @@ def populate_coin_metadata(coins):
         print(f"✅ Coin metadata populated for {len(COIN_METADATA)} coins.")
     except Exception as e:
         print(f"⚠️ Failed to populate metadata: {e}")
-        coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
-        response = requests.get(coinbase_url)
-        if response.status_code == 200:
-            data = response.json()
-            amount = data.get("data", {}).get("amount")
-            if amount:
-                return float(amount)
-        print(f"⚠️ Coinbase failed for {coin_symbol} with status {response.status_code}")
-    except Exception as e:
-        print(f"🚨 Coinbase error for {coin_symbol}: {e}")
-    return None
+
+
+COIN_METADATA = {}
+COINS = get_top_market_cap_symbols(100)
+populate_coin_metadata(COINS)
+PRICE_HISTORY = {coin: [] for coin in COINS}
+TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
+STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
 
 def fetch_price(coin_symbol):
