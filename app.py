@@ -35,6 +35,7 @@ LAST_STAR_RISER_UPDATE = datetime.min
 BUY_SESSION = {}
 STAR_RISER_HISTORY = deque(maxlen=10)
 
+COINS = ["btc", "eth", "sol", "doge", "ada"]
 
 def get_price_from_coinbase(coin_symbol):
     try:
