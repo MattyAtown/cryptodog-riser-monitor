@@ -7,6 +7,42 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
 
+  #askArnieWidget {
+   position: fixed;
+   bottom: 20px;
+   right: 20px;
+   background: rgba(0, 0, 0, 0.75);
+   border: 2px solid #0ff;
+   border-radius: 50px;
+   padding: 8px 12px;
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   cursor: pointer;
+   z-index: 9999;
+   box-shadow: 0 0 15px #0ff;
+   transition: transform 0.3s ease;
+  }
+
+  #askArnieWidget:hover {
+   transform: scale(1.05);
+   box-shadow: 0 0 25px #0ff;
+  }
+
+  #askArnieWidget img {
+   height: 50px;
+   width: 50px;
+   border-radius: 50%;
+   border: 2px solid #0ff;
+   object-fit: cover;
+  }
+
+   #askArnieWidget span {
+    font-family: 'Orbitron', sans-serif;
+    color: #0ff;
+    font-size: 0.95em;
+    text-shadow: 0 0 5px #0ff;
+  }
     button {
      font-family: 'Orbitron', sans-serif;
      font-size: 1em;
@@ -139,6 +175,18 @@
   </style>
 </head>
 <body>
+
+  <div id="askArnieWidget" onclick="launchArnieChat()">
+  <img src="/static/crypto_dog_logo.png" alt="CryptoDog" />
+  <span>Ask Arnie</span>
+</div>
+
+<script>
+  function launchArnieChat() {
+    alert("🔧 'Ask Arnie' chat coming soon...");
+    // Future: open chat window or GPT widget
+  }
+</script>
   <div class="header">
     <img src="/static/logo.png" alt="AiM Logo" />
     <h1>CryptoDog Dashboard</h1>
