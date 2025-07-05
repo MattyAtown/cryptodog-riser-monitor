@@ -233,22 +233,51 @@ See you inside!
 
     return render_template('signup.html')  # ✅ necessary for showing form on GET request
 
-def resolve_image_path(coin):
-    if not coin:
-        return '/static/coins/generic.png'
 
-    image_path = f"static/coins/{coin.lower()}.png"
-    if os.path.isfile(image_path):
-        return f"/static/coins/{coin.lower()}.png"
-    else:
-        return '/static/coins/generic.png'
 
 @app.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
     if not session.get('verified'):
         flash("⚠️ Please verify your email before subscribing.", "error")
         return redirect('/verify_email')
+import os
 
+# Optional global cache to avoid repeated API calls
+COINGECKO_IMAGE_CACHE = {}
+
+def resolve_image_path(coin):
+    if not coin:
+        return '/static/coins/generic.png'
+
+    # Try local image
+    local_path = f"static/coins/{coin.lower()}.png"
+    if os.path.isfile(local_path):
+        return f"/static/coins/{coin.lower()}.png"
+
+    # Try CoinGecko logo fallback
+    if coin.lower() in COINGECKO_IMAGE_CACHE:
+        return COINGECKO_IMAGE_CACHE[coin.lower()]
+
+    try:
+        # Fetch from CoinGecko by symbol → id mapping
+        search_url = f"https://api.coingecko.com/api/v3/coins/list"
+        response = requests.get(search_url)
+        if response.status_code == 200:
+            coins = response.json()
+            coin_entry = next((c for c in coins if c['symbol'].lower() == coin.lower()), None)
+            if coin_entry:
+                coin_id = coin_entry['id']
+                coin_data_url = f"https://api.coingecko.com/api/v3/coins/{coin_id}"
+                coin_data = requests.get(coin_data_url).json()
+                image_url = coin_data.get("image", {}).get("thumb")
+                if image_url:
+                    COINGECKO_IMAGE_CACHE[coin.lower()] = image_url  # Cache it
+                    return image_url
+    except Exception as e:
+        print(f"⚠️ CoinGecko logo fallback failed for {coin}: {e}")
+
+    # Final fallback
+    return '/static/coins/generic.png'
     if request.method == 'POST':
         tier = request.form.get('tier')
         session['subscription'] = tier
