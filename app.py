@@ -35,7 +35,7 @@ LAST_STAR_RISER_UPDATE = datetime.min
 BUY_SESSION = {}
 STAR_RISER_HISTORY = deque(maxlen=10)
 
-COINS = ["btc", "eth", "sol", "doge", "ada"]
+COINS = get_top_market_cap_symbols(100)
 
 def get_price_from_coinbase(coin_symbol):
     try:
@@ -50,6 +50,24 @@ def get_price_from_coinbase(coin_symbol):
     except Exception as e:
         print(f"🚨 Coinbase error for {coin_symbol}: {e}")
     return None
+    
+def get_top_market_cap_symbols(limit=100):
+    try:
+        url = "https://api.coingecko.com/api/v3/coins/markets"
+        params = {
+            "vs_currency": "usd",
+            "order": "market_cap_desc",
+            "per_page": limit,
+            "page": 1
+        }
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            # Return only lowercase symbols like ['btc', 'eth', 'xrp']
+            return [coin["symbol"].lower() for coin in data]
+    except Exception as e:
+        print(f"⚠️ Failed to fetch top coins: {e}")
+    return ["btc", "eth", "xrp", "sol", "ada"]  # fallback
 
 def fetch_price(coin_symbol):
     try:
