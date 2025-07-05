@@ -116,57 +116,7 @@ def fetch_price(coin_symbol):
         print(f"⛔ Skipping unsupported coin: {coin_symbol}")
         return '/static/coins/generic.png'
 
-    # 1️⃣ Try Coinbase
-    try:
-        url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            price = float(data['data']['amount'])
-            print(f"✅ Coinbase price for {coin_symbol}: ${price}")
-            return round(price, 6)
-        else:
-            print(f"⚠️ Coinbase failed for {coin_symbol} with status {response.status_code}")
-    except Exception as e:
-        print(f"🚨 Coinbase error for {coin_symbol}: {e}")
-
-    # 2️⃣ Try CoinGecko
-    try:
-        headers = {"x-cg-pro-api-key": os.getenv("COINGECKO_API_KEY")}
-        url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_symbol}&vs_currencies=usd"
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            data = response.json()
-            price = data.get(coin_symbol, {}).get("usd")
-            if price:
-                print(f"✅ CoinGecko price for {coin_symbol}: ${price}")
-                return round(float(price), 6)
-        else:
-            print(f"⚠️ CoinGecko failed for {coin_symbol} with status {response.status_code}")
-    except Exception as e:
-        print(f"🚨 CoinGecko error for {coin_symbol}: {e}")
-
-    # 3️⃣ Try CoinAPI.io
-    try:
-        coinapi_key = os.getenv("COIN_API")
-        if coinapi_key:
-            headers = {"X-CoinAPI-Key": coinapi_key}
-            url = f"https://rest.coinapi.io/v1/exchangerate/{coin_symbol.upper()}/USD"
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                data = response.json()
-                price = data.get("rate")
-                if price:
-                    print(f"✅ CoinAPI price for {coin_symbol}: ${price}")
-                    return round(float(price), 6)
-            else:
-                print(f"⚠️ CoinAPI failed for {coin_symbol} with status {response.status_code}")
-    except Exception as e:
-        print(f"🚨 CoinAPI error for {coin_symbol}: {e}")
-
-    print(f"❌ All APIs failed for {coin_symbol} → returning generic image path.")
-    return '/static/coins/generic.png'
-
+  
 
 def fetch_coin_description(coin_symbol):
     if coin_symbol.lower() in COIN_METADATA:
@@ -186,7 +136,32 @@ def fetch_coin_description(coin_symbol):
 
 from datetime import datetime, timedelta
 from collections import Counter
+try:
+    coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
+    cb_response = requests.get(coinbase_url)
+    if cb_response.status_code == 200:
+        price = float(cb_response.json()["data"]["amount"])
+        source = "coinbase"
+except Exception as e:
+    print(f"Coinbase error for {coin_symbol}: {e}")
 
+# Try CoinGecko if Coinbase failed
+if price is None:
+    try:
+        gecko_url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_symbol.lower()}&vs_currencies=usd"
+        gecko_response = requests.get(gecko_url)
+        if gecko_response.status_code == 200:
+            price_data = gecko_response.json()
+            if coin_symbol.lower() in price_data:
+                price = price_data[coin_symbol.lower()]["usd"]
+                source = "coingecko"
+    except Exception as e:
+        print(f"CoinGecko error for {coin_symbol}: {e}")
+
+# If both fail, return None or fallback
+if price is None:
+    print(f"❌ All APIs failed for {coin_symbol} → returning generic image path.")
+    image_path = "/static/coins/generic.png"
 def monitor_risers():
     global TOP_RISER, STAR_RISER
     global LAST_TOP_RISER, LAST_TOP_RISER_TIME, LAST_STAR_RISER_UPDATE
