@@ -35,22 +35,6 @@ LAST_STAR_RISER_UPDATE = datetime.min
 BUY_SESSION = {}
 STAR_RISER_HISTORY = deque(maxlen=10)
 
-def get_price_from_coinbase(coin_symbol):
-    try:
-        coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
-        response = requests.get(coinbase_url)
-        if response.status_code == 200:
-            data = response.json()
-            amount = data.get("data", {}).get("amount")
-            if amount:
-                return float(amount)
-        print(f"⚠️ Coinbase failed for {coin_symbol} with status {response.status_code}")
-    except Exception as e:
-        print(f"🚨 Coinbase error for {coin_symbol}: {e}")
-    return None
-
-COINS = get_top_market_cap_symbols(100)
-
 def get_top_market_cap_symbols(limit=100):
     try:
         url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -68,6 +52,23 @@ def get_top_market_cap_symbols(limit=100):
     except Exception as e:
         print(f"⚠️ Failed to fetch top coins: {e}")
     return ["btc", "eth", "xrp", "sol", "ada"]  # fallback
+
+COINS = get_top_market_cap_symbols(100)
+
+
+def get_price_from_coinbase(coin_symbol):
+    try:
+        coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
+        response = requests.get(coinbase_url)
+        if response.status_code == 200:
+            data = response.json()
+            amount = data.get("data", {}).get("amount")
+            if amount:
+                return float(amount)
+        print(f"⚠️ Coinbase failed for {coin_symbol} with status {response.status_code}")
+    except Exception as e:
+        print(f"🚨 Coinbase error for {coin_symbol}: {e}")
+    return None
 
 COINS = get_top_market_cap_symbols(100)
 
