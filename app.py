@@ -5,7 +5,6 @@ import string
 import requests
 import os
 from datetime import datetime
-from collections import defaultdict
 import threading
 import time
 import feedparser
@@ -22,7 +21,7 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
 mail = Mail(app)
 
-PRICE_HISTORY = defaultdict(list)
+PRICE_HISTORY = {coin: [] for coin in COINS}
 TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
@@ -70,8 +69,6 @@ def get_price_from_coinbase(coin_symbol):
         print(f"🚨 Coinbase error for {coin_symbol}: {e}")
     return None
 
-COINS = get_top_market_cap_symbols(100)
-
 def fetch_price(coin_symbol):
     try:
         # Try Coinbase first
@@ -110,8 +107,6 @@ def fetch_coin_description(coin_symbol):
     except Exception as e:
         print(f"⚠️ Failed to fetch description for {coin_symbol}: {e}")
     return ""
-
-COINS = get_top_market_cap_symbols(100)
 
 def monitor_risers():
     global TOP_RISER, STAR_RISER
@@ -192,8 +187,6 @@ def monitor_risers():
             print(f"[{timestamp}] 🚨 Error in monitor_risers(): {e}")
 
         time.sleep(5)
-
-COINS = get_top_market_cap_symbols(100)
         
 @app.route("/")
 def index():
