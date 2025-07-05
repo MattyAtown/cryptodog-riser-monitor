@@ -109,14 +109,20 @@ def get_local_coin_list():
         print(f"⚠️ Error reading local coin icons: {e}")
         return []
         
-def fetch_price(coin_symbol):
-    coin_symbol = coin_symbol.lower()
+def get_price_from_coinbase(coin_symbol):
+    try:
+        coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
+        response = requests.get(coinbase_url)
+        if response.status_code == 200:
+            data = response.json()
+            amount = data.get("data", {}).get("amount")
+            if amount:
+                return float(amount)
+        print(f"⚠️ Coinbase failed for {coin_symbol} with status {response.status_code}")
+    except Exception as e:
+        print(f"🚨 Coinbase error for {coin_symbol}: {e}")
+    return None
 
-    if coin_symbol not in COINS:
-        print(f"⛔ Skipping unsupported coin: {coin_symbol}")
-        return '/static/coins/generic.png'
-
-  
 
 def fetch_coin_description(coin_symbol):
     if coin_symbol.lower() in COIN_METADATA:
@@ -162,6 +168,8 @@ if price is None:
 if price is None:
     print(f"❌ All APIs failed for {coin_symbol} → returning generic image path.")
     image_path = "/static/coins/generic.png"
+
+
 def monitor_risers():
     global TOP_RISER, STAR_RISER
     global LAST_TOP_RISER, LAST_TOP_RISER_TIME, LAST_STAR_RISER_UPDATE
