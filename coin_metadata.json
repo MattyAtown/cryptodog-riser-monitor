@@ -1,22 +1,261 @@
+import json
+
+def populate_coin_metadata(coins, cache_file="coin_metadata.json"):
+    global COIN_METADATA
+
+    try:
+        with open(cache_file, "r") as f:
+            COIN_METADATA = json.load(f)
+            print("✅ Loaded coin metadata from file.")
+    except:
+        COIN_METADATA = {}
+        print("⚠️ No existing metadata file found. Starting fresh.")
+
+    updated = False
+
+    for coin in coins:
+        coin = coin.lower()
+        # Skip if all fields already exist
+        if coin in COIN_METADATA and all(k in COIN_METADATA[coin] for k in ["name", "category", "description"]):
+            continue
+
+        try:
+            url = f"https://api.coingecko.com/api/v3/coins/{coin}"
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                name = data.get("name", coin.upper())
+                category = data.get("categories", ["AltCoin"])[0]
+                desc_html = data.get("description", {}).get("en", "")
+                description = re.sub(r'<.*?>', '', desc_html).strip().split('.')[0][:100]  # 1-liner
+
+                COIN_METADATA[coin] = {
+                    "name": name,
+                    "category": category,
+                    "description": description
+                }
+                updated = True
+                print(f"📘 Added metadata for {coin.upper()}")
+        except Exception as e:
+            print(f"❌ Failed to fetch metadata for {coin}: {e}")
+
+    if updated:
+        try:
+            with open(cache_file, "w") as f:
+                json.dump(COIN_METADATA, f, indent=2)
+            print("💾 Metadata file updated.")
+        except Exception as e:
+            print(f"❌ Couldn’t write to metadata file: {e}")
+
 {
   "btc": {
     "name": "Bitcoin",
-    "category": "Store of Value"
+    "category": "Store of Value",
+    "description": "Most recognized cryptocurrency and digital gold."
   },
   "eth": {
     "name": "Ethereum",
-    "category": "Smart Contracts"
+    "category": "Smart Contract Platform",
+    "description": "Decentralized platform for smart contracts and dApps."
   },
-  "doge": {
-    "name": "Dogecoin",
-    "category": "Meme Coin"
+  "usdt": {
+    "name": "Tether",
+    "category": "Stablecoin",
+    "description": "Fiat-backed stablecoin pegged to the US Dollar."
+  },
+  "bnb": {
+    "name": "BNB",
+    "category": "Exchange Token",
+    "description": "Native token of Binance ecosystem."
   },
   "sol": {
     "name": "Solana",
-    "category": "Fast Transactions"
+    "category": "AltCoin",
+    "description": "High-speed blockchain with low fees."
+  },
+  "xrp": {
+    "name": "XRP",
+    "category": "Payments",
+    "description": "Real-time cross-border payments network."
   },
   "ada": {
     "name": "Cardano",
-    "category": "Academic Blockchain"
+    "category": "Smart Contract Platform",
+    "description": "Research-driven blockchain platform."
+  },
+  "doge": {
+    "name": "Dogecoin",
+    "category": "Meme Coin",
+    "description": "Originally started as a joke, now widely adopted."
+  },
+  "avax": {
+    "name": "Avalanche",
+    "category": "Smart Contract Platform",
+    "description": "Scalable and eco-friendly blockchain platform."
+  },
+  "shib": {
+    "name": "Shiba Inu",
+    "category": "Meme Coin",
+    "description": "Dogecoin-inspired ERC20 token."
+  },
+  "dot": {
+    "name": "Polkadot",
+    "category": "Interoperability",
+    "description": "Connects multiple blockchains into a unified network."
+  },
+  "matic": {
+    "name": "Polygon",
+    "category": "Layer 2",
+    "description": "Ethereum scaling solution with faster transactions."
+  },
+  "ltc": {
+    "name": "Litecoin",
+    "category": "Payments",
+    "description": "Faster and lighter version of Bitcoin."
+  },
+  "tron": {
+    "name": "TRON",
+    "category": "Entertainment",
+    "description": "Decentralized content sharing platform."
+  },
+  "link": {
+    "name": "Chainlink",
+    "category": "Oracle",
+    "description": "Decentralized oracle network."
+  },
+  "uni": {
+    "name": "Uniswap",
+    "category": "DeFi",
+    "description": "Leading decentralized exchange protocol."
+  },
+  "atom": {
+    "name": "Cosmos",
+    "category": "Interoperability",
+    "description": "Blockchain network of interconnected chains."
+  },
+  "xlm": {
+    "name": "Stellar",
+    "category": "Payments",
+    "description": "Cross-border payment platform."
+  },
+  "etc": {
+    "name": "Ethereum Classic",
+    "category": "Smart Contract Platform",
+    "description": "Original Ethereum chain post-hard fork."
+  },
+  "xmr": {
+    "name": "Monero",
+    "category": "Privacy",
+    "description": "Privacy-focused cryptocurrency."
+  },
+  "bch": {
+    "name": "Bitcoin Cash",
+    "category": "Payments",
+    "description": "Fork of Bitcoin aimed at faster payments."
+  },
+  "fil": {
+    "name": "Filecoin",
+    "category": "Storage",
+    "description": "Decentralized storage network."
+  },
+  "egld": {
+    "name": "MultiversX",
+    "category": "AltCoin",
+    "description": "Scalable, fast blockchain formerly Elrond."
+  },
+  "sui": {
+    "name": "Sui",
+    "category": "AltCoin",
+    "description": "Next-gen blockchain designed for instant finality."
+  },
+  "apt": {
+    "name": "Aptos",
+    "category": "Smart Contract Platform",
+    "description": "Layer 1 blockchain built for scalability."
+  },
+  "arb": {
+    "name": "Arbitrum",
+    "category": "Layer 2",
+    "description": "Scaling solution for Ethereum with rollups."
+  },
+  "op": {
+    "name": "Optimism",
+    "category": "Layer 2",
+    "description": "Ethereum L2 with fast and cheap transactions."
+  },
+  "rndr": {
+    "name": "Render",
+    "category": "GPU Computing",
+    "description": "Decentralized GPU rendering network."
+  },
+  "inj": {
+    "name": "Injective",
+    "category": "DeFi",
+    "description": "Layer 1 blockchain for finance apps."
+  },
+  "luna": {
+    "name": "Terra Luna Classic",
+    "category": "DeFi",
+    "description": "Legacy Terra blockchain."
+  },
+  "algo": {
+    "name": "Algorand",
+    "category": "Smart Contract Platform",
+    "description": "Fast and secure blockchain for payments."
+  },
+  "chz": {
+    "name": "Chiliz",
+    "category": "Fan Token",
+    "description": "Sports and entertainment token platform."
+  },
+  "grt": {
+    "name": "The Graph",
+    "category": "Indexing",
+    "description": "Decentralized query protocol for blockchains."
+  },
+  "hnt": {
+    "name": "Helium",
+    "category": "IoT",
+    "description": "Decentralized wireless network for IoT devices."
+  },
+  "mina": {
+    "name": "Mina Protocol",
+    "category": "Light Blockchain",
+    "description": "Blockchain with small, consistent size."
+  },
+  "cake": {
+    "name": "PancakeSwap",
+    "category": "DeFi",
+    "description": "DEX on Binance Smart Chain."
+  },
+  "neo": {
+    "name": "NEO",
+    "category": "Smart Contract Platform",
+    "description": "China-based Ethereum competitor."
+  },
+  "flow": {
+    "name": "Flow",
+    "category": "NFT",
+    "description": "Blockchain built for digital collectibles and games."
+  },
+  "icp": {
+    "name": "Internet Computer",
+    "category": "Web3",
+    "description": "Blockchain to run full internet services."
+  },
+  "aave": {
+    "name": "Aave",
+    "category": "DeFi",
+    "description": "Open-source liquidity protocol."
+  },
+  "theta": {
+    "name": "Theta Network",
+    "category": "Streaming",
+    "description": "Video delivery powered by blockchain."
+  },
+  "xdce": {
+    "name": "XDC Network",
+    "category": "Enterprise",
+    "description": "Hybrid blockchain for trade finance."
   }
 }
