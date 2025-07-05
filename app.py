@@ -67,35 +67,6 @@ def fetch_coin_description(coin_symbol):
         print(f"⚠️ Failed to fetch description for {coin_symbol}: {e}")
     return ""
 
-from datetime import datetime, timedelta
-from collections import Counter
-try:
-    coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
-    cb_response = requests.get(coinbase_url)
-    if cb_response.status_code == 200:
-        price = float(cb_response.json()["data"]["amount"])
-        source = "coinbase"
-except Exception as e:
-    print(f"Coinbase error for {coin_symbol}: {e}")
-
-# Try CoinGecko if Coinbase failed
-if price is None:
-    try:
-        gecko_url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_symbol.lower()}&vs_currencies=usd"
-        gecko_response = requests.get(gecko_url)
-        if gecko_response.status_code == 200:
-            price_data = gecko_response.json()
-            if coin_symbol.lower() in price_data:
-                price = price_data[coin_symbol.lower()]["usd"]
-                source = "coingecko"
-    except Exception as e:
-        print(f"CoinGecko error for {coin_symbol}: {e}")
-
-# If both fail, return None or fallback
-if price is None:
-    print(f"❌ All APIs failed for {coin_symbol} → returning generic image path.")
-    image_path = "/static/coins/generic.png"
-
 
 def monitor_risers():
     global TOP_RISER, STAR_RISER
