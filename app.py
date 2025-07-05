@@ -51,6 +51,28 @@ def get_price_from_coinbase(coin_symbol):
         print(f"🚨 Coinbase error for {coin_symbol}: {e}")
     return None
 
+def fetch_price(coin_symbol):
+    try:
+        # Try Coinbase first
+        coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
+        cb_response = requests.get(coinbase_url)
+        if cb_response.status_code == 200:
+            return float(cb_response.json()["data"]["amount"])
+    except Exception as e:
+        print(f"⚠️ Coinbase error for {coin_symbol}: {e}")
+
+    try:
+        # Fallback to CoinGecko
+        gecko_url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_symbol.lower()}&vs_currencies=usd"
+        gecko_response = requests.get(gecko_url)
+        if gecko_response.status_code == 200:
+            data = gecko_response.json()
+            return data.get(coin_symbol.lower(), {}).get("usd")
+    except Exception as e:
+        print(f"⚠️ CoinGecko error for {coin_symbol}: {e}")
+
+    print(f"❌ All APIs failed for {coin_symbol}")
+    return None
 
 def fetch_coin_description(coin_symbol):
     if coin_symbol.lower() in COIN_METADATA:
