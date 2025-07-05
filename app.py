@@ -35,8 +35,6 @@ LAST_STAR_RISER_UPDATE = datetime.min
 BUY_SESSION = {}
 STAR_RISER_HISTORY = deque(maxlen=10)
 
-COINS = get_top_market_cap_symbols(100)
-
 def get_price_from_coinbase(coin_symbol):
     try:
         coinbase_url = f"https://api.coinbase.com/v2/prices/{coin_symbol.upper()}-USD/spot"
@@ -50,7 +48,9 @@ def get_price_from_coinbase(coin_symbol):
     except Exception as e:
         print(f"🚨 Coinbase error for {coin_symbol}: {e}")
     return None
-    
+
+COINS = get_top_market_cap_symbols(100)
+
 def get_top_market_cap_symbols(limit=100):
     try:
         url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -68,6 +68,8 @@ def get_top_market_cap_symbols(limit=100):
     except Exception as e:
         print(f"⚠️ Failed to fetch top coins: {e}")
     return ["btc", "eth", "xrp", "sol", "ada"]  # fallback
+
+COINS = get_top_market_cap_symbols(100)
 
 def fetch_price(coin_symbol):
     try:
@@ -108,6 +110,7 @@ def fetch_coin_description(coin_symbol):
         print(f"⚠️ Failed to fetch description for {coin_symbol}: {e}")
     return ""
 
+COINS = get_top_market_cap_symbols(100)
 
 def monitor_risers():
     global TOP_RISER, STAR_RISER
@@ -188,6 +191,8 @@ def monitor_risers():
             print(f"[{timestamp}] 🚨 Error in monitor_risers(): {e}")
 
         time.sleep(5)
+
+COINS = get_top_market_cap_symbols(100)
         
 @app.route("/")
 def index():
