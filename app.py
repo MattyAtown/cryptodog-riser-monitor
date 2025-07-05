@@ -393,17 +393,25 @@ def get_price(coin):
 
     return jsonify({"price": round(price_data, 6)})
 
-@app.route("/api/coin_metadata", methods=["POST"])
-def coin_metadata():
-    import re
-    from flask import request
-    coin_ids = request.json.get("coins", [])
+import json
 
-    results = {}
-    for coin in coin_ids:
+# Load or initialize coin metadata
+try:
+    with open("coin_metadata.json", "r") as f:
+        COIN_METADATA = json.load(f)
+except Exception as e:
+    print(f"⚠️ Failed to load coin_metadata.json: {e}")
+    COIN_METADATA = {}
+
+# Helper to fetch and save metadata
+def fetch_and_save_coin_metadata(coins):
+    updated_data = {}
+
+    for coin in coins:
         try:
             url = f"https://api.coingecko.com/api/v3/coins/{coin.lower()}"
-            response = requests.get(url)
+            headers = {"x-cg-pro-api-key": os.getenv("COINGECKO_API_KEY")}
+            response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 data = response.json()
                 desc_html = data.get("description", {}).get("en", "")
@@ -412,38 +420,47 @@ def coin_metadata():
                 categories = data.get("categories", [])
                 homepage = data.get("links", {}).get("homepage", [""])[0]
 
-                results[coin] = {
+                updated_data[coin.lower()] = {
                     "name": name,
                     "category": categories[0] if categories else "N/A",
                     "description": desc,
-                    "homepage": homepage
-                }
-            else:
-                results[coin] = {
-                    "name": coin.upper(),
-                    "category": "N/A",
-                    "description": "",
-                    "homepage": ""
+                    "homepage": homepage,
+                    "chart_url": "",  # Optional future enhancement
+                    "volatility": 0   # Placeholder for future metrics
                 }
         except Exception as e:
-            results[coin] = {
-                "name": coin.upper(),
-                "category": "N/A",
-                "description": "",
-                "homepage": ""
-            }
+            print(f"❌ Error updating metadata for {coin}: {e}")
 
-    return jsonify(results)
-    
-import json  # Make sure this is in your imports if not already
+    # Update and persist
+    COIN_METADATA.update(updated_data)
+    with open("coin_metadata.json", "w") as f:
+        json.dump(COIN_METADATA, f, indent=2)
 
-# Load the metadata once when the app starts
-with open("coin_metadata.json", "r") as f:
-    COIN_METADATA = json.load(f)
+    return updated_data
 
+# POST route to bulk-update metadata
+@app.route("/api/coin_metadata", methods=["POST"])
+def coin_metadata():
+    coin_ids = request.json.get("coins", [])
+    updated = fetch_and_save_coin_metadata(coin_ids)
+    return jsonify(updated)
+
+# Coin info endpoint with on-the-fly fallback
 @app.route("/api/coin-info/<coin>/<float:price>/<float:change>")
 def coin_info(coin, price, change):
-    coin_data = COIN_METADATA.get(coin.lower(), {})
+    coin_lower = coin.lower()
+    coin_data = COIN_METADATA.get(coin_lower)
+
+    if not coin_data:
+        print(f"⚠️ Metadata for {coin} not found. Fetching on-the-fly...")
+        fetched = fetch_and_save_coin_metadata([coin_lower])
+        coin_data = fetched.get(coin_lower, {
+            "name": coin.upper(),
+            "category": "N/A",
+            "description": "",
+            "chart_url": "",
+            "volatility": 0
+        })
 
     return jsonify({
         "coin": coin,
@@ -456,6 +473,7 @@ def coin_info(coin, price, change):
         "image": resolve_image_path(coin),
         "chart_url": coin_data.get("chart_url", "")
     })
+
     
 @app.route("/api/top-riser-history")
 def top_riser_history_api():
