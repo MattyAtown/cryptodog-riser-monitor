@@ -9,6 +9,7 @@ import threading
 import time
 import feedparser
 import re
+import json
 
 app = Flask(__name__)
 app.secret_key = "arnie_secret_2025_crypto_dog"  # Or pull from an environment variable
@@ -57,9 +58,7 @@ TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
 
-     def populate_coin_metadata(coins):
-    global COIN_METADATA
-    COIN_METADATA = {}
+def populate_coin_metadata(coins):
     try:
         with open("static/coin_metadata.json", "r") as f:
             all_data = json.load(f)
