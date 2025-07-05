@@ -57,8 +57,7 @@ TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
 
-    
-    def populate_coin_metadata(coins):
+     def populate_coin_metadata(coins):
     global COIN_METADATA
     COIN_METADATA = {}
     try:
@@ -87,6 +86,7 @@ STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
     except Exception as e:
         print(f"🚨 Coinbase error for {coin_symbol}: {e}")
     return None
+
 
 def fetch_price(coin_symbol):
     try:
