@@ -315,25 +315,14 @@ See you inside!
     return render_template('signup.html')  # ✅ necessary for showing form on GET request
 
 def resolve_image_path(coin):
-    """
-    Returns the accessible URL path to the coin image.
-    Searches known folders and falls back to generic image if not found.
-    """
-    if not coin or coin.lower() in ['no riser', 'no star riser']:
+    if not coin:
         return '/static/coins/generic.png'
 
-    coin = coin.lower()
-
-    search_paths = [
-        f'static/coins/{coin}.png',
-        f'static/cryptodog_riser_monitor/{coin}.png'
-    ]
-
-    for path in search_paths:
-        if os.path.isfile(path):
-            return '/' + path  # URL-relative
-
-    return '/static/coins/generic.png'
+    image_path = f"static/coins/{coin.lower()}.png"
+    if os.path.isfile(image_path):
+        return f"/static/coins/{coin.lower()}.png"
+    else:
+        return '/static/coins/generic.png'
 
 @app.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
