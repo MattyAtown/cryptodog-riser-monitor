@@ -21,10 +21,6 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
 mail = Mail(app)
 
-PRICE_HISTORY = {coin: [] for coin in COINS}
-TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
-STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
-
 from collections import deque, Counter
 
 TOP_RISER_HISTORY = deque(maxlen=50)
@@ -53,7 +49,9 @@ def get_top_market_cap_symbols(limit=100):
     return ["btc", "eth", "xrp", "sol", "ada"]  # fallback
 
 COINS = get_top_market_cap_symbols(100)
-
+PRICE_HISTORY = {coin: [] for coin in COINS}
+TOP_RISER = (None, 0, 0.0)  # (coin, % rise, price)
+STAR_RISER = (None, 0, 0.0)  # (coin, % rise, price)
 
 def get_price_from_coinbase(coin_symbol):
     try:
