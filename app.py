@@ -145,10 +145,11 @@ def monitor_risers():
             max_rise_pct = 0.0
             final_price = 0.0
 
-    for coin in COINS:
+ for coin in COINS:
     price = fetch_price(coin)
     if price is None:
         continue
+
 
     # --- Maintain price history for 3-step riser logic
     PRICE_HISTORY[coin].append(price)
@@ -162,9 +163,7 @@ def monitor_risers():
     baseline = BASELINE_PRICE[coin]
     pct_change = ((price - baseline) / baseline) * 100
     SPARK_HISTORY[coin].append(round(pct_change, 2))
-    SPARK_HISTORY[coin] = SPARK_HISTORY[coin][-288:]  # Keep ~24 hours (288 points @ 5s interval)
-
-    # --- Optional: prune baseline at 24h if needed (e.g. with timestamped records)
+    SPARK_HISTORY[coin] = SPARK_HISTORY[coin][-288:]  # Keep ~24 hours
 
     # ✅ Riser logic (only if we have 3 points)
     if len(PRICE_HISTORY[coin]) == STEP_LIMIT:
@@ -173,13 +172,13 @@ def monitor_risers():
         if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
             rise_pct = ((p3 - p1) / p1) * 100
 
-                        print(f"[{timestamp}] ✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
+            print(f"[{timestamp}] ✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
 
-                        if rise_pct > max_rise_pct:
-                            top_riser_candidate = coin
-                            max_rise_pct = rise_pct
-                            final_price = p3
-
+            if rise_pct > max_rise_pct:
+                top_riser_candidate = coin
+                max_rise_pct = rise_pct
+                final_price = p3
+                
             if top_riser_candidate:
                 TOP_RISER = (top_riser_candidate, round(max_rise_pct, 5), round(final_price, 5))
                 print(f"[{timestamp}] 🔝 TOP RISER: {TOP_RISER[0].upper()} | +{TOP_RISER[1]}% | ${TOP_RISER[2]}")
