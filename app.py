@@ -326,31 +326,29 @@ def tier1():
         return redirect('/signup')
     return render_template('tier_1_crypto_intro.html')
 
-@app.route("/api/top-riser")
-def top_riser_api():
+@app.route('/api/top-riser')
+def get_top_riser():
+    coin, change, price = TOP_RISER
+    history = PRICE_HISTORY.get(coin, [])[-20:]  # Last 20 points
     return jsonify({
-        "coin": TOP_RISER[0],
-        "change": TOP_RISER[1],
-        "price": TOP_RISER[2],
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "coin": coin,
+        "change": change,
+        "price": price,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "trend": history  # ✅ Include this line
     })
 
-@app.route("/api/star-riser")
-def star_riser_api():
-    if STAR_RISER and STAR_RISER[0]:
-        return jsonify({
-            "coin": STAR_RISER[0],
-            "change": STAR_RISER[1],
-            "price": STAR_RISER[2],
-            "timestamp": STAR_RISER[3] if len(STAR_RISER) > 3 else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
-    else:
-        return jsonify({
-            "coin": None,
-            "change": 0.0,
-            "price": 0.0,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
+@app.route('/api/star-riser')
+def get_star_riser():
+    coin, change, price = STAR_RISER
+    history = PRICE_HISTORY.get(coin, [])[-20:]
+    return jsonify({
+        "coin": coin,
+        "change": change,
+        "price": price,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "trend": history  # ✅ Include this line
+    })
 
 @app.route("/api/debug/star")
 def debug_star():
