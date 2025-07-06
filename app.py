@@ -130,9 +130,9 @@ def monitor_risers():
     global LAST_TOP_RISER, LAST_TOP_RISER_TIME, LAST_STAR_RISER_UPDATE
     global TOP_RISER_HISTORY, STAR_RISER_HISTORY
 
-    STEP_LIMIT = 3  # 3 checks = 15 seconds
-    MIN_STEP = 0.000000000001  # Minimum rise per step
-    STAR_RISER_MIN_PERCENT = 1.0  # Min total % rise for Star Riser eligibility
+    STEP_LIMIT = 3
+    MIN_STEP = 0.000000000001
+    STAR_RISER_MIN_PERCENT = 1.0
 
     print("🚀 CryptoDog Riser Monitor started.")
 
@@ -144,46 +144,39 @@ def monitor_risers():
             top_riser_candidate = None
             max_rise_pct = 0.0
             final_price = 0.0
-            
-for coin in COINS:
-    price = fetch_price(coin)
-    if price is None:
-        continue
 
+            for coin in COINS:
+                price = fetch_price(coin)
+                if price is None:
+                    continue
 
-    # --- Maintain price history for 3-step riser logic
-    PRICE_HISTORY[coin].append(price)
-    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-STEP_LIMIT:]
+                # Maintain price history
+                PRICE_HISTORY[coin].append(price)
+                PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-STEP_LIMIT:]
 
-    # --- Baseline price set only once per 24-hour span
-    if coin not in BASELINE_PRICE:
-        BASELINE_PRICE[coin] = price
+                # Sparkline tracking (24h % trend)
+                if coin not in BASELINE_PRICE:
+                    BASELINE_PRICE[coin] = price
+                baseline = BASELINE_PRICE[coin]
+                pct_change = ((price - baseline) / baseline) * 100
+                SPARK_HISTORY[coin].append(round(pct_change, 2))
+                SPARK_HISTORY[coin] = SPARK_HISTORY[coin][-288:]
 
-    # --- Sparkline percentage change from baseline
-    baseline = BASELINE_PRICE[coin]
-    pct_change = ((price - baseline) / baseline) * 100
-    SPARK_HISTORY[coin].append(round(pct_change, 2))
-    SPARK_HISTORY[coin] = SPARK_HISTORY[coin][-288:]  # Keep ~24 hours
+                if len(PRICE_HISTORY[coin]) == STEP_LIMIT:
+                    p1, p2, p3 = PRICE_HISTORY[coin]
+                    if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
+                        rise_pct = ((p3 - p1) / p1) * 100
+                        print(f"[{timestamp}] ✅ {coin.upper()} rose 3x | Δ%: {rise_pct:.5f}")
+                        if rise_pct > max_rise_pct:
+                            top_riser_candidate = coin
+                            max_rise_pct = rise_pct
+                            final_price = p3
 
-    # ✅ Riser logic (only if we have 3 points)
-    if len(PRICE_HISTORY[coin]) == STEP_LIMIT:
-        p1, p2, p3 = PRICE_HISTORY[coin]
-
-        if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
-            rise_pct = ((p3 - p1) / p1) * 100
-
-            print(f"[{timestamp}] ✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
-
-            if rise_pct > max_rise_pct:
-                top_riser_candidate = coin
-                max_rise_pct = rise_pct
-                final_price = p3
-                
             if top_riser_candidate:
                 TOP_RISER = (top_riser_candidate, round(max_rise_pct, 5), round(final_price, 5))
                 print(f"[{timestamp}] 🔝 TOP RISER: {TOP_RISER[0].upper()} | +{TOP_RISER[1]}% | ${TOP_RISER[2]}")
 
-                # Update Top Riser History
+                # Update history
                 if LAST_TOP_RISER != TOP_RISER[0]:
                     LAST_TOP_RISER = TOP_RISER[0]
                     LAST_TOP_RISER_TIME = now
@@ -192,36 +185,31 @@ for coin in COINS:
                     LAST_TOP_RISER_TIME = now
                     TOP_RISER_HISTORY.appendleft({"coin": TOP_RISER[0], "timestamp": now})
 
-                # Immediate Star Riser (1-min view)
-                recent_top_risers = [entry["coin"] for entry in TOP_RISER_HISTORY if (now - entry["timestamp"]) <= timedelta(seconds=60)]
-                coin_counts = Counter(recent_top_risers)
+                # Star Riser logic (short + long term)
+                recent = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(seconds=60)]
+                count = Counter(recent)
+                if count:
+                    common, freq = count.most_common(1)[0]
+                    if TOP_RISER[0] == common and TOP_RISER[1] >= STAR_RISER_MIN_PERCENT:
+                        STAR_RISER = (common, round(freq * 1.5, 2), TOP_RISER[2], timestamp)
+                        print(f"[{timestamp}] 🌟 STAR RISER: {STAR_RISER[0]} | Score: {STAR_RISER[1]}")
 
-                if coin_counts:
-                    most_common, freq = coin_counts.most_common(1)[0]
-
-                    if TOP_RISER[0] == most_common and TOP_RISER[1] >= STAR_RISER_MIN_PERCENT:
-                        STAR_RISER = (most_common, round(freq * 1.5, 2), TOP_RISER[2], timestamp)
-                        print(f"[{timestamp}] 🌟 STAR RISER: {STAR_RISER[0].upper()} | Score: {STAR_RISER[1]} | Price: ${STAR_RISER[2]}")
-
-            # ✅ Long-Term Star Riser (updates every 60 seconds)
+            # Long-Term Star Riser
             if (now - LAST_STAR_RISER_UPDATE) >= timedelta(seconds=60):
-                recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
-                if recent_30:
-                    common_30, freq = Counter(recent_30).most_common(1)[0]
+                last_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
+                if last_30:
+                    common_30, freq = Counter(last_30).most_common(1)[0]
                     latest_price = fetch_price(common_30) or 0.0
                     STAR_RISER = (common_30, round(freq * 1.5, 2), round(latest_price, 5), timestamp)
-
                     if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
                         STAR_RISER_HISTORY.appendleft(common_30)
-
-                    print(f"[{timestamp}] 🌟 STAR RISER Updated (60s): {STAR_RISER[0]} | Score: {STAR_RISER[1]} | ${STAR_RISER[2]}")
+                    print(f"[{timestamp}] 🌟 STAR RISER Updated (60s): {STAR_RISER[0]} | Score: {STAR_RISER[1]}")
                 LAST_STAR_RISER_UPDATE = now
 
         except Exception as e:
             print(f"[{timestamp}] 🚨 Error in monitor_risers(): {e}")
 
         time.sleep(5)
-
 
 # --- Save PRICE_HISTORY to file for persistence
 def save_price_history():
