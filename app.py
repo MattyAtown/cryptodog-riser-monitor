@@ -422,40 +422,47 @@ def coin_metadata():
     updated = fetch_and_save_coin_metadata(coin_ids)
     return jsonify(updated)
 
-# Coin info endpoint with on-the-fly fallback
-@app.route("/api/coin-info/<coin>/<price>/<change>")
-def coin_info(coin, price, change):
-    try:
-        price = float(price)
-        change = float(change)
-    except ValueError:
-        return jsonify({"error": "Invalid price or change format"}), 400
+@app.route("/api/coin-info/<coin>/<price>/<rise>")
+def coin_info(coin, price, rise):
+    symbol = coin.lower()
+    
+    # Use metadata if available
+    meta = COIN_METADATA.get(symbol, {})
 
-    coin_lower = coin.lower()
-    coin_data = COIN_METADATA.get(coin_lower)
+    name = meta.get("name", coin.upper())
+    category = meta.get("category", "Unknown")
+    description = meta.get("description")
 
-    if not coin_data:
-        print(f"⚠️ Metadata for {coin} not found. Fetching on-the-fly...")
-        fetched = fetch_and_save_coin_metadata([coin_lower])
-        coin_data = fetched.get(coin_lower, {
-            "name": coin.upper(),
-            "category": "N/A",
-            "description": "",
-            "chart_url": "",
-            "volatility": 0
-        })
+    # If no description in local metadata, try fetching from Coingecko
+    if not description:
+        try:
+            url = f"https://api.coingecko.com/api/v3/coins/{symbol}"
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                desc_html = data.get("description", {}).get("en", "")
+                description = re.sub(r'<.*?>', '', desc_html).strip()[:300]
+
+                # Cache it in COIN_METADATA for future use
+                COIN_METADATA[symbol] = {
+                    "name": name,
+                    "category": category,
+                    "description": description
+                }
+
+        except Exception as e:
+            print(f"⚠️ Failed to fetch description for {symbol}: {e}")
+            description = "No description available."
 
     return jsonify({
-        "coin": coin,
-        "name": coin_data.get("name", coin.upper()),
-        "category": coin_data.get("category", "N/A"),
-        "description": coin_data.get("description", ""),
-        "volatility": coin_data.get("volatility", 0),
-        "price": f"{price:.2f}",
-        "change": f"{change:.2f}",
-        "image": resolve_image_path(coin),
-        "chart_url": coin_data.get("chart_url", "")
+        "coin": coin.upper(),
+        "price": price,
+        "rise": rise,
+        "name": name,
+        "category": category,
+        "description": description
     })
+
 
     
 @app.route("/api/top-riser-history")
