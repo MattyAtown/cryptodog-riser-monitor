@@ -528,20 +528,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById(canvasId);
   if (!canvas || !data || data.length < 2) return;
 
-  // Scale canvas to match its displayed size
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
   const ctx = canvas.getContext("2d");
   const w = canvas.width;
   const h = canvas.height;
+  const padding = 6; // Add some vertical padding
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
 
   ctx.clearRect(0, 0, w, h);
 
-  // Glow effect
   ctx.shadowColor = color;
   ctx.shadowBlur = 10;
   ctx.strokeStyle = color;
@@ -550,7 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ctx.beginPath();
   data.forEach((price, i) => {
     const x = (i / (data.length - 1)) * w;
-    const y = h - ((price - min) / range) * h;
+    const y = padding + (h - 2 * padding) * (1 - (price - min) / range);
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
