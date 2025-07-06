@@ -144,8 +144,8 @@ def monitor_risers():
             top_riser_candidate = None
             max_rise_pct = 0.0
             final_price = 0.0
-
- for coin in COINS:
+            
+for coin in COINS:
     price = fetch_price(coin)
     if price is None:
         continue
