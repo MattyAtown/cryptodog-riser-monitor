@@ -208,6 +208,21 @@ def monitor_risers():
             print(f"[{timestamp}] 🚨 Error in monitor_risers(): {e}")
 
         time.sleep(5)
+
+# --- Save PRICE_HISTORY to file for persistence
+def save_price_history():
+    try:
+        with open("data/price_history.json", "w") as f:
+            json.dump(PRICE_HISTORY, f)
+        print("💾 Price history saved.")
+    except Exception as e:
+        print(f"⚠️ Error saving price history: {e}")
+
+# --- Background task to save every X minutes
+def periodic_save():
+    while True:
+        save_price_history()
+        time.sleep(300)  # Every 5 minutes
         
 @app.route("/")
 def index():
@@ -570,6 +585,7 @@ def crypto_news():
 
 # Start the monitor in a background thread
 threading.Thread(target=monitor_risers, daemon=True).start()
+threading.Thread(target=periodic_save, daemon=True).start()
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
