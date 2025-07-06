@@ -48,25 +48,34 @@ def get_top_market_cap_symbols(limit=100):
         print(f"⚠️ Failed to fetch top coins: {e}")
     return ["btc", "eth", "xrp", "sol", "ada"]  # fallback list
 
-# --- Function to populate metadata ---
 def populate_coin_metadata(coins):
     global COIN_METADATA
-    COIN_METADATA = {}
-    try:
-        with open("static/coin_metadata.json", "r") as f:
-            all_data = json.load(f)
-            for coin in coins:
-                if coin in all_data:
-                    COIN_METADATA[coin] = all_data[coin]
-                else:
-                    COIN_METADATA[coin] = {
-                        "name": coin.upper(),
-                        "category": "Unknown",
-                        "description": "No description available."
-                    }
-        print(f"✅ Coin metadata populated for {len(COIN_METADATA)} coins.")
-    except Exception as e:
-        print(f"⚠️ Failed to populate metadata: {e}")
+    
+
+    # Try multiple locations for the metadata file
+    paths_to_try = ["static/coin_metadata.json", "coin_metadata.json"]
+
+    loaded_data = None
+    for path in paths_to_try:
+        try:
+            with open(path, "r") as f:
+                loaded_data = json.load(f)
+                print(f"✅ Loaded coin metadata from: {path}")
+                break
+        except Exception as e:
+            print(f"⚠️ Could not load metadata from {path}: {e}")
+
+    for coin in coins:
+        if loaded_data and coin in loaded_data:
+            COIN_METADATA[coin] = loaded_data[coin]
+        else:
+            COIN_METADATA[coin] = {
+                "name": coin.upper(),
+                "category": "Unknown",
+                "description": "No description available."
+            }
+
+    print(f"✅ Coin metadata populated for {len(COIN_METADATA)} coins.")
 
 
 COIN_METADATA = {}
