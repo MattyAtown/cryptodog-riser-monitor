@@ -328,7 +328,7 @@ def top_riser_api():
 
 @app.route("/api/star-riser")
 def star_riser_api():
-    if STAR_RISER[0]:
+    if STAR_RISER and STAR_RISER[0]:
         return jsonify({
             "coin": STAR_RISER[0],
             "change": STAR_RISER[1],
@@ -347,7 +347,9 @@ def star_riser_api():
 def debug_star():
     return jsonify({
         "STAR_RISER": STAR_RISER,
-        "STAR_RISER_HISTORY": list(STAR_RISER_HISTORY)
+        "TOP_RISER_HISTORY": list(TOP_RISER_HISTORY),
+        "STAR_RISER_HISTORY": list(STAR_RISER_HISTORY),
+        "LAST_STAR_RISER_UPDATE": LAST_STAR_RISER_UPDATE.strftime("%Y-%m-%d %H:%M:%S")
     })
     
 @app.route('/api/price/<coin>')
