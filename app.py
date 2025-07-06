@@ -338,17 +338,18 @@ def get_top_riser():
         "trend": history  # ✅ Include this line
     })
 
-@app.route('/api/star-riser')
+@app.route("/api/star-riser")
 def get_star_riser():
-    coin, change, price = STAR_RISER
-    history = PRICE_HISTORY.get(coin, [])[-20:]
-    return jsonify({
-        "coin": coin,
-        "change": change,
-        "price": price,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "trend": history  # ✅ Include this line
-    })
+    global STAR_RISER
+    if STAR_RISER and STAR_RISER[0]:
+        coin, change, price, timestamp = STAR_RISER
+        return jsonify({
+            "coin": coin,
+            "change": change,
+            "price": price,
+            "timestamp": timestamp
+        })
+    return jsonify({"coin": "No Riser", "change": 0, "price": 0.0, "timestamp": datetime.now().isoformat()})
 
 @app.route("/api/debug/star")
 def debug_star():
