@@ -109,6 +109,10 @@ def fetch_price(coin_symbol):
     print(f"❌ All APIs failed for {coin_symbol}")
     return None
 
+PRICE_HISTORY = {coin: [] for coin in COINS}
+BASELINE_PRICE = {}
+SPARK_HISTORY = {coin: [] for coin in COINS}
+
 def fetch_coin_description(coin_symbol):
     if coin_symbol.lower() in COIN_METADATA:
         return COIN_METADATA[coin_symbol.lower()].get("description", "")
