@@ -306,7 +306,25 @@ def subscribe():
     if not session.get('verified'):
         flash("⚠️ Please verify your email before subscribing.", "error")
         return redirect('/verify_email')
-import os
+
+    if request.method == 'POST':
+        tier = request.form.get('tier')
+        session['subscription'] = tier
+
+        if tier == 'Tier 1':
+            flash('✅ Tier 1 Activated! You can now begin your free training.', 'success')
+            return redirect('/tier1')  # Go directly to Tier 1 dashboard
+
+        # Future support for paid tiers:
+        payment_method = request.form.get('payment')
+        if not payment_method:
+            flash('❌ Please select a payment method.', 'error')
+            return redirect('/subscribe')
+
+        session['payment_method'] = payment_method
+        return redirect('/payment_crypto')
+
+    return render_template('subscribe.html')
 
 # Optional global cache to avoid repeated API calls
 COINGECKO_IMAGE_CACHE = {}
