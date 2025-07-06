@@ -170,7 +170,7 @@ def monitor_risers():
                     LAST_TOP_RISER_TIME = now
                     TOP_RISER_HISTORY.appendleft({"coin": TOP_RISER[0], "timestamp": now})
 
-                # Star Riser logic
+                # Immediate Star Riser (1-min view)
                 recent_top_risers = [entry["coin"] for entry in TOP_RISER_HISTORY if (now - entry["timestamp"]) <= timedelta(seconds=60)]
                 coin_counts = Counter(recent_top_risers)
 
@@ -181,16 +181,19 @@ def monitor_risers():
                         STAR_RISER = (most_common, round(freq * 1.5, 2), TOP_RISER[2], timestamp)
                         print(f"[{timestamp}] 🌟 STAR RISER: {STAR_RISER[0].upper()} | Score: {STAR_RISER[1]} | Price: ${STAR_RISER[2]}")
 
-               # Star Riser logic: update every 60 seconds based on most consistent performer over 30 minutes
-if (now - LAST_STAR_RISER_UPDATE) >= timedelta(seconds=60):
-    recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
-    if recent_30:
-        common_30, freq = Counter(recent_30).most_common(1)[0]
-        STAR_RISER = (common_30, round(freq * 1.5, 2), fetch_price(common_30), timestamp)
-        if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
-            STAR_RISER_HISTORY.appendleft(common_30)
-        print(f"[{timestamp}] 🌟 STAR RISER Updated (60s): {STAR_RISER[0]} | Score: {STAR_RISER[1]} | ${STAR_RISER[2]}")
-    LAST_STAR_RISER_UPDATE = now
+            # ✅ Long-Term Star Riser (updates every 60 seconds)
+            if (now - LAST_STAR_RISER_UPDATE) >= timedelta(seconds=60):
+                recent_30 = [e["coin"] for e in TOP_RISER_HISTORY if (now - e["timestamp"]) <= timedelta(minutes=30)]
+                if recent_30:
+                    common_30, freq = Counter(recent_30).most_common(1)[0]
+                    latest_price = fetch_price(common_30) or 0.0
+                    STAR_RISER = (common_30, round(freq * 1.5, 2), round(latest_price, 5), timestamp)
+
+                    if not STAR_RISER_HISTORY or STAR_RISER_HISTORY[0] != common_30:
+                        STAR_RISER_HISTORY.appendleft(common_30)
+
+                    print(f"[{timestamp}] 🌟 STAR RISER Updated (60s): {STAR_RISER[0]} | Score: {STAR_RISER[1]} | ${STAR_RISER[2]}")
+                LAST_STAR_RISER_UPDATE = now
 
         except Exception as e:
             print(f"[{timestamp}] 🚨 Error in monitor_risers(): {e}")
