@@ -7,6 +7,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
 
+  .banner {
+     background-color: rgba(0, 0, 0, 0.6);
+     color: #ffffff;
+     font-weight: 600;
+     font-size: 1.2rem;
+     text-shadow: 0 0 8px #ff69b4;
+     padding: 12px 20px;
+     border-radius: 10px;
+     margin: 10px auto;
+     width: 90%;
+     max-width: 900px;
+     text-align: center;
+     min-height: 48px;
+     }
+  
+  
   #askArnieWidget {
     position: fixed;
     bottom: 20px;
@@ -397,10 +413,12 @@
 
     function rotateBannerMessages() {
       const messages = [
-        "Crypto surges to all-time highs – more to come?",
-        "XRP and SOL showing strong momentum with lower risk.",
-        "Caution: Meme coins are highly manipulated.",
-        "Sign up to learn minimum-risk, high-reward strategies."
+        "🚀 Sign up for your Free Tier 1 AI Trading Coach – Learn the basics with Arnie!",
+        "📈 CryptoDog shows current Top Riser results – Basing results on now, giving you Warnings!",
+        "🌟 Star Riser tracks consistent gainers over time – Strong Buy Signals for smart traders!",
+        "🤖 Any Questions about the site or subscriptions? Ask Arnie. He’ll be back with answers!",
+        "📰 News updates are live – Popular topics often hint at future moves. Stay informed.",
+        "💰 Make money by learning how to trade with less risk and more oversight at CryptoDogLive!"
       ];
       let index = 0;
       setInterval(() => {
@@ -409,7 +427,7 @@
       }, 8000);
     }
 
-       fetchTopRiser();
+    fetchTopRiser();
     fetchStarRiser();
     fetchNews();
     rotateBannerMessages();
