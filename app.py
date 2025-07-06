@@ -252,8 +252,16 @@ def signup():
         email = request.form.get('email')
         first = request.form.get('first')
 
+        # ✅ Save user email to session
+        session['user_email'] = email
+
+        # ✅ Create token from email
+        token = serializer.dumps(email, salt='email-confirm')
+        verify_link = url_for('verify_token', token=token, _external=True)
+
+        # ✅ Build email message
         msg = Message(
-            subject="Welcome to CryptoDog | Learn with Arnie",
+            subject="Welcome to CryptoDog | Verify Your Email",
             sender=app.config['MAIL_USERNAME'],
             recipients=[email]
         )
@@ -262,25 +270,25 @@ def signup():
 Thanks for signing up to CryptoDog! You're now subscribed to the Arnie Trading Academy.
 
 👉 Click here to confirm your subscription and begin your journey:
-https://cryptodoglive.onrender.com/thank-you
+{verify_link}
+
+This link will expire in 1 hour.
 
 See you inside!
 – Arnie 🐶"""
 
         try:
             mail.send(msg)
-            print(f"✅ Email sent to {email}")
-            flash('✅ Email sent! Check your inbox.', 'success')
+            print(f"✅ Verification email sent to {email}")
+            flash('✅ Check your inbox to verify your email.', 'success')
         except Exception as e:
-            print(f"❌ Failed to send email: {e}")
-            flash('❌ Failed to send email. Try again.', 'error')
+            print(f"❌ Failed to send verification email: {e}")
+            flash('❌ Failed to send verification email. Please try again.', 'error')
 
-        return redirect(url_for('verify_email'))  # ✅ keeps user experience flowing
+        return redirect(url_for('verify_email'))  # Show message page
 
-    return render_template('signup.html')  # ✅ necessary for showing form on GET request
-
-
-
+    return render_template('signup.html')  # Show signup form
+    
 @app.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
     if not session.get('verified'):
