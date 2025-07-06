@@ -146,18 +146,32 @@ def monitor_risers():
             final_price = 0.0
 
             for coin in COINS:
-                price = fetch_price(coin)
-                if price is None:
-                    continue
+    price = fetch_price(coin)
+    if price is None:
+        continue
 
-                PRICE_HISTORY[coin].append(price)
-                PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-STEP_LIMIT:]
+    # --- Maintain price history for 3-step riser logic
+    PRICE_HISTORY[coin].append(price)
+    PRICE_HISTORY[coin] = PRICE_HISTORY[coin][-STEP_LIMIT:]
 
-                if len(PRICE_HISTORY[coin]) == STEP_LIMIT:
-                    p1, p2, p3 = PRICE_HISTORY[coin]
+    # --- Baseline price set only once per 24-hour span
+    if coin not in BASELINE_PRICE:
+        BASELINE_PRICE[coin] = price
 
-                    if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
-                        rise_pct = ((p3 - p1) / p1) * 100
+    # --- Sparkline percentage change from baseline
+    baseline = BASELINE_PRICE[coin]
+    pct_change = ((price - baseline) / baseline) * 100
+    SPARK_HISTORY[coin].append(round(pct_change, 2))
+    SPARK_HISTORY[coin] = SPARK_HISTORY[coin][-288:]  # Keep ~24 hours (288 points @ 5s interval)
+
+    # --- Optional: prune baseline at 24h if needed (e.g. with timestamped records)
+
+    # ✅ Riser logic (only if we have 3 points)
+    if len(PRICE_HISTORY[coin]) == STEP_LIMIT:
+        p1, p2, p3 = PRICE_HISTORY[coin]
+
+        if (p2 > p1 + MIN_STEP) and (p3 > p2 + MIN_STEP):
+            rise_pct = ((p3 - p1) / p1) * 100
 
                         print(f"[{timestamp}] ✅ {coin.upper()} rose 3x | t1: {p1:.6f} → t3: {p3:.6f} | Δ%: {rise_pct:.5f}")
 
@@ -208,6 +222,7 @@ def monitor_risers():
             print(f"[{timestamp}] 🚨 Error in monitor_risers(): {e}")
 
         time.sleep(5)
+
 
 # --- Save PRICE_HISTORY to file for persistence
 def save_price_history():
