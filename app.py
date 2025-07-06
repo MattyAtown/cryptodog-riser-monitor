@@ -550,12 +550,14 @@ def buy_summary():
 @app.route('/thank-you')
 def thank_you():
     if 'user_email' not in session:
-        return redirect('/signup')  # Or login page if more appropriate
+        flash("⚠️ Please sign up first.", "error")
+        return redirect('/signup')
 
-    # Only allow if verified and on Tier 1
-    if session.get('subscription') != 'Tier 1' or not session.get('verified'):
-        return redirect('/subscribe')
+    if not session.get('verified'):
+        flash("⚠️ Please verify your email to continue.", "error")
+        return redirect('/verify_email')
 
+    return render_template('thank_you.html')
 
 @app.route('/tier-1')
 def tier_one():
