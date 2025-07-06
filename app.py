@@ -324,24 +324,12 @@ def top_riser_api():
 
 @app.route("/api/star-riser")
 def star_riser_api():
-    if STAR_RISER_HISTORY:
-        coin = STAR_RISER_HISTORY[0]
-        change = 0.0
-        price = 0.0
-
-        # Optional: Try to retrieve price and change from existing trend data
-        if coin in PRICE_HISTORY and len(PRICE_HISTORY[coin]) >= 2:
-            old_price = PRICE_HISTORY[coin][0]
-            new_price = PRICE_HISTORY[coin][-1]
-            if old_price > 0:
-                change = ((new_price - old_price) / old_price) * 100
-                price = new_price
-
+    if STAR_RISER[0]:
         return jsonify({
-            "coin": coin,
-            "change": round(change, 2),
-            "price": round(price, 4),
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "coin": STAR_RISER[0],
+            "change": STAR_RISER[1],
+            "price": STAR_RISER[2],
+            "timestamp": STAR_RISER[3] if len(STAR_RISER) > 3 else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
     else:
         return jsonify({
@@ -351,6 +339,13 @@ def star_riser_api():
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
 
+@app.route("/api/debug/star")
+def debug_star():
+    return jsonify({
+        "STAR_RISER": STAR_RISER,
+        "STAR_RISER_HISTORY": list(STAR_RISER_HISTORY)
+    })
+    
 @app.route('/api/price/<coin>')
 def get_price(coin):
     price_data = fetch_price(coin.upper())  # This is your own function fetching the price
