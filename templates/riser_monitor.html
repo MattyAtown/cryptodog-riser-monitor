@@ -354,6 +354,10 @@
       if (boxPrefix === "topRiser") lastTopRiserCoin = coin;
       if (boxPrefix === "starRiser") lastStarRiserCoin = coin;
 
+      // Draw mini trend line
+      if (data.trend && data.trend.length > 1) {
+          drawSparkline(`${boxPrefix}Trend`, data.trend, boxPrefix === "topRiser" ? "#0ff" : "#ff69b4");
+    }
       change = change || "0.00";
       price = parseFloat(price);
       timestamp = timestamp || new Date().toLocaleString();
@@ -519,6 +523,40 @@ document.addEventListener("DOMContentLoaded", () => {
   window.startTracking = startTracking;
   window.stopTracking = stopTracking;
 });
+
+  function drawSparkline(canvasId, data, color = "#0ff") {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !data || data.length < 2) return;
+
+  // Scale canvas to match its displayed size
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Glow effect
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 10;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  data.forEach((price, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((price - min) / range) * h;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
 </script>
 </body>
 </html>
