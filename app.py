@@ -288,6 +288,18 @@ See you inside!
         return redirect(url_for('verify_email'))  # Show message page
 
     return render_template('signup.html')  # Show signup form
+
+@app.route('/verify/<token>')
+def verify_token(token):
+    try:
+        email = serializer.loads(token, salt='email-confirm', max_age=3600)
+        session['verified'] = True
+        session['user_email'] = email
+        flash("✅ Email verified! Choose your subscription.", "success")
+        return redirect('/subscribe')
+    except Exception as e:
+        flash("❌ Verification link is invalid or expired. Please sign up again.", "error")
+        return redirect('/signup')
     
 @app.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
