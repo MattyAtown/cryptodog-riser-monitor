@@ -390,7 +390,7 @@ import json
 
 # Load or initialize coin metadata
 try:
-    with open("coin_metadata.json", "r") as f:
+    with open("static/coin_metadata.json", "r") as f:
         COIN_METADATA = json.load(f)
 except Exception as e:
     print(f"⚠️ Failed to load coin_metadata.json: {e}")
@@ -426,7 +426,7 @@ def fetch_and_save_coin_metadata(coins):
 
     # Update and persist
     COIN_METADATA.update(updated_data)
-    with open("coin_metadata.json", "w") as f:
+    with open("static/coin_metadata.json", "w") as f:
         json.dump(COIN_METADATA, f, indent=2)
 
     return updated_data
