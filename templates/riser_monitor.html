@@ -8,19 +8,26 @@
   <style>
 
   .banner {
-     background-color: rgba(0, 0, 0, 0.6);
-     color: #ffffff;
-     font-weight: 600;
-     font-size: 1.2rem;
-     text-shadow: 0 0 8px #ff69b4;
-     padding: 12px 20px;
-     border-radius: 10px;
-     margin: 10px auto;
-     width: 90%;
-     max-width: 900px;
-     text-align: center;
-     min-height: 48px;
-     }
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.25rem;
+    padding: 14px 22px;
+    border-radius: 12px;
+    margin: 12px auto;
+    width: 90%;
+    max-width: 960px;
+    text-align: center;
+    min-height: 50px;
+    letter-spacing: 0.5px;
+    font-family: 'Orbitron', sans-serif;
+    box-shadow: 0 0 20px #ff00ff88, inset 0 0 12px #ff00ff44;
+    text-shadow:
+    1px 1px 2px #000000,
+    0 0 4px #ff69b4,
+    0 0 8px #ff69b4,
+    2px 2px 2px rgba(0, 0, 0, 0.4);
+  }
   
   
   #askArnieWidget {
@@ -225,7 +232,7 @@
     <img id="dogFace" src="/static/neutral.png" alt="CryptoDog" class="crypto-face" />
   </div>
 
-  <div class="buy-signal" id="buySignalBar">Tracking Live Signals...</div>
+  <div class="banner" id="buySignalBar">Tracking Live Signals...</div>
 
   <div class="section">
     <!-- TOP RISER BOX -->
