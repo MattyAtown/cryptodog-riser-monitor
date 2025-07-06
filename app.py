@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
 from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 import random
 import string
 import requests
@@ -13,6 +14,7 @@ import json
 
 app = Flask(__name__)
 app.secret_key = "arnie_secret_2025_crypto_dog"  # Or pull from an environment variable
+serializer = URLSafeTimedSerializer(app.secret_key)
 
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
