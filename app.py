@@ -295,6 +295,7 @@ def verify_token(token):
         email = serializer.loads(token, salt='email-confirm', max_age=3600)
         session['verified'] = True
         session['user_email'] = email
+        session.modified = True
         flash("✅ Email verified! Welcome aboard.", "success")
         return redirect('/thank-you')  # ✅ Optional: change to /subscribe or /tier1 if preferred
     except Exception as e:
