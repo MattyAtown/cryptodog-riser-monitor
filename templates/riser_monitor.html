@@ -120,6 +120,7 @@
       background-size: cover;
       color: #fff;
     }
+    
 
     .riser-title {
       font-size: 1.2em;
@@ -215,6 +216,27 @@
       display: block;
       margin: 8px auto 0 auto;
     }
+
+    .neon-login-btn {
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.6); /* transparent dark background */
+  color: #00ffff; /* neon text */
+  font-weight: bold;
+  border: 2px solid #00ffff;
+  border-radius: 10px;
+  box-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff;
+  text-shadow: 0 0 6px #00ffff;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+  background-clip: padding-box;
+}
+.neon-login-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 16px #00ffff, 0 0 24px #00ffff;
+  transform: scale(1.05);
+}
   </style>
 </head>
 <body>
@@ -301,11 +323,11 @@
     <h2>🎓 Learn to Trade with Arnie</h2>
     <p>Sign up to our GPT-powered mentor program.</p>
     <p><strong>Start with a Free Trial – Tier 1</strong></p>
-    <a href="/login_redirect" style="text-decoration: none;">
-  <button style="padding: 12px 24px; font-weight: bold; background: #0ff; border: none; border-radius: 8px; color: #000; box-shadow: 0 0 10px #0ff;">
-    🔐 Log In to Access
-  </button>
-</a>
+    <div style="margin-top: 15px;">
+  <a href="/login_redirect" style="text-decoration: none;">
+    <button class="neon-login-btn">🔐 Log In to Access</button>
+  </a>
+</div>
   {% endif %}
 </div>
   <div class="section">
@@ -573,22 +595,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 </body>
-  <div style="position: absolute; top: 20px; right: 30px; z-index: 100;">
-  {% if session.get("email") %}
-    <span style="color: #0ff; margin-right: 10px;">
-      👋 Welcome, {{ session.get("email").split('@')[0] }}
-    </span>
-    <a href="/logout">
-      <button style="padding: 8px 16px; background-color: #ff0080; color: #fff; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 0 8px #ff0080;">
-        Logout
-      </button>
-    </a>
-  {% else %}
-    <a href="/login">
-      <button style="padding: 8px 16px; background-color: #00ffff; color: #000; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 0 8px #00ffff;">
-        Login
-      </button>
-    </a>
-  {% endif %}
 </div>
 </html>
