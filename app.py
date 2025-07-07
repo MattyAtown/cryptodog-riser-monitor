@@ -585,6 +585,12 @@ def buy_summary():
         "since": buy_time.isoformat()
     })
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("👋 You’ve been logged out.", "info")
+    return redirect('/')
+
 @app.route('/thank-you')
 def thank_you():
     if 'user_email' not in session:
