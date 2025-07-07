@@ -314,7 +314,7 @@ def subscribe():
 
         if tier == 'Tier 1':
             flash('✅ Tier 1 Activated! You can now begin your free training.', 'success')
-            return redirect('/tier1')  # Or home/dashboard
+            return redirect('/tier1')  # Or home/riser_monitor.html
 
         payment_method = request.form.get('payment')
         if not payment_method:
@@ -366,7 +366,7 @@ def resolve_image_path(coin):
 
         if tier == 'Tier 1':
             flash('✅ Tier 1 Activated! You can now begin your free training.', 'success')
-            return redirect('/')  # ✅ Go to dashboard, NOT tier1 directly
+            return redirect('/')  # ✅ Go to riser_monitor.html, NOT tier1 directly
 
         payment_method = request.form.get('payment')
         if not payment_method:
@@ -604,7 +604,7 @@ def logout():
 def thank_you():
     if 'user_email' not in session:
         flash("⚠️ Please sign up first.", "error")
-        return redirect('/signup')
+        return redirect('/riser_monitor.html')
 
     if not session.get('verified'):
         flash("⚠️ Please verify your email to continue.", "error")
@@ -615,6 +615,10 @@ def thank_you():
 @app.route('/tier-1')
 def tier_one():
     return render_template('tier_1_crypto_intro.html')
+
+@app.route("/riser_monitor")
+def riser_monitor():
+    return render_template("riser_monitor.html")
 
 @app.route("/api/star-riser-history")
 def star_riser_history_api():
