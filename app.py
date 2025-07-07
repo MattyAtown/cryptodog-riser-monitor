@@ -521,7 +521,14 @@ def coin_info(coin, price, rise):
         "description": description
     })
 
-
+@app.route("/login_redirect")
+def login_redirect():
+    if session.get("user_email") and session.get("verified"):
+        # If session is already active and verified, redirect to main area
+        return redirect(url_for("dashboard"))  # Change 'dashboard' if needed
+    else:
+        # Otherwise go to login page
+        return redirect(url_for("login"))
     
 @app.route("/api/top-riser-history")
 def top_riser_history_api():
