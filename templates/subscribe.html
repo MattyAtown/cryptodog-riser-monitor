@@ -50,14 +50,14 @@
   <div class="box">
     <h2>Choose Your CryptoDog Subscription</h2>
     <form action="/subscribe" method="POST">
-      <select name="tier" required>
+      <select id="tierSelect" name="tier" required>
         <option value="">-- Select Tier --</option>
         <option value="Tier 1">Tier 1 (Free Trial)</option>
         <option value="Tier 2">Tier 2 (Analysis Tools)</option>
         <option value="Tier 3">Tier 3 (AiM Coaching)</option>
       </select>
 
-      <select name="payment">
+      <select id="paymentSelect" name="payment">
         <option value="">-- Select Payment Method --</option>
         <option value="crypto">Crypto</option>
         <option value="card">Credit/Debit Card</option>
@@ -67,6 +67,7 @@
     </form>
     <p class="note">Tier 1 skips payment and gives you instant access.</p>
   </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const tierSelect = document.getElementById('tierSelect');
@@ -75,15 +76,15 @@
       function togglePaymentField() {
         if (tierSelect.value === "Tier 1") {
           paymentSelect.style.display = "none";
-          paymentSelect.name = "";  // prevent it from being submitted
+          paymentSelect.disabled = true;
         } else {
           paymentSelect.style.display = "inline-block";
-          paymentSelect.name = "payment";  // include for POST
+          paymentSelect.disabled = false;
         }
       }
 
       tierSelect.addEventListener("change", togglePaymentField);
-      togglePaymentField(); // Run once on load in case default is Tier 1
+      togglePaymentField(); // Run on page load
     });
   </script>
 </body>
