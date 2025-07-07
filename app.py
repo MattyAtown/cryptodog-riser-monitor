@@ -314,9 +314,8 @@ def subscribe():
 
         if tier == 'Tier 1':
             flash('✅ Tier 1 Activated! You can now begin your free training.', 'success')
-            return redirect('/tier1')  # Go directly to Tier 1 dashboard
+            return redirect('/tier1')  # Or home/dashboard
 
-        # Future support for paid tiers:
         payment_method = request.form.get('payment')
         if not payment_method:
             flash('❌ Please select a payment method.', 'error')
@@ -324,8 +323,6 @@ def subscribe():
 
         session['payment_method'] = payment_method
         return redirect('/payment_crypto')
-
-    return render_template('subscribe.html')
 
 # Optional global cache to avoid repeated API calls
 COINGECKO_IMAGE_CACHE = {}
@@ -608,9 +605,9 @@ def tier_one():
 def star_riser_history_api():
     return jsonify(list(STAR_RISER_HISTORY))
 
-@app.route('/pay/crypto')
-def pay_crypto():
-    tier = request.args.get('tier', 'Tier Unknown')
+@app.route('/payment_crypto')
+def payment_crypto():
+    tier = session.get('subscription', 'Unknown')
     return render_template('payment_crypto.html', tier=tier)
 
 @app.route("/api/crypto-news")
