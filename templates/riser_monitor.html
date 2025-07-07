@@ -561,4 +561,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 </body>
+  <div style="position: absolute; top: 20px; right: 30px; z-index: 100;">
+  {% if session.get("email") %}
+    <span style="color: #0ff; margin-right: 10px;">
+      👋 Welcome, {{ session.get("email").split('@')[0] }}
+    </span>
+    <a href="/logout">
+      <button style="padding: 8px 16px; background-color: #ff0080; color: #fff; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 0 8px #ff0080;">
+        Logout
+      </button>
+    </a>
+  {% else %}
+    <a href="/login">
+      <button style="padding: 8px 16px; background-color: #00ffff; color: #000; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 0 8px #00ffff;">
+        Login
+      </button>
+    </a>
+  {% endif %}
+</div>
 </html>
