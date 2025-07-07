@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tier 1: Crypto Basics | CryptoDog Academy</title>
+  <title>Tier 1: Initiate Training | CryptoDog Academy</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -73,13 +73,19 @@
 
     .response-buttons button {
       margin-right: 10px;
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-weight: bold;
-      background: #0ff;
+      background: #00ffff;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       color: #000;
       cursor: pointer;
+      box-shadow: 0 0 10px #0ff;
+      transition: transform 0.2s ease;
+    }
+
+    .response-buttons button:hover {
+      transform: scale(1.05);
     }
 
     .response-buttons {
@@ -95,12 +101,56 @@
       color: #0ff;
       text-decoration: none;
     }
+
+    .upgrade-box {
+      margin-top: 40px;
+      text-align: center;
+      background: rgba(0,0,0,0.8);
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #0ff;
+      box-shadow: 0 0 12px #0ff;
+    }
+
+    .upgrade-box h3 {
+      color: #0ff;
+      margin-bottom: 15px;
+      text-shadow: 0 0 6px #0ff;
+    }
+
+    .upgrade-box ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 20px;
+    }
+
+    .upgrade-box li {
+      margin: 8px 0;
+      color: #fff;
+    }
+
+    .upgrade-box a button {
+      padding: 12px 28px;
+      font-size: 1em;
+      font-weight: bold;
+      background: #ff0080;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 12px #ff0080;
+      transition: transform 0.2s ease;
+    }
+
+    .upgrade-box a button:hover {
+      transform: scale(1.08);
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <img src="/static/logo.png" alt="CryptoDog Logo" />
-    <h1>CryptoDog Academy: Tier 1 Free Trial</h1>
+    <h1>CryptoDog Academy: Initiate Training</h1>
     <img src="/static/neutral.png" alt="Dog Face" height="60" />
   </div>
 
@@ -111,6 +161,19 @@
     <div class="response-buttons" id="responseButtons" style="display:none">
       <button id="yesBtn" onclick="handleResponse(true)">✅ Makes Sense</button>
       <button onclick="handleResponse(false)">❌ Don’t Understand</button>
+    </div>
+
+    <div class="upgrade-box" id="upgradePrompt" style="display:none">
+      <h3>🔓 Unlock the Next Level</h3>
+      <p>You’ve completed your Tier 1 mission. Ready to access:</p>
+      <ul>
+        <li>📈 Advanced Trend Forecast Tools</li>
+        <li>🤖 AI Trading Assistant</li>
+        <li>🎯 Weekly Coaching with Arnie</li>
+      </ul>
+      <a href="/subscribe">
+        <button>Upgrade Now</button>
+      </a>
     </div>
   </div>
 
@@ -140,6 +203,7 @@
     const responseButtons = document.getElementById("responseButtons");
     const progressBar = document.getElementById("progressBar");
     const yesBtn = document.getElementById("yesBtn");
+    const upgradePrompt = document.getElementById("upgradePrompt");
 
     function typeText(element, text, callback) {
       element.innerHTML = "";
@@ -164,6 +228,7 @@
 
     function loadStep(index) {
       responseButtons.style.display = "none";
+      upgradePrompt.style.display = "none";
       progressBar.textContent = `Step ${index + 1} of ${flow.length}`;
       typeText(questionBox, flow[index].question, () => {
         setTimeout(() => {
@@ -184,6 +249,7 @@
           progressBar.textContent = "✅ All Steps Complete";
           typeText(questionBox, "🎉 You’ve completed Tier 1: Crypto Basics!", null);
           answerBox.innerHTML = "Come back soon to unlock Tier 2 and dive deeper into trading!";
+          upgradePrompt.style.display = "block";
         }
       } else {
         typeText(answerBox, "Think of crypto like internet money. It’s stored safely, can be sent anywhere, and no one can change it without permission.", () => {
