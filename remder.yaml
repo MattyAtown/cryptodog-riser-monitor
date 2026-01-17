@@ -2,20 +2,27 @@ services:
   - type: web
     name: cryptodogkitty
     env: python
-    buildCommand: ""
+    plan: free
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
       - key: FLASK_ENV
         value: production
+
       - key: COINGECKO_API_KEY
-        value: your_key_here
+        sync: false
+
       - key: MAIL_SERVER
-        value: smtp.gmail.com
+        value: smtpout.secureserver.net
+
       - key: MAIL_PORT
-        value: 587
+        value: "587"
+
       - key: MAIL_USE_TLS
-        value: true
+        value: "True"
+
       - key: MAIL_USERNAME
-        value: your_email_here
+        sync: false
+
       - key: MAIL_PASSWORD
-        value: your_email_password_here
+        sync: false
