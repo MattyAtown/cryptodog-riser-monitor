@@ -1,9 +1,21 @@
 services:
   - type: web
-    name: cryptodog
+    name: cryptodogkitty
     env: python
     buildCommand: ""
-    startCommand: python app.py
+    startCommand: gunicorn app:app
     envVars:
-      - key: PORT
-        value: 10000
+      - key: FLASK_ENV
+        value: production
+      - key: COINGECKO_API_KEY
+        value: your_key_here
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USERNAME
+        value: your_email_here
+      - key: MAIL_PASSWORD
+        value: your_email_password_here
